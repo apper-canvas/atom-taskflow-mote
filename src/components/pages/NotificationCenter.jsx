@@ -8,7 +8,7 @@ import Loading from '@/components/ui/Loading';
 import ErrorView from '@/components/ui/ErrorView';
 import { notificationService } from '@/services/api/notificationService';
 import { formatDistanceToNow, format } from 'date-fns';
-import { showToast } from '@/utils/toast';
+import toast from '@/utils/toast';
 
 const NotificationCenter = () => {
   const [notifications, setNotifications] = useState([]);
@@ -53,12 +53,12 @@ const NotificationCenter = () => {
     try {
       await notificationService.markAsRead(notificationId);
       setNotifications(prev => prev.map(n => 
-        n.Id === notificationId ? { ...n, isRead: true } : n
+n.Id === notificationId ? { ...n, isRead: true } : n
       ));
-      showToast('Notification marked as read');
+      toast('Notification marked as read');
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
-      showToast('Failed to mark as read', 'error');
+      toast('Failed to mark as read', 'error');
     }
   };
 
@@ -66,12 +66,12 @@ const NotificationCenter = () => {
     try {
       await notificationService.markAsUnread(notificationId);
       setNotifications(prev => prev.map(n => 
-        n.Id === notificationId ? { ...n, isRead: false } : n
+n.Id === notificationId ? { ...n, isRead: false } : n
       ));
-      showToast('Notification marked as unread');
+      toast('Notification marked as unread');
     } catch (error) {
       console.error('Failed to mark notification as unread:', error);
-      showToast('Failed to mark as unread', 'error');
+      toast('Failed to mark as unread', 'error');
     }
   };
 
@@ -80,12 +80,12 @@ const NotificationCenter = () => {
 
     try {
       await notificationService.delete(notificationId);
-      setNotifications(prev => prev.filter(n => n.Id !== notificationId));
+setNotifications(prev => prev.filter(n => n.Id !== notificationId));
       setSelectedNotifications(prev => prev.filter(id => id !== notificationId));
-      showToast('Notification deleted');
+      toast('Notification deleted');
     } catch (error) {
       console.error('Failed to delete notification:', error);
-      showToast('Failed to delete notification', 'error');
+      toast('Failed to delete notification', 'error');
     }
   };
 
@@ -96,12 +96,12 @@ const NotificationCenter = () => {
       await Promise.all(selectedNotifications.map(id => notificationService.markAsRead(id)));
       setNotifications(prev => prev.map(n => 
         selectedNotifications.includes(n.Id) ? { ...n, isRead: true } : n
-      ));
+));
       setSelectedNotifications([]);
-      showToast(`${selectedNotifications.length} notifications marked as read`);
+      toast(`${selectedNotifications.length} notifications marked as read`);
     } catch (error) {
       console.error('Failed to mark notifications as read:', error);
-      showToast('Failed to mark notifications as read', 'error');
+      toast('Failed to mark notifications as read', 'error');
     }
   };
 
@@ -111,12 +111,12 @@ const NotificationCenter = () => {
 
     try {
       await Promise.all(selectedNotifications.map(id => notificationService.delete(id)));
-      setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id)));
+setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id)));
       setSelectedNotifications([]);
-      showToast(`${selectedNotifications.length} notifications deleted`);
+      toast(`${selectedNotifications.length} notifications deleted`);
     } catch (error) {
       console.error('Failed to delete notifications:', error);
-      showToast('Failed to delete notifications', 'error');
+      toast('Failed to delete notifications', 'error');
     }
   };
 
