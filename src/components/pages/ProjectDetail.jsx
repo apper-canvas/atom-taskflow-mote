@@ -12,7 +12,7 @@ import Badge from '@/components/atoms/Badge'
 import ProjectDashboard from '@/components/molecules/ProjectDashboard'
 import TaskList from '@/components/organisms/TaskList'
 import TaskEditModal from '@/components/molecules/TaskEditModal'
-import { showToast } from '@/utils/toast'
+import toast from '@/utils/toast'
 
 function ProjectDetail() {
   const { id } = useParams()
@@ -46,9 +46,9 @@ function ProjectDetail() {
       setProject(projectData)
       setProjectStats(projectStatsData)
       setTasks(allTasks.filter(task => task.projectId === parseInt(id)))
-    } catch (err) {
+} catch (err) {
       setError(err.message)
-      showToast('Failed to load project data', 'error')
+      toast.error('Failed to load project data')
     } finally {
       setLoading(false)
     }
@@ -67,23 +67,22 @@ function ProjectDetail() {
   const handleSaveTask = async (taskId, taskData) => {
     try {
       if (taskId) {
-        const updatedTask = await taskService.update(taskId, taskData)
+const updatedTask = await taskService.update(taskId, taskData)
         setTasks(prev => prev.map(t => t.Id === taskId ? updatedTask : t))
-        showToast('Task updated successfully!', 'success')
+        toast.success('Task updated successfully!')
       } else {
         const newTask = await taskService.create({ ...taskData, projectId: parseInt(id) })
         setTasks(prev => [newTask, ...prev])
-        showToast('Task created successfully!', 'success')
+        toast.success('Task created successfully!')
       }
-      
       setIsTaskModalOpen(false)
       setEditingTask(null)
       
       // Refresh project stats
       const updatedStats = await projectService.getProjectStats(id)
-      setProjectStats(updatedStats)
+setProjectStats(updatedStats)
     } catch (err) {
-      showToast('Failed to save task', 'error')
+      toast.error('Failed to save task')
       throw err
     }
   }
@@ -92,15 +91,15 @@ function ProjectDetail() {
     try {
       await taskService.delete(taskId)
       setTasks(prev => prev.filter(t => t.Id !== taskId))
-      setIsTaskModalOpen(false)
+setIsTaskModalOpen(false)
       setEditingTask(null)
-      showToast('Task deleted successfully', 'success')
+      toast.success('Task deleted successfully')
       
       // Refresh project stats
       const updatedStats = await projectService.getProjectStats(id)
       setProjectStats(updatedStats)
     } catch (err) {
-      showToast('Failed to delete task', 'error')
+      toast.error('Failed to delete task')
       throw err
     }
   }
@@ -109,18 +108,17 @@ function ProjectDetail() {
     try {
       const updatedTask = await taskService.update(taskId, { completed })
       setTasks(prev => prev.map(t => t.Id === taskId ? updatedTask : t))
-      
-      if (completed) {
-        showToast('Task completed! Great job! ✅', 'success')
+if (completed) {
+        toast.success('Task completed! Great job! ✅')
       } else {
-        showToast('Task marked as active', 'info')
+        toast.info('Task marked as active')
       }
       
       // Refresh project stats
       const updatedStats = await projectService.getProjectStats(id)
       setProjectStats(updatedStats)
     } catch (err) {
-      showToast('Failed to update task', 'error')
+      toast.error('Failed to update task')
     }
   }
 
