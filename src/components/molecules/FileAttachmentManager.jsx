@@ -82,11 +82,12 @@ const FileAttachmentManager = ({
         (taskId && file.taskId === taskId)
       );
       setArchivedFiles(relevantArchived);
-setArchivedFiles(relevantArchived);
-    } catch (error) {
+} catch (error) {
       console.error('Failed to load archived files:', error);
     }
   };
+
+  const validateFile = (file) => {
     if (!supportedTypes[file.type]) {
       return `File type ${file.type} is not supported`;
     }
@@ -405,11 +406,12 @@ const getDisplayFiles = () => {
       file.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
-};
 
-  const filteredAttachments = getDisplayFiles();
+  const getFileIcon = (file) => {
     return supportedTypes[file.type]?.icon || 'File';
   };
+
+  const filteredAttachments = getDisplayFiles();
 
   const getFolderIcon = () => 'Folder';
   const getLinkIcon = () => 'ExternalLink';
@@ -773,13 +775,14 @@ onChange={(e) => setSearchTerm(e.target.value)}
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
 </div>
+        </div>
+      )}
 
-          {/* External Links Display */}
-          {viewMode === 'links' && (
-            <div className="space-y-3">
-              {getCurrentFolderLinks().length === 0 ? (
+      {/* External Links Display */}
+      {viewMode === 'links' && (
+        <div className="space-y-3">
+          {getCurrentFolderLinks().length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <ApperIcon name="ExternalLink" size={48} className="mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium">No external links</p>

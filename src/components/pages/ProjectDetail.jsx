@@ -492,7 +492,7 @@ Settings
           </motion.div>
         </div>
       )}
-    </div>
+</div>
   )
 }
 

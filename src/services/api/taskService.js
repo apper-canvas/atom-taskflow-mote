@@ -95,9 +95,9 @@ notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
       linkedTasks: updates.linkedTasks !== undefined ? 
         (Array.isArray(updates.linkedTasks) ? updates.linkedTasks : []) : 
         (Array.isArray(tasks[index].linkedTasks) ? tasks[index].linkedTasks : []),
-      externalLinks: updates.externalLinks !== undefined ?
+externalLinks: updates.externalLinks !== undefined ?
         (Array.isArray(updates.externalLinks) ? updates.externalLinks : []) :
-        (Array.isArray(tasks[index].externalLinks) ? tasks[index].externalLinks : [])
+        (Array.isArray(tasks[index].externalLinks) ? tasks[index].externalLinks : []),
       updatedAt: new Date().toISOString()
     }
     

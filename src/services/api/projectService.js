@@ -110,19 +110,17 @@ isFavorite: false,
 
   // Archive project
   async archive(id) {
-    return new Promise((resolve, reject) => {
+return new Promise((resolve, reject) => {
       setTimeout(() => {
         const project = projects.find(p => p.Id === parseInt(id))
         if (project) {
-project.status = 'Archived'
+          project.status = 'Archived'
           project.isArchived = true
           project.archivedAt = new Date().toISOString()
           project.archivedBy = 'current-user'
           project.updatedAt = new Date().toISOString()
           resolve(project)
         } else {
-          reject(new Error('Project not found'))
-} else {
           reject(new Error('Project not found'))
         }
       }, 200)
@@ -144,7 +142,9 @@ project.status = 'Archived'
         } else {
           reject(new Error('Project not found'))
         }
-      }, 200)
+}, 200)
+    })
+  },
 
   // Delete project permanently
   async delete(id) {
