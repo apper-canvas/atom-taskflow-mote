@@ -841,9 +841,10 @@ onChange={(e) => setSearchTerm(e.target.value)}
                 ))
               )}
 </div>
-          )}
-        </div>
-      )}
+</div>
+        )}
+      
+      {/* Rename Modal */}
       {/* Rename Modal */}
 {renameModal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -927,11 +928,10 @@ onChange={(e) => setSearchTerm(e.target.value)}
               onClick={() => setCreateFolderModal({ isOpen: false, name: '' })}
             >
               Cancel
-            </Button>
+</Button>
             <Button onClick={handleCreateFolder}>
               Create Folder
             </Button>
-</Button>
           </div>
         </div>
       </Modal>
