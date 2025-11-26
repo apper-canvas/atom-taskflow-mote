@@ -77,7 +77,7 @@ dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "
         dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
-        isRecurring: task.isRecurring || false,
+isRecurring: task.isRecurring || false,
         recurrence: task.recurrence || null,
         assignedTo: task.assignedTo || null,
         reminders: task.reminders || [
@@ -169,13 +169,13 @@ const handleInputChange = (field, value) => {
     }
   }
 
-  const handleRecurringSave = (taskId, recurringData) => {
+const handleRecurringSave = (taskId, recurringData) => {
     setFormData(prev => ({
       ...prev,
       isRecurring: true,
       recurrence: recurringData.recurrence
     }))
-setShowRecurringModal(false)
+    setShowRecurringModal(false)
   }
 
 const [previewFile, setPreviewFile] = useState(null);
@@ -278,7 +278,7 @@ dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : n
       reminderMethod: formData.reminderMethod,
       dueDateTime: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
-      tags: formData.tags,
+tags: formData.tags,
       isRecurring: formData.isRecurring,
       recurrence: formData.recurrence,
       assignedTo: formData.assignedTo,
@@ -532,7 +532,7 @@ linkedTasks: formData.linkedTasks
             </div>
             {formData.isRecurring && formData.recurrence && (
               <div className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded">
-                <strong>Schedule:</strong> {formData.recurrence.pattern} every {formData.recurrence.interval} 
+<strong>Schedule:</strong> {formData.recurrence.pattern} every {formData.recurrence.interval} 
                 {formData.recurrence.pattern === 'weekly' && formData.recurrence.daysOfWeek.length > 0 && (
                   <span> on {formData.recurrence.daysOfWeek.map(d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ')}</span>
                 )}

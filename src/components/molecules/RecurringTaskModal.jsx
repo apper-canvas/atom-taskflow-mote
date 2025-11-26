@@ -45,7 +45,7 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         tags: task.tags || [],
-        recurrence: task.recurrence || formData.recurrence
+recurrence: task.recurrence || formData.recurrence
       })
     } else {
       // Reset form for new recurring task
@@ -126,7 +126,7 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
             currentDate = addDays(currentDate, interval)
             break
           case 'weekly':
-            if (daysOfWeek.length > 0) {
+if (daysOfWeek.length > 0) {
               // Find next occurrence in selected days
               let nextDate = addDays(currentDate, 1)
               while (!daysOfWeek.includes(nextDate.getDay())) {
@@ -320,8 +320,8 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
               <option value="custom">⚙️ Custom</option>
             </Select>
 
-            <Input
-              label={formData.recurrence.pattern === 'custom' ? 'Every X Days' : 'Every X ' + formData.recurrence.pattern.slice(0, -2)}
+<Input
+              label={formData.recurrence.pattern === 'custom' ? 'Every X Days' : 'Every X ' + (formData.recurrence.pattern === 'daily' ? 'day(s)' : formData.recurrence.pattern.slice(0, -2))}
               type="number"
               min="1"
               max="365"

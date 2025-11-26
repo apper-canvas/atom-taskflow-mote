@@ -194,7 +194,13 @@ switch (priority) {
                     </button>}
                     
                     {/* Feature indicators */}
-                    <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
+                        {task.isRecurring && (
+                            <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+                                <ApperIcon name="RotateCcw" size={12} />
+                                <span>Recurring</span>
+                            </div>
+                        )}
                         {task.notes && (
                             <button
                                 onClick={() => setShowNotes(!showNotes)}
