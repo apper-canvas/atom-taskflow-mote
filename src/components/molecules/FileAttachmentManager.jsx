@@ -1022,9 +1022,10 @@ onChange={(e) => setSearchTerm(e.target.value)}
               Archive
             </Button>
           </div>
-        </div>
+</div>
       </Modal>
     </div>
   );
 };
+
 export default FileAttachmentManager;

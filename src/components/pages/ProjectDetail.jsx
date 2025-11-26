@@ -317,10 +317,9 @@ Settings
               <ApperIcon 
                 name="Star" 
                 size={18} 
-                className={project?.isFavorite ? 'fill-current' : ''} 
+className={project?.isFavorite ? 'fill-current' : ''} 
               />
               {project?.isFavorite ? 'Unfavorite' : 'Favorite'}
-{project?.isFavorite ? 'Unfavorite' : 'Favorite'}
             </Button>
             <Button
               variant="outline"
@@ -487,9 +486,9 @@ Settings
                 onClick={handleDeleteProject}
               >
                 Delete Project
-              </Button>
+</Button>
             </div>
-</motion.div>
+          </motion.div>
         </div>
       )}
     </div>
