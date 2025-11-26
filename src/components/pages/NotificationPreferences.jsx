@@ -8,7 +8,7 @@ import Input from '@/components/atoms/Input';
 import Loading from '@/components/ui/Loading';
 import ErrorView from '@/components/ui/ErrorView';
 import { notificationService } from '@/services/api/notificationService';
-import { showToast } from '@/utils/toast';
+import toast from '@/utils/toast';
 
 const NotificationPreferences = () => {
   const [preferences, setPreferences] = useState({
@@ -55,11 +55,11 @@ const NotificationPreferences = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await notificationService.updatePreferences(preferences);
-      showToast('Preferences saved successfully');
+await notificationService.updatePreferences(preferences);
+      toast.success('Preferences saved successfully');
     } catch (error) {
       console.error('Failed to save preferences:', error);
-      showToast('Failed to save preferences', 'error');
+      toast.error('Failed to save preferences');
     } finally {
       setSaving(false);
     }
