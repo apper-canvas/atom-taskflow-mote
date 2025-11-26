@@ -1,23 +1,30 @@
-import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
-import ApperIcon from '@/components/ApperIcon';
-import Textarea from '@/components/atoms/Textarea';
-import Button from '@/components/atoms/Button';
-import MentionDropdown from './MentionDropdown';
+import React, { useRef, useState } from "react";
+import { motion } from "framer-motion";
+import commentService from "@/services/api/commentService";
+import ApperIcon from "@/components/ApperIcon";
+import Textarea from "@/components/atoms/Textarea";
+import Button from "@/components/atoms/Button";
+import MentionDropdown from "@/components/molecules/MentionDropdown";
 
 const CommentInput = ({ 
   onSubmit, 
-  onCancel, 
+onCancel, 
   placeholder = "Add a comment...", 
   submitText = "Post Comment",
-  initialContent = "" 
+  initialContent = "",
+  enableTopicSelection = false,
+  taskId = null
 }) => {
   const [content, setContent] = useState(initialContent);
   const [mentions, setMentions] = useState([]);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [availableTopics, setAvailableTopics] = useState([]);
+  const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+  const [newTopicName, setNewTopicName] = useState('');
   const textareaRef = useRef(null);
 
   const handleContentChange = (e) => {
@@ -96,8 +103,18 @@ const CommentInput = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!content.trim() || isSubmitting) return;
+if (!content.trim() || isSubmitting) return;
+
+    // Load topics when topic selection is enabled
+    if (enableTopicSelection && taskId && availableTopics.length === 0) {
+      try {
+        const { commentService } = await import('@/services/api/commentService');
+        const topics = await commentService.getCommentTopics(taskId);
+        setAvailableTopics(topics);
+      } catch (error) {
+        console.error('Failed to load topics:', error);
+      }
+    }
 
     setIsSubmitting(true);
     
@@ -119,11 +136,11 @@ const CommentInput = ({
   };
 
   return (
-    <motion.form
+<motion.form
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-3"
-      onSubmit={handleSubmit}
+onSubmit={handleSubmit}
     >
       <div className="relative">
         <Textarea

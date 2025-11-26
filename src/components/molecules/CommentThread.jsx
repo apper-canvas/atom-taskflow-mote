@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { formatDistanceToNow, format } from 'date-fns';
-import ApperIcon from '@/components/ApperIcon';
-import commentService from '@/services/api/commentService';
-import { updateTaskCommentStats } from '@/services/api/taskService';
-import CommentInput from './CommentInput';
-import CommentReactions from './CommentReactions';
-import toast from '@/utils/toast';
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { format, formatDistanceToNow } from "date-fns";
+import CommentInput from "@/components/molecules/CommentInput";
+import CommentReactions from "@/components/molecules/CommentReactions";
+import commentService, { addReaction, buildCommentThreads, createComment, deleteComment, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
+import { updateTaskCommentStats } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import toast from "@/utils/toast";
 
 const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [comments, setComments] = useState([]);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread
+const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
 
@@ -21,7 +21,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
     loadComments();
   }, [taskId]);
 
-  useEffect(() => {
+useEffect(() => {
     buildThreads();
   }, [comments, searchQuery, filterType]);
 
@@ -46,7 +46,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   };
 
   const buildThreads = async () => {
-    let filteredComments = comments;
+let filteredComments = comments;
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -64,6 +64,11 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
       case 'unread':
         filteredComments = filteredComments.filter(c => c.isUnread);
         break;
+      case 'topic':
+        if (selectedTopic) {
+          filteredComments = filteredComments.filter(c => c.topic === selectedTopic);
+        }
+        break;
       default:
         break;
     }
@@ -72,12 +77,13 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
     setThreads(threadStructure);
   };
 
-  const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null) => {
+const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null, topic = null) => {
     try {
       const newComment = await commentService.createComment({
         taskId,
         parentId,
-        content,
+content,
+        topic,
         contentType: 'html',
         mentions,
         attachments,
@@ -158,7 +164,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
     }
   };
 
-  const renderComment = (comment, isReply = false) => (
+const renderComment = (comment, isReply = false) => (
     <motion.div
       key={comment.Id}
       initial={{ opacity: 0, y: 10 }}
@@ -323,7 +329,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
             className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <select
+<select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -352,10 +358,12 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
       </div>
 
       {/* Add Comment Input */}
-      <div className="border-t border-gray-200 pt-4">
+<div className="border-t border-gray-200 pt-4">
         <CommentInput
           onSubmit={handleAddComment}
           placeholder="Add a comment..."
+          taskId={taskId}
+          enableTopicSelection={true}
         />
       </div>
     </div>

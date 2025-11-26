@@ -348,6 +348,7 @@ className={project?.isFavorite ? 'fill-current' : ''}
             { id: 'overview', label: 'Overview', icon: 'BarChart3' },
             { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
             { id: 'comments', label: 'Comments', icon: 'MessageCircle' },
+            { id: 'topics', label: 'Topics', icon: 'Hash' },
             { id: 'members', label: 'Members', icon: 'Users' }
           ].map(tab => (
             <button
@@ -384,9 +385,11 @@ className={project?.isFavorite ? 'fill-current' : ''}
         </div>
       )}
 {activeTab === 'comments' && (
-          <div className="space-y-6">
+<div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Task Comments</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {activeTab === 'topics' ? 'Comment Topics' : 'Task Comments'}
+              </h3>
               {selectedTaskForComments && (
                 <button
                   onClick={() => setSelectedTaskForComments(null)}

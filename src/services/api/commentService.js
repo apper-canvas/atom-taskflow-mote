@@ -1,4 +1,7 @@
-import commentsData from '@/services/mockData/comments.json';
+import commentsData from "@/services/mockData/comments.json";
+
+// Mock delay function for simulating API calls
+const delay = (ms = 200) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock team members for mentions
 const mockTeamMembers = [
@@ -10,6 +13,14 @@ const mockTeamMembers = [
 ];
 
 let comments = [...commentsData];
+
+// Get unique topics from comments
+export const getCommentTopics = async (taskId) => {
+  await delay();
+  const taskComments = comments.filter(c => c.taskId === parseInt(taskId));
+  const topics = [...new Set(taskComments.map(c => c.topic).filter(Boolean))];
+  return topics.sort();
+};
 
 // Get all comments for a specific task
 export const getCommentsByTaskId = async (taskId) => {
@@ -32,7 +43,8 @@ export const createComment = async (commentData) => {
   const newComment = {
     Id: maxId + 1,
     taskId: parseInt(commentData.taskId),
-    parentId: commentData.parentId || null,
+parentId: commentData.parentId || null,
+    topic: commentData.topic || null,
     content: commentData.content || "",
     contentType: commentData.contentType || "text", // text, html, markdown
     authorId: commentData.authorId || 1,
@@ -270,28 +282,54 @@ export const getCommentStats = async (taskId) => {
 // Build threaded comment structure
 export const buildCommentThreads = (comments) => {
   const commentMap = {};
-  const threads = [];
+  const topicGroups = {};
 
-  // First pass: create comment map
+  // First pass: create comment map and group by topic
   comments.forEach(comment => {
     commentMap[comment.Id] = { ...comment, replies: [] };
-  });
-
-  // Second pass: build threads
-  comments.forEach(comment => {
-    if (comment.parentId && commentMap[comment.parentId]) {
-      commentMap[comment.parentId].replies.push(commentMap[comment.Id]);
-    } else {
-      threads.push(commentMap[comment.Id]);
+    
+    const topic = comment.topic || 'General';
+    if (!topicGroups[topic]) {
+      topicGroups[topic] = [];
     }
   });
 
-  // Sort threads: pinned first, then by creation date
-  return threads.sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return new Date(b.createdAt) - new Date(a.createdAt);
+  // Second pass: build threads within topics
+  comments.forEach(comment => {
+    const topic = comment.topic || 'General';
+    
+    if (comment.parentId && commentMap[comment.parentId]) {
+      commentMap[comment.parentId].replies.push(commentMap[comment.Id]);
+    } else {
+      topicGroups[topic].push(commentMap[comment.Id]);
+    }
   });
+
+  // Sort threads within each topic: pinned first, then by creation date
+  Object.keys(topicGroups).forEach(topic => {
+    topicGroups[topic].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  });
+
+  // Return flattened structure with topic headers
+  const result = [];
+  Object.keys(topicGroups).sort().forEach(topic => {
+    if (topicGroups[topic].length > 0) {
+      result.push({
+        Id: `topic-${topic}`,
+        type: 'topic-header',
+        topic: topic,
+        commentCount: topicGroups[topic].length,
+        comments: topicGroups[topic]
+      });
+      result.push(...topicGroups[topic]);
+    }
+  });
+
+  return result;
 };
 
 const commentService = {
@@ -308,7 +346,8 @@ const commentService = {
   markAsRead,
   getTeamMembers,
   getCommentStats,
-  buildCommentThreads
+buildCommentThreads,
+  getCommentTopics
 };
 
 export default commentService;
