@@ -15,7 +15,6 @@ import TaskEditModal from '@/components/molecules/TaskEditModal'
 import toast from '@/utils/toast'
 import MemberCard from '@/components/molecules/MemberCard'
 import MemberManagementModal from '@/components/molecules/MemberManagementModal'
-import { showToast } from '@/utils/toast'
 
 function ProjectDetail() {
   const { id } = useParams()
@@ -61,31 +60,31 @@ const loadProjectData = async () => {
 const handleToggleFavorite = async () => {
     try {
       await projectService.toggleFavorite(id)
-      const updatedProject = await projectService.getById(id)
+const updatedProject = await projectService.getById(id)
       setProject(updatedProject)
-      showToast(updatedProject.isFavorite ? 'Added to favorites' : 'Removed from favorites', 'success')
+      toast.success(updatedProject.isFavorite ? 'Added to favorites' : 'Removed from favorites')
     } catch (error) {
-      showToast('Failed to update favorite status', 'error')
+      toast.error('Failed to update favorite status')
     }
   }
 
   const handleArchiveProject = async () => {
-    try {
+try {
       await projectService.archive(id)
-      showToast('Project archived successfully', 'success')
+      toast.success('Project archived successfully')
       navigate('/projects')
     } catch (error) {
-      showToast('Failed to archive project', 'error')
+      toast.error('Failed to archive project')
     }
   }
 
-  const handleDeleteProject = async () => {
+const handleDeleteProject = async () => {
     try {
       await projectService.delete(id)
-      showToast('Project deleted successfully', 'success')
+      toast.success('Project deleted successfully')
       navigate('/projects')
     } catch (error) {
-      showToast('Failed to delete project', 'error')
+      toast.error('Failed to delete project')
     }
   }
   // Member management handlers
