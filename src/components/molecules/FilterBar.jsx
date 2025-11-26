@@ -20,17 +20,20 @@ const FilterBar = ({
   onProjectChange,
   projects = [],
   viewMode,
-  onViewModeChange 
+  onViewModeChange,
+  activeSmartView,
+  onSmartViewChange
 }) => {
-  const categories = [
+const categories = [
     { value: "all", label: "All Tasks", icon: "List", count: 0 },
     { value: "Personal", label: "Personal", icon: "Home", count: 0 },
     { value: "Work", label: "Work", icon: "Briefcase", count: 0 },
-{ value: "Other", label: "Other", icon: "Folder", count: 0 }
+    { value: "Other", label: "Other", icon: "Folder", count: 0 }
   ];
 
-  const priorities = ["all", "High", "Medium", "Low"];
+  const priorities = ["all", "Urgent", "High", "Medium", "Low"];
   const [availableTags, setAvailableTags] = useState([]);
+
   const statuses = [
     { value: "all", label: "All" },
     { value: "active", label: "Active" },
@@ -48,6 +51,15 @@ const FilterBar = ({
     }))
   ]
 
+  // Smart views for quick filtering
+  const smartViews = [
+    { id: 'all', label: 'All Tasks', icon: 'List', color: 'gray' },
+    { id: 'today', label: 'Today', icon: 'Calendar', color: 'orange' },
+    { id: 'upcoming', label: 'Upcoming', icon: 'Clock', color: 'green' },
+    { id: 'overdue', label: 'Overdue', icon: 'AlertCircle', color: 'red' },
+    { id: 'completed', label: 'Completed', icon: 'CheckCircle', color: 'green' }
+  ]
+
   // Load available tags for filtering
   useEffect(() => {
     const loadTags = async () => {
@@ -63,11 +75,32 @@ const FilterBar = ({
   }, [])
 
   return (
-    <motion.div
+<motion.div
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-4"
     >
+      {/* Smart Views */}
+      <div className="flex flex-wrap gap-2">
+        {smartViews.map((view) => (
+          <motion.button
+            key={view.id}
+            onClick={() => onSmartViewChange?.(view.id)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+              activeSmartView === view.id
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            )}
+          >
+            <ApperIcon name={view.icon} size={16} />
+            {view.label}
+          </motion.button>
+        ))}
+      </div>
+
       {/* Search Bar */}
       <div className="relative">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
@@ -76,7 +109,7 @@ const FilterBar = ({
         <Input
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Search tasks..."
+          placeholder="Search tasks by title, description, or tags..."
           className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
         />
       </div>
@@ -198,16 +231,16 @@ const FilterBar = ({
               Groups
             </button>
             <button
-              onClick={() => onViewModeChange("calendar")}
+              onClick={() => onViewModeChange("board")}
               className={cn(
                 "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                viewMode === "calendar"
+                viewMode === "board"
                   ? "bg-white shadow-sm text-blue-600 font-medium"
                   : "text-gray-600 hover:text-gray-900"
               )}
             >
-              <ApperIcon name="Calendar" size={16} />
-              Calendar
+              <ApperIcon name="Columns" size={16} />
+              Board
             </button>
           </div>
         </div>

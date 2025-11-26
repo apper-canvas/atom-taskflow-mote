@@ -6,9 +6,10 @@ import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import toast from "@/utils/toast";
+import { toast } from "@/utils/toast";
 import { cn } from "@/utils/cn";
-const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask, onDragStart, onDragEnd }) => {
+
+const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [subtasks, setSubtasks] = useState([]);
@@ -115,49 +116,33 @@ switch (priority) {
   const [showAttachments, setShowAttachments] = useState(false);
   const [showLinkedTasks, setShowLinkedTasks] = useState(false);
 
-const handleDragStart = (e) => {
-    if (onDragStart) {
-      onDragStart(e, task)
-    }
-  }
-
-  const handleDragEnd = (e) => {
-    if (onDragEnd) {
-      onDragEnd(e)
-    }
-  }
-
   return (
     <motion.div
-      layout
-      initial={{
-          opacity: 0,
-          y: 20
-      }}
-      animate={{
-          opacity: 1,
-          y: 0
-      }}
-      exit={{
-          opacity: 0,
-          y: -20
-      }}
-      whileHover={{
-          y: -2,
-          shadow: "0 8px 25px rgba(0,0,0,0.12)"
-      }}
-      draggable={!task.completed}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      className={cn(
-        "bg-white rounded-xl p-4 shadow-sm border border-gray-200 transition-all duration-200 hover:border-blue-300",
+    layout
+    initial={{
+        opacity: 0,
+        y: 20
+    }}
+    animate={{
+        opacity: 1,
+        y: 0
+    }}
+    exit={{
+        opacity: 0,
+        y: -20
+    }}
+    whileHover={{
+        y: -2,
+        shadow: "0 8px 25px rgba(0,0,0,0.12)"
+    }}
+    className={cn(
+"bg-white rounded-xl p-4 shadow-sm border border-gray-200 transition-all duration-200 hover:border-blue-300",
         (task.completed || task.status === "Completed") && "opacity-60",
-        `border-l-4 border-l-[${getPriorityColor(task.priority)}]`,
-        !task.completed && "cursor-grab active:cursor-grabbing"
-      )}
-      style={{
-          borderLeftColor: getPriorityColor(task.priority)
-      }}>
+        `border-l-4 border-l-[${getPriorityColor(task.priority)}]`
+    )}
+    style={{
+        borderLeftColor: getPriorityColor(task.priority)
+    }}>
     <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1">
             {/* Checkbox */}
