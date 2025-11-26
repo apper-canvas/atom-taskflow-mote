@@ -1,4 +1,5 @@
 import tasksData from "@/services/mockData/tasks.json";
+import React from "react";
 let tasks = [...tasksData]
 
 const delay = () => new Promise(resolve => setTimeout(resolve, 300))
@@ -264,9 +265,210 @@ notes: task.notes || "",
   // Initialize storage
   initialize() {
     if (!this.loadFromLocalStorage()) {
+if (!this.loadFromLocalStorage()) {
       this.saveToLocalStorage()
     }
-}
+  },
+
+  // Automation Features
+
+  // Create follow-up task automatically
+    await delay();
+    
+    const parentTask = tasks.find(t => t.Id === parentTaskId);
+    if (!parentTask) {
+      throw new Error('Parent task not found');
+    }
+
+    const defaultFollowupData = {
+      title: followupData.title || `Follow-up: ${parentTask.title}`,
+      description: followupData.description || `Follow-up task for: ${parentTask.title}`,
+      priority: followupData.priority || parentTask.priority,
+      projectId: followupData.projectId || parentTask.projectId,
+      assignedTo: followupData.assignedTo || parentTask.assignedTo,
+      dueDate: followupData.dueDate || this.calculateFollowupDueDate(parentTask),
+      tags: followupData.tags || parentTask.tags || [],
+      parentTaskId: parentTaskId,
+      isFollowup: true,
+      status: 'Todo',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const followupTask = await this.create(defaultFollowupData);
+    
+    // Update parent task with follow-up reference
+    const updatedParent = await this.update(parentTaskId, {
+      ...parentTask,
+      hasFollowup: true,
+      followupTaskId: followupTask.Id,
+      updatedAt: new Date().toISOString()
+    });
+
+    return followupTask;
+  },
+
+  // Calculate follow-up due date based on rules
+  calculateFollowupDueDate(parentTask) {
+    const now = new Date();
+    const parentDue = parentTask.dueDate ? new Date(parentTask.dueDate) : now;
+    
+    // Default follow-up rules
+    const followupDelayDays = this.getFollowupDelayDays(parentTask.priority);
+    const followupDate = new Date(Math.max(now.getTime(), parentDue.getTime()));
+    followupDate.setDate(followupDate.getDate() + followupDelayDays);
+    
+    return followupDate.toISOString();
+  },
+
+  // Get follow-up delay based on priority
+  getFollowupDelayDays(priority) {
+    const delayMap = {
+      'High': 1,      // 1 day for high priority
+      'Medium': 3,    // 3 days for medium priority  
+      'Low': 7        // 1 week for low priority
+    };
+    return delayMap[priority] || 3; // Default to 3 days
+  },
+
+  // Configure automation rules
+  async configureAutomationRules(rules) {
+    await delay();
+    
+    // Store automation rules (in real app, would be in database)
+    if (!this.automationRules) {
+      this.automationRules = {};
+    }
+    
+    this.automationRules = {
+      ...this.automationRules,
+      ...rules,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return this.automationRules;
+  },
+
+  // Get automation rules
+  async getAutomationRules() {
+    await delay();
+    return this.automationRules || {
+      autoCreateFollowup: true,
+      followupDelayDays: {
+        'High': 1,
+        'Medium': 3,
+        'Low': 7
+      },
+      inheritPriority: true,
+      inheritAssignee: true,
+      inheritTags: true,
+      emailNotifications: true,
+      notificationTypes: ['task_assigned', 'task_due', 'task_overdue']
+    };
+  },
+
+  // Process task completion and trigger automation
+  async processTaskCompletion(taskId, completedBy = null) {
+    await delay();
+    
+    const task = tasks.find(t => t.Id === taskId);
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    // Mark task as completed
+    const completedTask = await this.update(taskId, {
+      status: 'Completed',
+      completedAt: new Date().toISOString(),
+      completedBy: completedBy,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Get automation rules
+    const rules = await this.getAutomationRules();
+    
+    // Auto-create follow-up if enabled
+    if (rules.autoCreateFollowup && this.shouldCreateFollowup(task)) {
+      try {
+        const followupTask = await this.createFollowupTask(taskId);
+        
+        // Send notification about follow-up creation
+        if (typeof window !== 'undefined' && window.notificationService) {
+          await window.notificationService.createTaskNotification(
+            'task_assigned',
+            followupTask.Id,
+            followupTask.title,
+            `Follow-up task created for completed task: ${task.title}`,
+            followupTask.assignedTo
+          );
+        }
+      } catch (error) {
+        console.error('Failed to create follow-up task:', error);
+      }
+    }
+
+    // Trigger email notifications if enabled
+    if (rules.emailNotifications && typeof window !== 'undefined' && window.notificationService) {
+      try {
+        await window.notificationService.sendEmailNotification({
+          type: 'task_completed',
+          taskId: task.Id,
+          taskTitle: task.title,
+          assignedTo: task.assignedTo,
+          completedBy: completedBy,
+          completedAt: completedTask.completedAt
+        });
+      } catch (error) {
+        console.error('Failed to send completion email:', error);
+      }
+    }
+
+    return completedTask;
+  },
+
+  // Determine if follow-up should be created
+  shouldCreateFollowup(task) {
+    // Don't create follow-up for follow-up tasks
+    if (task.isFollowup) return false;
+    
+    // Don't create if task already has a follow-up
+    if (task.hasFollowup) return false;
+    
+    // Create follow-up for high priority tasks or tasks with specific tags
+    return task.priority === 'High' || 
+           (task.tags && task.tags.includes('follow-up-required')) ||
+           task.projectId; // Create follow-ups for project tasks
+  },
+
+  // Get follow-up task candidates (tasks that might need follow-ups)
+  async getFollowupCandidates() {
+    await delay();
+    
+    const completedTasks = tasks.filter(task => 
+      task.status === 'Completed' && 
+      !task.hasFollowup && 
+      !task.isFollowup
+    );
+
+    return completedTasks.filter(task => this.shouldCreateFollowup(task));
+  },
+
+  // Batch process follow-up creation
+  async batchCreateFollowups(taskIds) {
+    await delay();
+    
+    const results = [];
+    for (const taskId of taskIds) {
+      try {
+        const followupTask = await this.createFollowupTask(taskId);
+        results.push({ success: true, taskId, followupTask });
+      } catch (error) {
+        results.push({ success: false, taskId, error: error.message });
+      }
+    }
+    
+    return results;
+  }
 }
 
 // Template Management

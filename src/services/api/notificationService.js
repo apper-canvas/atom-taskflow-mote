@@ -1,4 +1,5 @@
 import notificationsData from "@/services/mockData/notifications.json";
+import React from "react";
 // Simulate API delay
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -268,7 +269,332 @@ export const notificationService = {
       
     } catch (error) {
       console.error('Failed to play notification sound:', error);
-      throw new Error('Audio playback failed');
+throw new Error('Audio playback failed');
     }
+  },
+
+  // Email Automation Features
+  
+  // Send email notification
+  async sendEmailNotification(emailData) {
+    await delay();
+    
+    try {
+      // Check if email notifications are enabled
+      if (!userPreferences.emailFrequency || userPreferences.emailFrequency === 'never') {
+        return { success: false, reason: 'Email notifications disabled' };
+      }
+
+      // Respect quiet hours for non-urgent emails
+      if (!this.shouldSendNotification() && emailData.priority !== 'High') {
+        return { success: false, reason: 'Quiet hours active' };
+      }
+
+      // Create email from template
+      const emailContent = await this.createEmailFromTemplate(emailData);
+      
+      // Queue email for sending
+      await this.queueEmail({
+        ...emailContent,
+        ...emailData,
+        queuedAt: new Date().toISOString()
+      });
+
+      // Create notification record
+      const notification = await this.create({
+        type: 'email_sent',
+        title: 'Email notification sent',
+        message: `Email sent: ${emailContent.subject}`,
+        taskId: emailData.taskId,
+        metadata: {
+          emailType: emailData.type,
+          recipient: emailData.assignedTo,
+          subject: emailContent.subject
+        }
+      });
+
+      return { success: true, notificationId: notification.Id };
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+      throw new Error(`Email notification failed: ${error.message}`);
+    }
+  },
+
+  // Create email content from template
+  async createEmailFromTemplate(emailData) {
+    await delay();
+    
+    const templates = {
+      task_assigned: {
+        subject: `New task assigned: ${emailData.taskTitle}`,
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2563eb;">New Task Assignment</h2>
+            <p>You have been assigned a new task:</p>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937;">${emailData.taskTitle}</h3>
+              ${emailData.description ? `<p style="color: #6b7280;">${emailData.description}</p>` : ''}
+              ${emailData.dueDate ? `<p><strong>Due Date:</strong> ${new Date(emailData.dueDate).toLocaleDateString()}</p>` : ''}
+              ${emailData.priority ? `<p><strong>Priority:</strong> ${emailData.priority}</p>` : ''}
+            </div>
+            <p>Click here to view the task in your dashboard.</p>
+          </div>
+        `,
+        textTemplate: `New Task Assignment\n\nYou have been assigned: ${emailData.taskTitle}\n\n${emailData.description || ''}\n\nDue Date: ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}\nPriority: ${emailData.priority || 'Not set'}`
+      },
+      
+      task_completed: {
+        subject: `Task completed: ${emailData.taskTitle}`,
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #10b981;">Task Completed</h2>
+            <p>A task has been marked as completed:</p>
+            <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937;">${emailData.taskTitle}</h3>
+              <p><strong>Completed by:</strong> ${emailData.completedBy || 'Unknown'}</p>
+              <p><strong>Completed at:</strong> ${emailData.completedAt ? new Date(emailData.completedAt).toLocaleString() : 'Just now'}</p>
+            </div>
+          </div>
+        `,
+        textTemplate: `Task Completed\n\nTask: ${emailData.taskTitle}\nCompleted by: ${emailData.completedBy || 'Unknown'}\nCompleted at: ${emailData.completedAt ? new Date(emailData.completedAt).toLocaleString() : 'Just now'}`
+      },
+      
+      task_due: {
+        subject: `Task due soon: ${emailData.taskTitle}`,
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #f59e0b;">Task Due Soon</h2>
+            <p>This task is due soon:</p>
+            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937;">${emailData.taskTitle}</h3>
+              <p><strong>Due Date:</strong> ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}</p>
+              <p><strong>Priority:</strong> ${emailData.priority || 'Not set'}</p>
+            </div>
+            <p>Please review and complete this task on time.</p>
+          </div>
+        `,
+        textTemplate: `Task Due Soon\n\nTask: ${emailData.taskTitle}\nDue Date: ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}\nPriority: ${emailData.priority || 'Not set'}`
+      },
+      
+      task_overdue: {
+        subject: `OVERDUE: ${emailData.taskTitle}`,
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ef4444;">Task Overdue</h2>
+            <p>This task is now overdue:</p>
+            <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ef4444;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937;">${emailData.taskTitle}</h3>
+              <p><strong>Was Due:</strong> ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}</p>
+              <p><strong>Days Overdue:</strong> ${emailData.daysOverdue || 'Unknown'}</p>
+              <p><strong>Priority:</strong> ${emailData.priority || 'Not set'}</p>
+            </div>
+            <p style="color: #ef4444; font-weight: bold;">Immediate attention required!</p>
+          </div>
+        `,
+        textTemplate: `TASK OVERDUE\n\nTask: ${emailData.taskTitle}\nWas Due: ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}\nDays Overdue: ${emailData.daysOverdue || 'Unknown'}\nPriority: ${emailData.priority || 'Not set'}\n\nImmediate attention required!`
+      }
+    };
+
+    const template = templates[emailData.type] || templates.task_assigned;
+    
+    return {
+      subject: template.subject,
+      html: template.htmlTemplate,
+      text: template.textTemplate
+    };
+  },
+
+  // Queue email for batch sending
+  async queueEmail(emailData) {
+    await delay();
+    
+    if (!this.emailQueue) {
+      this.emailQueue = [];
+    }
+    
+    const queueItem = {
+      id: Date.now() + Math.random(),
+      ...emailData,
+      status: 'queued',
+      attempts: 0,
+      maxAttempts: 3,
+      queuedAt: new Date().toISOString()
+    };
+    
+    this.emailQueue.push(queueItem);
+    return queueItem;
+  },
+
+  // Process email queue
+  async processEmailQueue() {
+    await delay();
+    
+    if (!this.emailQueue || this.emailQueue.length === 0) {
+      return { processed: 0, failed: 0 };
+    }
+    
+    const queuedEmails = this.emailQueue.filter(email => email.status === 'queued');
+    let processed = 0;
+    let failed = 0;
+    
+    for (const email of queuedEmails) {
+      try {
+        // Send email via edge function
+        const result = await this.sendEmailViaEdgeFunction(email);
+        
+        if (result.success) {
+          email.status = 'sent';
+          email.sentAt = new Date().toISOString();
+          processed++;
+        } else {
+          throw new Error(result.error || 'Unknown error');
+        }
+      } catch (error) {
+        email.attempts++;
+        
+        if (email.attempts >= email.maxAttempts) {
+          email.status = 'failed';
+          email.failedAt = new Date().toISOString();
+          email.lastError = error.message;
+          failed++;
+        } else {
+          email.status = 'queued'; // Retry later
+          email.nextRetry = new Date(Date.now() + (email.attempts * 60000)).toISOString(); // Exponential backoff
+        }
+      }
+    }
+    
+    return { processed, failed };
+  },
+
+  // Send email via edge function
+  async sendEmailViaEdgeFunction(emailData) {
+    try {
+      // Initialize ApperClient
+      if (typeof window === 'undefined' || !window.ApperSDK) {
+        throw new Error('ApperSDK not available');
+      }
+      
+      const { ApperClient } = window.ApperSDK;
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      });
+
+      const result = await apperClient.functions.invoke(import.meta.env.VITE_SEND_EMAIL_NOTIFICATION, {
+        body: JSON.stringify({
+          to: emailData.assignedTo || emailData.recipientEmail,
+          subject: emailData.subject,
+          html: emailData.html,
+          text: emailData.text,
+          taskId: emailData.taskId,
+          type: emailData.type
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (result.success === false) {
+        console.info(`apper_info: Got an error in this function: ${import.meta.env.VITE_SEND_EMAIL_NOTIFICATION}. The response body is: ${JSON.stringify(result)}.`);
+        return { success: false, error: result.error || 'Email sending failed' };
+      }
+
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.info(`apper_info: Got this error an this function: ${import.meta.env.VITE_SEND_EMAIL_NOTIFICATION}. The error is: ${error.message}`);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Batch send emails
+  async batchSendEmails(emailDataArray) {
+    await delay();
+    
+    const results = [];
+    
+    for (const emailData of emailDataArray) {
+      try {
+        const result = await this.sendEmailNotification(emailData);
+        results.push({ success: true, emailData, result });
+      } catch (error) {
+        results.push({ success: false, emailData, error: error.message });
+      }
+    }
+    
+    return results;
+  },
+
+  // Send task reminder emails
+  async sendTaskReminders() {
+    await delay();
+    
+    try {
+      // This would typically get tasks from the task service
+      // For now, we'll create a simple reminder system
+      const reminderEmails = [];
+      
+      // Get tasks due in next 24 hours (mock implementation)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // In real implementation, this would query actual tasks
+      const dueTasks = []; // taskService.getTasksDueBefore(tomorrow)
+      
+      for (const task of dueTasks) {
+        reminderEmails.push({
+          type: 'task_due',
+          taskId: task.Id,
+          taskTitle: task.title,
+          assignedTo: task.assignedTo,
+          dueDate: task.dueDate,
+          priority: task.priority
+        });
+      }
+      
+      if (reminderEmails.length > 0) {
+        return await this.batchSendEmails(reminderEmails);
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Failed to send task reminders:', error);
+      throw new Error('Task reminder sending failed');
+    }
+  },
+
+  // Configure email automation settings
+  async configureEmailAutomation(settings) {
+    await delay();
+    
+    const emailSettings = {
+      enabled: settings.enabled ?? true,
+      frequency: settings.frequency || 'instant', // instant, daily, weekly
+      types: settings.types || ['task_assigned', 'task_due', 'task_overdue'],
+      batchSize: settings.batchSize || 10,
+      retryAttempts: settings.retryAttempts || 3,
+      templates: settings.templates || {},
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Store settings (in real app, would be in user preferences)
+    if (!userPreferences.emailAutomation) {
+      userPreferences.emailAutomation = {};
+    }
+    
+    userPreferences.emailAutomation = emailSettings;
+    return emailSettings;
+  },
+
+  // Get email automation settings
+  async getEmailAutomationSettings() {
+    await delay();
+    return userPreferences.emailAutomation || {
+      enabled: true,
+      frequency: 'instant',
+      types: ['task_assigned', 'task_due', 'task_overdue'],
+      batchSize: 10,
+      retryAttempts: 3
+    };
   }
 };
