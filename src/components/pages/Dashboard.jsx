@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
 import ApperIcon from "@/components/ApperIcon";
@@ -16,6 +17,7 @@ import NotificationBell from "@/components/molecules/NotificationBell";
 import toast, { showToast } from "@/utils/toast";
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -244,15 +246,26 @@ const handleSaveTask = async (taskId, taskData) => {
           
 <div className="flex items-center gap-3">
             <NotificationBell />
-            <motion.button
-              onClick={handleCreateNewTask}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-            >
-              <ApperIcon name="Plus" size={18} />
-              New Task
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.button
+                onClick={() => navigate('/templates')}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-white text-gray-700 font-medium rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition-all duration-200"
+              >
+                <ApperIcon name="Layout" size={16} />
+                Templates
+              </motion.button>
+              <motion.button
+                onClick={handleCreateNewTask}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              >
+                <ApperIcon name="Plus" size={18} />
+                New Task
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 

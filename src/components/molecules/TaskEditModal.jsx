@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
+import QuickTemplateSelector from "@/components/molecules/QuickTemplateSelector";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
 import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
-import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
-import TagSelector from "@/components/molecules/TagSelector";
 import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
+import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import FilePreviewModal from "@/components/molecules/FilePreviewModal";
-// Mock users for assignment
+import TagSelector from "@/components/molecules/TagSelector";
+import NotificationBell from "@/components/molecules/NotificationBell";
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
   { id: 2, name: "Sarah Johnson", email: "sarah@company.com" },
@@ -35,7 +36,7 @@ const [formData, setFormData] = useState({
     parentTaskId: null,
     tags: [],
     isRecurring: false,
-recurrence: null,
+    recurrence: null,
     assignedTo: null,
     projectId: null,
     reminders: [
@@ -51,6 +52,8 @@ recurrence: null,
     attachments: [],
     linkedTasks: []
   });
+
+  const [showQuickTemplates, setShowQuickTemplates] = useState(false)
   
 const [availableTasks, setAvailableTasks] = useState([])
   const [isSubtaskMode, setIsSubtaskMode] = useState(false)
@@ -301,7 +304,53 @@ linkedTasks: formData.linkedTasks
       onClose={onClose}
       title={isEdit ? "Edit Task" : "Create New Task"}
       size="lg"
-    >
+>
+      <div className="p-6">
+        {/* Template Selection Option */}
+        {(!task || !task.Id) && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-blue-900">Start from Template</h4>
+                <p className="text-sm text-blue-700">Save time by using a pre-built task template</p>
+              </div>
+              <Button
+                type="button"
+                onClick={() => setShowQuickTemplates(!showQuickTemplates)}
+                variant="outline"
+                size="sm"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                <ApperIcon name="Layout" size={16} />
+                Use Template
+              </Button>
+            </div>
+            
+            {showQuickTemplates && (
+              <div className="mt-3 relative">
+                <QuickTemplateSelector
+                  isVisible={showQuickTemplates}
+                  onSelectTemplate={(templateTask) => {
+                    // Fill form with template data
+                    setFormData({
+                      ...formData,
+                      title: templateTask.title,
+                      description: templateTask.description,
+                      category: templateTask.category,
+                      priority: templateTask.priority,
+                      tags: templateTask.tags || []
+                    })
+                    setShowQuickTemplates(false)
+                  }}
+                  onCancel={() => setShowQuickTemplates(false)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      
+        <div className="space-y-4">
+        {/* Project Selection */}
 <form onSubmit={handleSubmit} className="space-y-6">
         {/* Parent Task Selection for Subtasks */}
 {/* Project Selection */}
@@ -862,8 +911,9 @@ linkedTasks: formData.linkedTasks
       <FilePreviewModal
         file={previewFile}
         isOpen={!!previewFile}
-        onClose={() => setPreviewFile(null)}
+onClose={() => setPreviewFile(null)}
       />
+      </div>
     </Modal>
   )
 }

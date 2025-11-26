@@ -1,6 +1,4 @@
 import projectsData from "@/services/mockData/projects.json";
-import React from "react";
-
 let projects = [...projectsData].map(project => ({
 ...project,
   isFavorite: project.isFavorite || false,
@@ -343,11 +341,10 @@ return new Promise((resolve, reject) => {
             if (!task.dueDate && !task.dueDateTime) return false
             const dueDate = new Date(task.dueDate || task.dueDateTime)
             return !task.completed && dueDate < new Date()
-          }).length,
+}).length,
           completionPercentage: projectTasks.length > 0 
             ? Math.round((projectTasks.filter(task => task.completed).length / projectTasks.length) * 100)
             : 0,
-          memberCount: project.members ? project.members.length : 0,
           priorityBreakdown: {
             High: projectTasks.filter(task => task.priority === 'High' && !task.completed).length,
             Medium: projectTasks.filter(task => task.priority === 'Medium' && !task.completed).length,
@@ -360,7 +357,193 @@ return new Promise((resolve, reject) => {
         reject(error)
       }
     })
-  }
-}
+  },
 
+  // Project Template Management
+  async getTemplates() {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    try {
+      const stored = localStorage.getItem("taskflow-project-templates")
+      return stored ? JSON.parse(stored) : []
+    } catch (error) {
+      console.error("Failed to load project templates:", error)
+      return []
+    }
+  },
+
+async getTemplateById(id) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const template = templates.find(t => t.Id === parseInt(id))
+    if (!template) {
+      throw new Error(`Project template with Id ${id} not found`)
+    }
+    return { ...template }
+  },
+
+  async createTemplate(templateData) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const maxId = templates.length > 0 ? Math.max(...templates.map(t => t.Id)) : 0
+    
+    const newTemplate = {
+      Id: maxId + 1,
+      name: templateData.name,
+      description: templateData.description || "",
+      category: templateData.category || "Business",
+      icon: templateData.icon || "📁",
+      isPublic: templateData.isPublic || false,
+      defaults: {
+        color: templateData.defaults?.color || "#3b82f6",
+        status: templateData.defaults?.status || "Active",
+        settings: templateData.defaults?.settings || {}
+      },
+      tasks: Array.isArray(templateData.tasks) ? templateData.tasks : [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: "current-user",
+      usageCount: 0
+    }
+    
+    templates.push(newTemplate)
+    this.saveProjectTemplatesToStorage(templates)
+    return { ...newTemplate }
+  },
+
+async updateTemplate(id, updates) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const index = templates.findIndex(t => t.Id === parseInt(id))
+    
+    if (index === -1) {
+      throw new Error(`Project template with Id ${id} not found`)
+    }
+    
+    templates[index] = {
+      ...templates[index],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+    
+    this.saveProjectTemplatesToStorage(templates)
+    return { ...templates[index] }
+  },
+
+async deleteTemplate(id) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const index = templates.findIndex(t => t.Id === parseInt(id))
+    
+    if (index === -1) {
+      throw new Error(`Project template with Id ${id} not found`)
+    }
+    
+    const deleted = templates.splice(index, 1)[0]
+    this.saveProjectTemplatesToStorage(templates)
+    return { ...deleted }
+  },
+
+async createFromTemplate(templateId, overrides = {}) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const template = await this.getTemplateById(templateId)
+    
+    // Create project from template
+    const projectData = {
+      ...template.defaults,
+      ...overrides,
+      name: overrides.name || template.name
+    }
+    
+    const project = await this.create(projectData)
+    
+    // Create tasks if template has them
+    if (template.tasks && template.tasks.length > 0) {
+      const { taskService } = await import('./taskService')
+      
+      for (const taskTemplate of template.tasks) {
+        await taskService.create({
+          ...taskTemplate,
+          projectId: project.Id
+        })
+      }
+    }
+    
+    // Increment usage count
+    await this.updateTemplate(templateId, {
+      usageCount: template.usageCount + 1
+    })
+    
+    return project
+  },
+
+async getTemplateCategories() {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const categories = [...new Set(templates.map(t => t.category))]
+    return categories.length > 0 ? categories : ["Business", "Personal", "Education", "Non-Profit"]
+  },
+
+async exportTemplates() {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    const templates = await this.getTemplates()
+    const exportData = {
+      version: "1.0",
+      exportedAt: new Date().toISOString(),
+      type: "project-templates",
+      templates: templates.map(template => ({
+        ...template,
+        createdBy: undefined,
+        Id: undefined
+      }))
+    }
+    return exportData
+  },
+
+async importTemplates(importData) {
+    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
+    await delay()
+    if (!importData.templates || !Array.isArray(importData.templates)) {
+      throw new Error("Invalid project template data format")
+    }
+    
+    const existingTemplates = await this.getTemplates()
+    const maxId = existingTemplates.length > 0 ? Math.max(...existingTemplates.map(t => t.Id)) : 0
+    
+    const importedTemplates = []
+    let currentId = maxId
+    
+    for (const templateData of importData.templates) {
+      currentId++
+      const newTemplate = {
+        ...templateData,
+        Id: currentId,
+        createdBy: "imported",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        usageCount: 0
+      }
+      existingTemplates.push(newTemplate)
+      importedTemplates.push(newTemplate)
+    }
+    
+    this.saveProjectTemplatesToStorage(existingTemplates)
+    return importedTemplates
+  },
+
+  saveProjectTemplatesToStorage(templates) {
+    try {
+      localStorage.setItem("taskflow-project-templates", JSON.stringify(templates))
+    } catch (error) {
+      console.error("Failed to save project templates to localStorage:", error)
+    }
+}
+}
 export { projectService }

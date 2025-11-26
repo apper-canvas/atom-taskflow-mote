@@ -1,5 +1,15 @@
 import { createBrowserRouter } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
+import Loading from "@/components/ui/Loading";
+import Layout from "@/components/organisms/Layout";
+import ProjectSettings from "@/components/pages/ProjectSettings";
+import ProjectTimeline from "@/components/pages/ProjectTimeline";
+import Dashboard from "@/components/pages/Dashboard";
+import NotificationPreferences from "@/components/pages/NotificationPreferences";
+import NotFound from "@/components/pages/NotFound";
+import ProjectDetail from "@/components/pages/ProjectDetail";
+import NotificationCenter from "@/components/pages/NotificationCenter";
+import ProjectList from "@/components/pages/ProjectList";
 
 // Enhanced lazy loading with error recovery
 const createLazyComponent = (importFunc, componentName) => {
@@ -17,7 +27,7 @@ const createLazyComponent = (importFunc, componentName) => {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900">Page Loading Failed</h2>
-              <p className="text-gray-600">
+<p className="text-gray-600">
                 The {componentName} component could not be loaded. This might be due to a network issue or missing files.
               </p>
               <button
@@ -37,10 +47,10 @@ const createLazyComponent = (importFunc, componentName) => {
   );
 };
 
+// Lazy loaded components
 const Layout = createLazyComponent(() => import("@/components/organisms/Layout"), "Layout")
 const Dashboard = createLazyComponent(() => import("@/components/pages/Dashboard"), "Dashboard")
 const NotFound = createLazyComponent(() => import("@/components/pages/NotFound"), "NotFound")
-
 // Project pages
 const ProjectList = createLazyComponent(() => import("@/components/pages/ProjectList"), "ProjectList")
 const ProjectDetail = createLazyComponent(() => import("@/components/pages/ProjectDetail"), "ProjectDetail")

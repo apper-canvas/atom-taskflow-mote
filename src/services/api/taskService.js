@@ -1,6 +1,4 @@
 import tasksData from "@/services/mockData/tasks.json";
-import React from "react";
-
 let tasks = [...tasksData]
 
 const delay = () => new Promise(resolve => setTimeout(resolve, 300))
@@ -266,6 +264,199 @@ notes: task.notes || "",
     if (!this.loadFromLocalStorage()) {
       this.saveToLocalStorage()
     }
+}
+  }
+}, // Added missing comma here
+
+// Template Management
+taskService.getTemplates = async function() {
+  await delay()
+try {
+    const stored = localStorage.getItem("taskflow-task-templates")
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.error("Failed to load task templates:", error)
+    return []
+  }
+}
+
+taskService.getTemplateById = async function(id) {
+  await delay()
+  const templates = await this.getTemplates()
+  const template = templates.find(t => t.Id === parseInt(id))
+  if (!template) {
+    throw new Error(`Template with Id ${id} not found`)
+  }
+  return { ...template }
+}
+
+taskService.createTemplate = async function(templateData) {
+  await delay()
+  const templates = await this.getTemplates()
+  const maxId = templates.length > 0 ? Math.max(...templates.map(t => t.Id)) : 0
+  
+  const newTemplate = {
+    Id: maxId + 1,
+    name: templateData.name,
+    description: templateData.description || "",
+    category: templateData.category || "General",
+    icon: templateData.icon || "📝",
+    isPublic: templateData.isPublic || false,
+    tags: templateData.tags || [],
+    defaults: {
+      title: templateData.defaults?.title || "",
+      description: templateData.defaults?.description || "",
+      category: templateData.defaults?.category || "Personal",
+      priority: templateData.defaults?.priority || "Medium",
+      status: templateData.defaults?.status || "Not Started",
+      projectId: templateData.defaults?.projectId || null,
+      tags: templateData.defaults?.tags || [],
+      estimatedTime: templateData.defaults?.estimatedTime || null,
+      assignedTo: templateData.defaults?.assignedTo || null
+    },
+    subtasks: Array.isArray(templateData.subtasks) ? templateData.subtasks : [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    createdBy: "current-user", // In real app, would be from auth
+    usageCount: 0
+  }
+  
+  templates.push(newTemplate)
+  this.saveTemplatesToStorage(templates)
+  return { ...newTemplate }
+}
+
+taskService.updateTemplate = async function(id, updates) {
+  await delay()
+  const templates = await this.getTemplates()
+  const index = templates.findIndex(t => t.Id === parseInt(id))
+  
+  if (index === -1) {
+    throw new Error(`Template with Id ${id} not found`)
+  }
+  
+  templates[index] = {
+    ...templates[index],
+    ...updates,
+    updatedAt: new Date().toISOString()
+  }
+  
+  this.saveTemplatesToStorage(templates)
+  return { ...templates[index] }
+}
+
+taskService.deleteTemplate = async function(id) {
+  await delay()
+  const templates = await this.getTemplates()
+  const index = templates.findIndex(t => t.Id === parseInt(id))
+  
+  if (index === -1) {
+    throw new Error(`Template with Id ${id} not found`)
+  }
+  
+  const deleted = templates.splice(index, 1)[0]
+  this.saveTemplatesToStorage(templates)
+  return { ...deleted }
+}
+
+taskService.createFromTemplate = async function(templateId, overrides = {}) {
+  await delay()
+  const template = await this.getTemplateById(templateId)
+  
+  // Create main task from template
+  const taskData = {
+    ...template.defaults,
+    ...overrides,
+    title: overrides.title || template.defaults.title || template.name
+  }
+  
+  const mainTask = await this.create(taskData)
+  
+  // Create subtasks if template has them
+  if (template.subtasks && template.subtasks.length > 0) {
+    for (const subtaskTemplate of template.subtasks) {
+      await this.createSubtask(mainTask.Id, {
+        ...subtaskTemplate,
+        category: taskData.category,
+        priority: taskData.priority,
+        projectId: taskData.projectId
+      })
+    }
+  }
+  
+  // Increment usage count
+  await this.updateTemplate(templateId, {
+    usageCount: template.usageCount + 1
+  })
+  
+  return mainTask
+}
+
+taskService.getTemplateCategories = async function() {
+  await delay()
+  const templates = await this.getTemplates()
+  const categories = [...new Set(templates.map(t => t.category))]
+  return categories.length > 0 ? categories : ["General", "Work", "Personal", "Project"]
+}
+
+taskService.getPopularTemplates = async function(limit = 10) {
+  await delay()
+  const templates = await this.getTemplates()
+  return templates
+    .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
+    .slice(0, limit)
+}
+
+taskService.exportTemplates = async function() {
+  await delay()
+  const templates = await this.getTemplates()
+  const exportData = {
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    templates: templates.map(template => ({
+      ...template,
+      createdBy: undefined, // Remove user-specific data
+      Id: undefined // Will be regenerated on import
+    }))
+  }
+  return exportData
+}
+
+taskService.importTemplates = async function(importData) {
+  await delay()
+  if (!importData.templates || !Array.isArray(importData.templates)) {
+    throw new Error("Invalid template data format")
+  }
+  
+  const existingTemplates = await this.getTemplates()
+  const maxId = existingTemplates.length > 0 ? Math.max(...existingTemplates.map(t => t.Id)) : 0
+  
+  const importedTemplates = []
+  let currentId = maxId
+  
+  for (const templateData of importData.templates) {
+    currentId++
+    const newTemplate = {
+      ...templateData,
+      Id: currentId,
+      createdBy: "imported",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      usageCount: 0
+    }
+    existingTemplates.push(newTemplate)
+    importedTemplates.push(newTemplate)
+  }
+  
+  this.saveTemplatesToStorage(existingTemplates)
+  return importedTemplates
+}
+
+taskService.saveTemplatesToStorage = function(templates) {
+  try {
+    localStorage.setItem("taskflow-task-templates", JSON.stringify(templates))
+  } catch (error) {
+    console.error("Failed to save templates to localStorage:", error)
   }
 }
 
