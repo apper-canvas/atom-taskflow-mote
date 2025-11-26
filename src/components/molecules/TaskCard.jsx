@@ -5,9 +5,8 @@ import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Badge from "@/components/atoms/Badge";
 import { cn } from "@/utils/cn";
-import { taskService } from "@/services/taskService";
+import { taskService } from "@/services/api/taskService";
 import { toast } from "@/utils/toast";
-
 const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask }) => {
   const [showSubtasks, setShowSubtasks] = useState(false)
   const [subtasks, setSubtasks] = useState([])
