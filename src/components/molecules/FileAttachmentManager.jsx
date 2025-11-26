@@ -845,7 +845,7 @@ onChange={(e) => setSearchTerm(e.target.value)}
         </div>
       )}
       {/* Rename Modal */}
-      {renameModal.isOpen && (
+{renameModal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -898,7 +898,7 @@ onChange={(e) => setSearchTerm(e.target.value)}
             </div>
           </motion.div>
         </div>
-)}
+      )}
 
       {/* Create Folder Modal */}
       <Modal
@@ -931,6 +931,7 @@ onChange={(e) => setSearchTerm(e.target.value)}
             <Button onClick={handleCreateFolder}>
               Create Folder
             </Button>
+</Button>
           </div>
         </div>
       </Modal>
@@ -1021,10 +1022,9 @@ onChange={(e) => setSearchTerm(e.target.value)}
               Archive
             </Button>
           </div>
-</div>
+        </div>
       </Modal>
     </div>
   );
 };
-
 export default FileAttachmentManager;
