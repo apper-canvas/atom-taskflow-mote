@@ -20,22 +20,17 @@ const FilterBar = ({
   onProjectChange,
   projects = [],
   viewMode,
-  onViewModeChange,
-  activeSmartView,
-  onSmartViewChange,
-  activeGroupBy,
-  onGroupByChange
+  onViewModeChange 
 }) => {
-const categories = [
+  const categories = [
     { value: "all", label: "All Tasks", icon: "List", count: 0 },
     { value: "Personal", label: "Personal", icon: "Home", count: 0 },
     { value: "Work", label: "Work", icon: "Briefcase", count: 0 },
-    { value: "Other", label: "Other", icon: "Folder", count: 0 }
+{ value: "Other", label: "Other", icon: "Folder", count: 0 }
   ];
 
-  const priorities = ["all", "Urgent", "High", "Medium", "Low"];
+  const priorities = ["all", "High", "Medium", "Low"];
   const [availableTags, setAvailableTags] = useState([]);
-
   const statuses = [
     { value: "all", label: "All" },
     { value: "active", label: "Active" },
@@ -53,15 +48,6 @@ const categories = [
     }))
   ]
 
-  // Smart views for quick filtering
-  const smartViews = [
-    { id: 'all', label: 'All Tasks', icon: 'List', color: 'gray' },
-    { id: 'today', label: 'Today', icon: 'Calendar', color: 'orange' },
-    { id: 'upcoming', label: 'Upcoming', icon: 'Clock', color: 'green' },
-    { id: 'overdue', label: 'Overdue', icon: 'AlertCircle', color: 'red' },
-    { id: 'completed', label: 'Completed', icon: 'CheckCircle', color: 'green' }
-  ]
-
   // Load available tags for filtering
   useEffect(() => {
     const loadTags = async () => {
@@ -77,213 +63,144 @@ const categories = [
   }, [])
 
   return (
-<motion.div
-    initial={{
-        y: -20,
-        opacity: 0
-    }}
-    animate={{
-        y: 0,
-        opacity: 1
-    }}
-    className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-4">
-    {/* Smart Views */}
-    <div className="flex flex-wrap gap-2">
-        {smartViews.map(view => <motion.button
-            key={view.id}
-            onClick={() => onSmartViewChange?.(view.id)}
-            whileHover={{
-                scale: 1.02
-            }}
-            whileTap={{
-                scale: 0.98
-            }}
-            className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                activeSmartView === view.id ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            )}>
-            <ApperIcon name={view.icon} size={16} />
-            {view.label}
-        </motion.button>)}
-    </div>
-    {/* Search Bar */}
-    <div className="relative">
+    <motion.div
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-4"
+    >
+      {/* Search Bar */}
+      <div className="relative">
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-            <ApperIcon name="Search" size={18} className="text-gray-400" />
+          <ApperIcon name="Search" size={18} className="text-gray-400" />
         </div>
         <Input
-            value={searchTerm}
-            onChange={e => onSearchChange(e.target.value)}
-            placeholder="Search tasks by title, description, or tags..."
-            className="pl-10 bg-gray-50 border-gray-200 focus:bg-white" />
-    </div>
-    {/* Category Filter Pills */}
-    <div className="flex flex-wrap gap-2">
-        {categories.map(category => <motion.button
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Search tasks..."
+          className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+        />
+      </div>
+
+      {/* Category Filter Pills */}
+      <div className="flex flex-wrap gap-2">
+        {categories.map((category) => (
+          <motion.button
             key={category.value}
             onClick={() => onCategoryChange(category.value)}
-            whileHover={{
-                scale: 1.02
-            }}
-            whileTap={{
-                scale: 0.98
-            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             className={cn(
-                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
-                selectedCategory === category.value ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            )}>
+              "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+              selectedCategory === category.value
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            )}
+          >
             <ApperIcon name={category.icon} size={16} />
             {category.label}
-        </motion.button>)}
-    </div>
-    {/* Additional Filters */}
-    <div className="flex flex-wrap items-center gap-4">
+          </motion.button>
+        ))}
+      </div>
+
+{/* Additional Filters */}
+<div className="flex flex-wrap items-center gap-4">
         {/* Project Filter */}
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Project:</span>
-            <select
-                value={selectedProject}
-                onChange={e => onProjectChange(e.target.value)}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[140px]">
-                {projectOptions.map(option => <option key={option.value} value={option.value}>
-                    {option.icon && option.value !== "all" && option.value !== "unassigned" ? `${option.icon} ` : ""}{option.label}
-                </option>)}
-            </select>
+          <span className="text-sm font-medium text-gray-700">Project:</span>
+          <select
+            value={selectedProject}
+            onChange={(e) => onProjectChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[140px]"
+          >
+            {projectOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.icon && option.value !== "all" && option.value !== "unassigned" ? `${option.icon} ` : ""}{option.label}
+              </option>
+            ))}
+          </select>
         </div>
+
         {/* Priority Filter */}
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Priority:</span>
-            <select
-                value={selectedPriority}
-                onChange={e => onPriorityChange(e.target.value)}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                {priorities.map(priority => <option key={priority} value={priority}>
-                    {priority === "all" ? "All" : priority}
-                </option>)}
-            </select>
+          <span className="text-sm font-medium text-gray-700">Priority:</span>
+          <select
+            value={selectedPriority}
+            onChange={(e) => onPriorityChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {priorities.map((priority) => (
+              <option key={priority} value={priority}>
+                {priority === "all" ? "All" : priority}
+              </option>
+            ))}
+          </select>
         </div>
+
         {/* Tag Filter */}
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Tag:</span>
-            <select
-                value={selectedTag}
-                onChange={e => onTagChange(e.target.value)}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                <option value="all">All Tags</option>
-                {availableTags.map(tag => <option key={tag.Id} value={tag.Id}>
-                    {tag.name}
-                </option>)}
-            </select>
+          <span className="text-sm font-medium text-gray-700">Tag:</span>
+          <select
+            value={selectedTag}
+            onChange={(e) => onTagChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="all">All Tags</option>
+            {availableTags.map((tag) => (
+              <option key={tag.Id} value={tag.Id}>
+                {tag.name}
+              </option>
+            ))}
+          </select>
         </div>
+
         {/* Status Filter */}
         <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Status:</span>
-            <select
-                value={selectedStatus}
-                onChange={e => onStatusChange(e.target.value)}
-                className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                {statuses.map(status => <option key={status.value} value={status.value}>
-                    {status.label}
-                </option>)}
-            </select>
+          <span className="text-sm font-medium text-gray-700">Status:</span>
+          <select
+            value={selectedStatus}
+            onChange={(e) => onStatusChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            {statuses.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
         </div>
-        {/* View Mode Toggle */}
+
         {/* View Mode Toggle */}
         <div className="flex items-center gap-2 ml-auto">
-            <span className="text-sm font-medium text-gray-700">View:</span>
-            <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                    onClick={() => onViewModeChange("list")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "list" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="List" size={16} />List
-                                </button>
-                <button
-                    onClick={() => onViewModeChange("category")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "category" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="Grid3X3" size={16} />Groups
-                                </button>
-                <button
-                    onClick={() => onViewModeChange("board")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "board" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="Columns" size={16} />Board
-                                </button>
-                <button
-                    onClick={() => onViewModeChange("table")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "table" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="Table" size={16} />Table
-                                </button>
-                <button
-                    onClick={() => onViewModeChange("calendar")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "calendar" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="Calendar" size={16} />Calendar
-                                </button>
-                <button
-                    onClick={() => onViewModeChange("timeline")}
-                    className={cn(
-                        "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
-                        viewMode === "timeline" ? "bg-white shadow-sm text-blue-600 font-medium" : "text-gray-600 hover:text-gray-900"
-                    )}>
-                    <ApperIcon name="Clock" size={16} />Timeline
-                                </button>
-            </div>
+          <span className="text-sm font-medium text-gray-700">View:</span>
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => onViewModeChange("list")}
+              className={cn(
+                "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
+                viewMode === "list"
+                  ? "bg-white shadow-sm text-blue-600 font-medium"
+                  : "text-gray-600 hover:text-gray-900"
+              )}
+            >
+              <ApperIcon name="List" size={16} />
+              List
+            </button>
+            <button
+              onClick={() => onViewModeChange("category")}
+              className={cn(
+                "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
+                viewMode === "category"
+                  ? "bg-white shadow-sm text-blue-600 font-medium"
+                  : "text-gray-600 hover:text-gray-900"
+              )}
+            >
+              <ApperIcon name="Grid3X3" size={16} />
+              Groups
+            </button>
+          </div>
         </div>
-    </div>
-    {/* Grouping Controls - Show only for table and list views */}
-    {(viewMode === "table" || viewMode === "list") && <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
-        <span className="text-sm font-medium text-gray-700">Group by:</span>
-        <div className="flex flex-wrap gap-2">
-            {[{
-                value: null,
-                label: "None",
-                icon: "List"
-            }, {
-                value: "status",
-                label: "Status",
-                icon: "CheckCircle"
-            }, {
-                value: "priority",
-                label: "Priority",
-                icon: "AlertCircle"
-            }, {
-                value: "project",
-                label: "Project",
-                icon: "Folder"
-            }, {
-                value: "assignedTo",
-                label: "Assignee",
-                icon: "User"
-            }, {
-                value: "dueDate",
-                label: "Due Date",
-                icon: "Calendar"
-            }].map(group => <button
-                key={group.value || "none"}
-                onClick={() => onGroupByChange?.(group.value)}
-                className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-200",
-                    activeGroupBy === group.value ? "bg-blue-100 text-blue-700 font-medium" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                )}>
-                <ApperIcon name={group.icon} size={14} />
-                {group.label}
-            </button>)}
-        </div>
-    </div>}
-</motion.div>
+      </div>
+    </motion.div>
   )
 }
 

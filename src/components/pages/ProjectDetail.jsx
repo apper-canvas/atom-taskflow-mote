@@ -1,26 +1,21 @@
-import React, { Suspense, lazy, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import { differenceInDays, format } from "date-fns";
-import { projectService } from "@/services/api/projectService";
-import { taskService } from "@/services/api/taskService";
-import ApperIcon from "@/components/ApperIcon";
-import Loading from "@/components/ui/Loading";
-import ErrorView from "@/components/ui/ErrorView";
-import Button from "@/components/atoms/Button";
-import Badge from "@/components/atoms/Badge";
-import TaskList from "@/components/organisms/TaskList";
-import BoardView from "@/components/organisms/BoardView";
-import MemberCard from "@/components/molecules/MemberCard";
-import ProjectDashboard from "@/components/molecules/ProjectDashboard";
-import MemberManagementModal from "@/components/molecules/MemberManagementModal";
-import TaskEditModal from "@/components/molecules/TaskEditModal";
-import toast from "@/utils/toast";
+import React, { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { format, differenceInDays } from 'date-fns'
+import { projectService } from '@/services/api/projectService'
+import { taskService } from '@/services/api/taskService'
+import ApperIcon from '@/components/ApperIcon'
+import Loading from '@/components/ui/Loading'
+import ErrorView from '@/components/ui/ErrorView'
+import Button from '@/components/atoms/Button'
+import Badge from '@/components/atoms/Badge'
+import ProjectDashboard from '@/components/molecules/ProjectDashboard'
+import TaskList from '@/components/organisms/TaskList'
+import TaskEditModal from '@/components/molecules/TaskEditModal'
+import toast from '@/utils/toast'
+import MemberCard from '@/components/molecules/MemberCard'
+import MemberManagementModal from '@/components/molecules/MemberManagementModal'
 
-// Lazy load view components
-const CalendarView = lazy(() => import('@/components/organisms/CalendarView'))
-const TableView = lazy(() => import('@/components/organisms/TableView'))
-const ProjectTimeline = lazy(() => import('@/components/pages/ProjectTimeline'))
 function ProjectDetail() {
   const { id } = useParams()
 const navigate = useNavigate()
@@ -30,14 +25,11 @@ const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
-const [editingTask, setEditingTask] = useState(null)
+  const [editingTask, setEditingTask] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [viewMode, setViewMode] = useState('list')
-  const [groupBy, setGroupBy] = useState(null)
-
   useEffect(() => {
     if (id) {
       loadProjectData()
@@ -318,11 +310,9 @@ Settings
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-8">
         <nav className="flex space-x-8">
-{[
+          {[
             { id: 'overview', label: 'Overview', icon: 'BarChart3' },
             { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
-            { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-            { id: 'timeline', label: 'Timeline', icon: 'Clock' },
             { id: 'members', label: 'Members', icon: 'Users' }
           ].map(tab => (
             <button
@@ -346,111 +336,17 @@ Settings
         <ProjectDashboard project={project} stats={projectStats} tasks={tasks} />
       )}
 
-{activeTab === 'tasks' && (
+      {activeTab === 'tasks' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Tasks</h3>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">View:</span>
-                <select
-                  value={viewMode}
-                  onChange={(e) => setViewMode(e.target.value)}
-                  className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="list">List</option>
-                  <option value="board">Board</option>
-                  <option value="table">Table</option>
-                </select>
-              </div>
-              {(viewMode === 'list' || viewMode === 'table') && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Group:</span>
-                  <select
-                    value={groupBy || ''}
-                    onChange={(e) => setGroupBy(e.target.value || null)}
-                    className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">None</option>
-                    <option value="status">Status</option>
-                    <option value="priority">Priority</option>
-                    <option value="assignedTo">Assignee</option>
-                  </select>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {viewMode === 'board' ? (
-            <BoardView
-              tasks={tasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditTask}
-              onToggleSubtask={() => {}}
-              onCreateSubtask={() => {}}
-              onCreateTask={handleCreateTask}
-            />
-          ) : viewMode === 'table' ? (
-            <TableView
-              tasks={tasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-              onToggleSubtask={() => {}}
-              onCreateSubtask={() => {}}
-              groupBy={groupBy}
-            />
-          ) : (
-            <TaskList
-              tasks={tasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditTask}
-              onCreateSubtask={() => {}}
-              onToggleSubtask={() => {}}
-              viewMode={viewMode}
-              groupBy={groupBy}
-            />
-          )}
-        </div>
-      )}
-
-      {activeTab === 'calendar' && (
-        <div className="space-y-6">
-          <CalendarView
+          <TaskList
             tasks={tasks}
             onToggleComplete={handleToggleComplete}
             onEdit={handleEditTask}
-            onDelete={handleDeleteTask}
-            onToggleSubtask={() => {}}
-            onCreateSubtask={() => {}}
-            onCreateTask={handleCreateTask}
+            onCreateSubtask={() => {}} // Handled by TaskCard internally
+            onToggleSubtask={() => {}} // Handled by TaskCard internally
+            viewMode="list"
           />
         </div>
-      )}
-{activeTab === 'timeline' && (
-        <Suspense fallback={
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center space-y-4">
-              <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            </div>
-          </div>
-        }>
-          <div className="space-y-6">
-            <ProjectTimeline
-              tasks={tasks}
-              onToggleComplete={handleToggleComplete}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-              onToggleSubtask={() => {}}
-              onCreateSubtask={() => {}}
-              onCreateTask={handleCreateTask}
-              project={project}
-            />
-          </div>
-        </Suspense>
       )}
 
 {activeTab === 'members' && (
@@ -521,7 +417,7 @@ Settings
             <div className="flex items-center gap-3 mb-4">
               <ApperIcon name="AlertTriangle" size={24} className="text-red-500" />
               <h3 className="text-lg font-semibold text-gray-900">Delete Project</h3>
-</div>
+            </div>
             <p className="text-gray-600 mb-6">
               Are you sure you want to delete "{project?.name}"? This action cannot be undone and will remove all associated tasks and data.
             </p>
