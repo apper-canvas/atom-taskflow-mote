@@ -489,9 +489,9 @@ Settings
                 Delete Project
               </Button>
             </div>
-          </motion.div>
+</motion.div>
         </div>
-)}
+      )}
     </div>
   )
 }

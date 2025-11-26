@@ -841,8 +841,8 @@ onChange={(e) => setSearchTerm(e.target.value)}
                 ))
               )}
             </div>
-          )}
-</div>
+)}
+        </div>
       )}
 
       {/* Rename Modal */}
@@ -888,19 +888,20 @@ onChange={(e) => setSearchTerm(e.target.value)}
                 >
                   Cancel
                 </Button>
-<Button
+                <Button
                   onClick={() => renameFile(renameModal.file, `${renameModal.newName}.${renameModal.file?.name.split('.').pop()}`)}
                   variant="default"
                   size="sm"
                 >
                   Rename
                 </Button>
-</div>
+              </div>
             </div>
           </motion.div>
         </div>
       )}
-{/* Create Folder Modal */}
+
+      {/* Create Folder Modal */}
       <Modal
         isOpen={createFolderModal.isOpen}
         onClose={() => setCreateFolderModal({ isOpen: false, name: '' })}
@@ -1014,13 +1015,12 @@ onChange={(e) => setSearchTerm(e.target.value)}
             >
               Cancel
             </Button>
-<Button
+            <Button
               variant="destructive"
               onClick={() => archiveFile(confirmArchive.file)}
             >
               Archive
             </Button>
-</Button>
           </div>
         </div>
       </Modal>
