@@ -9,7 +9,7 @@ import Loading from '@/components/ui/Loading'
 import ErrorView from '@/components/ui/ErrorView'
 import Button from '@/components/atoms/Button'
 import Select from '@/components/atoms/Select'
-import { showToast } from '@/utils/toast'
+import toast from '@/utils/toast'
 
 function ProjectTimeline() {
   const { id } = useParams()
@@ -43,7 +43,7 @@ function ProjectTimeline() {
       ))
     } catch (err) {
       setError(err.message)
-      showToast('Failed to load project timeline', 'error')
+toast.error('Failed to load project timeline')
     } finally {
       setLoading(false)
     }
