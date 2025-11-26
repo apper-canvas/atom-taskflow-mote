@@ -106,8 +106,8 @@ function Layout() {
           </div>
 </div>
 
-        {/* Page Content */}
-        <main>
+{/* Page Content */}
+        <main className="pt-0">
           <Outlet />
         </main>
       </div>

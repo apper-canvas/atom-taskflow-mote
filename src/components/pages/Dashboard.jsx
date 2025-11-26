@@ -221,12 +221,12 @@ if (loading) return <Loading />;
   if (error) return <ErrorView message={error} onRetry={handleRetry} />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
         {/* Header */}
-        <motion.div
+<motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8"
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4"
         >
           <div className="flex items-center gap-4 mb-4 sm:mb-0">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
