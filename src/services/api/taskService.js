@@ -112,9 +112,17 @@ async update(id, updates) {
   },
 
   // Get subtasks for a parent task
-  async getSubtasks(parentTaskId) {
+async getSubtasks(parentTaskId) {
     await delay()
     return tasks.filter(task => task.parentTaskId === parseInt(parentTaskId))
+      .map(task => ({ ...task }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  },
+
+  // Get tasks by team ID
+  async getByTeam(teamId) {
+    await delay()
+    return tasks.filter(task => task.teamId === parseInt(teamId))
       .map(task => ({ ...task }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   },
