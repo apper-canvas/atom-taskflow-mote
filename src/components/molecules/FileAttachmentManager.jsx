@@ -108,75 +108,79 @@ const FileAttachmentManager = ({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+// URL validation utility
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  // Create folder helper
+  const createFolder = async (folderName) => {
+    try {
+      const newFolder = await fileService.createFolder({
+        name: folderName,
+        projectId,
+        taskId,
+        parentFolderId: currentFolder?.Id || null
+      });
+      setFolders(prev => [...prev, newFolder]);
+      toast.success('Folder created successfully');
+      return newFolder;
+    } catch (error) {
+      toast.error('Failed to create folder');
+      return null;
+    }
+  };
+
+  // Handle folder creation
+  const handleCreateFolder = async () => {
+    if (!createFolderModal.name.trim()) {
+      toast.error('Folder name cannot be empty');
+      return;
+    }
+    
+    await createFolder(createFolderModal.name.trim());
+    setCreateFolderModal({ isOpen: false, name: '' });
+  };
+
+  // Handle external link addition
+  const handleAddExternalLink = async () => {
+    if (!externalLinkModal.url.trim()) {
+      toast.error('URL cannot be empty');
+      return;
+    }
+
+    if (!isValidUrl(externalLinkModal.url)) {
+      toast.error('Please enter a valid URL');
+      return;
+    }
+
+    try {
+      const newLink = await fileService.createExternalLink({
+        title: externalLinkModal.title.trim() || 'External Link',
+        url: externalLinkModal.url.trim(),
+        description: externalLinkModal.description.trim(),
+        taskId,
+        projectId,
+        folderId: currentFolder?.Id || null
+      });
+
+      onExternalLinksChange && onExternalLinksChange([...externalLinks, newLink]);
+      toast.success('External link added successfully');
+      setExternalLinkModal({ isOpen: false, title: '', url: '', description: '' });
+    } catch (error) {
+      toast.error('Failed to add external link');
+    }
+  };
+
 const processFiles = useCallback(async (files) => {
     const fileArray = Array.from(files);
     const validFiles = [];
     const errors = [];
-    // Create folder if needed
-    const createFolder = async (folderName) => {
-      try {
-        const newFolder = await fileService.createFolder({
-          name: folderName,
-          projectId,
-          taskId,
-          parentFolderId: currentFolder?.Id || null
-        });
-        setFolders(prev => [...prev, newFolder]);
-        toast.success('Folder created successfully');
-        return newFolder;
-      } catch (error) {
-        toast.error('Failed to create folder');
-        return null;
-      }
-    };
-
-    const handleCreateFolder = async () => {
-      if (!createFolderModal.name.trim()) {
-        toast.error('Folder name cannot be empty');
-        return;
-      }
-      
-      await createFolder(createFolderModal.name.trim());
-      setCreateFolderModal({ isOpen: false, name: '' });
-    };
-
-    const handleAddExternalLink = async () => {
-      if (!externalLinkModal.url.trim()) {
-        toast.error('URL cannot be empty');
-        return;
-      }
-
-      if (!isValidUrl(externalLinkModal.url)) {
-        toast.error('Please enter a valid URL');
-        return;
-      }
-
-      try {
-        const newLink = await fileService.createExternalLink({
-          title: externalLinkModal.title.trim() || 'External Link',
-          url: externalLinkModal.url.trim(),
-          description: externalLinkModal.description.trim(),
-          taskId,
-          projectId,
-          folderId: currentFolder?.Id || null
-        });
-
-        onExternalLinksChange && onExternalLinksChange([...externalLinks, newLink]);
-        toast.success('External link added successfully');
-        setExternalLinkModal({ isOpen: false, title: '', url: '', description: '' });
-      } catch (error) {
-        toast.error('Failed to add external link');
-      }
-    };
-
-    const isValidUrl = (string) => {
-      try {
-        new URL(string);
-        return true;
-} catch (_) {
-        return false;
-      }
-    };
 
     for (const file of fileArray) {
       const error = validateFile(file);
