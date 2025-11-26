@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
+import { teamService } from "@/services/api/teamService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Button from "@/components/atoms/Button";
+import Select from "@/components/atoms/Select";
 import TaskList from "@/components/organisms/TaskList";
 import TaskStats from "@/components/organisms/TaskStats";
 import QuickAddTask from "@/components/molecules/QuickAddTask";
@@ -19,33 +21,35 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [createLoading, setCreateLoading] = useState(false)
-  
-  // Filters
+// Filters
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedPriority, setSelectedPriority] = useState("all")
-const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedProject, setSelectedProject] = useState("all")
   const [selectedTag, setSelectedTag] = useState("all")
+  const [selectedTeam, setSelectedTeam] = useState("all")
   const [viewMode, setViewMode] = useState("list")
   
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [modalLoading, setModalLoading] = useState(false)
-const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
   const [projects, setProjects] = useState([])
-  
+  const [teams, setTeams] = useState([])
   // Load tasks and projects
-  const loadTasks = async () => {
+const loadTasks = async () => {
     try {
       setError("")
-const [taskData, projectData] = await Promise.all([
+      const [taskData, projectData, teamData] = await Promise.all([
         taskService.getAll(),
-        projectService.getAll()
+        projectService.getAll(),
+        teamService.getAll()
       ])
       setTasks(taskData)
       setProjects(projectData)
+      setTeams(teamData)
     } catch (err) {
       console.error("Failed to load tasks:", err)
       setError(err.message || "Failed to load tasks")
@@ -242,16 +246,31 @@ const handleSaveTask = async (taskId, taskData) => {
           </div>
           
 <div className="flex items-center gap-3">
-            <motion.button
-              onClick={handleCreateNewTask}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-            >
-              <ApperIcon name="Plus" size={18} />
-              New Task
-            </motion.button>
-</div>
+              {/* Team Context Selector */}
+              <Select
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(e.target.value)}
+                className="min-w-[180px]"
+              >
+                <option value="all">🌐 All Teams</option>
+                <option value="personal">👤 Personal Tasks</option>
+                {teams.map(team => (
+                  <option key={team.Id} value={team.Id}>
+                    {team.icon} {team.name}
+                  </option>
+                ))}
+              </Select>
+
+              <motion.button
+                onClick={handleCreateNewTask}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              >
+                <ApperIcon name="Plus" size={18} />
+                New Task
+              </motion.button>
+            </div>
         </motion.div>
 
         {/* Stats */}
@@ -317,14 +336,16 @@ const handleSaveTask = async (taskId, taskData) => {
           onCreateTask={handleCreateNewTask}
         />
 
-        {/* Edit Modal */}
+{/* Edit Modal */}
         <TaskEditModal
-isOpen={isModalOpen}
+          isOpen={isModalOpen}
           onClose={handleCloseModal}
           task={editingTask}
           onSave={handleSaveTask}
           onDelete={handleDeleteTask}
           isLoading={modalLoading}
+          teams={teams}
+          selectedTeam={selectedTeam}
         />
       </div>
     </div>

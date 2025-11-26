@@ -11,13 +11,7 @@ import Input from "@/components/atoms/Input";
 import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import TagSelector from "@/components/molecules/TagSelector";
 // Mock users for assignment
-const mockUsers = [
-  { id: 1, name: "John Smith", email: "john@company.com" },
-  { id: 2, name: "Sarah Johnson", email: "sarah@company.com" },
-  { id: 3, name: "Mike Chen", email: "mike@company.com" },
-  { id: 4, name: "Lisa Wong", email: "lisa@company.com" },
-  { id: 5, name: "David Brown", email: "david@company.com" }
-];
+// Removed mockUsers - will be replaced with actual team members
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
     title: "",
@@ -34,8 +28,9 @@ const [formData, setFormData] = useState({
     tags: [],
     isRecurring: false,
 recurrence: null,
-    assignedTo: null,
+assignedTo: null,
     projectId: null,
+    teamId: null,
     reminders: [
       { type: "on_due", enabled: false },
       { type: "1_day_before", enabled: false },
@@ -56,14 +51,14 @@ const [availableTasks, setAvailableTasks] = useState([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showRecurringModal, setShowRecurringModal] = useState(false)
 useEffect(() => {
-if (task) {
+    if (task) {
       setFormData({
         title: task.title || "",
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         status: task.status || "Not Started",
-dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
+        dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
         reminderEnabled: task.reminderEnabled || false,
         reminderDateTime: task.reminderDateTime ? format(new Date(task.reminderDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         reminderMethod: task.reminderMethod || "notification",
@@ -83,12 +78,13 @@ dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "
         actualTime: task.actualTime || 0,
         timeSpent: task.timeSpent || 0,
         notes: task.notes || "",
-attachments: task.attachments || [],
+        attachments: task.attachments || [],
         projectId: task.projectId || null,
+        teamId: task.teamId || null,
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
-} else {
+    } else {
       // Check if we're creating a subtask (parentTaskId passed via task prop)
       if (task?.parentTaskId) {
         setFormData(prev => ({
@@ -99,14 +95,18 @@ attachments: task.attachments || [],
       }
     }
     
-    // Load available parent tasks for subtask creation
+// Load available parent tasks for subtask creation
     loadAvailableTasks()
+    loadAvailableProjects()
+    loadTeams()
     setErrors({})
     setShowDeleteConfirm(false)
     setShowRecurringModal(false)
   }, [task, isOpen])
 
 const [availableProjects, setAvailableProjects] = useState([])
+const [teams, setTeams] = useState([])
+const [selectedTeam, setSelectedTeam] = useState(null)
 
   const loadAvailableTasks = async () => {
     try {
@@ -118,8 +118,7 @@ const [availableProjects, setAvailableProjects] = useState([])
       console.error('Failed to load tasks:', error)
     }
   }
-
-  const loadAvailableProjects = async () => {
+const loadAvailableProjects = async () => {
     try {
       const projects = await projectService.getAll()
       // Only show active projects
@@ -127,6 +126,38 @@ const [availableProjects, setAvailableProjects] = useState([])
       setAvailableProjects(activeProjects)
     } catch (error) {
       console.error('Failed to load projects:', error)
+    }
+  }
+
+  const loadTeams = async () => {
+    try {
+      // Mock teams data - replace with actual API call when available
+      const mockTeams = [
+        {
+          Id: 1,
+          name: 'Development Team',
+          icon: '💻',
+          members: [
+            { Id: 1, name: 'John Doe', email: 'john@example.com', status: 'Active' },
+            { Id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'Active' }
+          ]
+        },
+        {
+          Id: 2,
+          name: 'Marketing Team',
+          icon: '📈',
+          members: [
+            { Id: 3, name: 'Bob Wilson', email: 'bob@example.com', status: 'Active' }
+          ]
+        }
+      ]
+      setTeams(mockTeams)
+      // Set default selected team if user has a preferred team
+      if (mockTeams.length > 0) {
+        setSelectedTeam(mockTeams[0].Id)
+      }
+    } catch (error) {
+      console.error('Failed to load teams:', error)
     }
   }
 
@@ -268,11 +299,12 @@ const handleTagsChange = (newTags) => {
     if (!validateForm()) return
 
 const taskData = {
-...formData,
+      ...formData,
       projectId: formData.projectId ? parseInt(formData.projectId) : null,
+      teamId: formData.teamId ? parseInt(formData.teamId) : null,
       title: formData.title.trim(),
       description: formData.description.trim(),
-dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
+      dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
       reminderEnabled: formData.reminderEnabled,
       reminderDateTime: formData.reminderEnabled && formData.reminderDateTime ? new Date(formData.reminderDateTime).toISOString() : null,
       reminderMethod: formData.reminderMethod,
@@ -288,7 +320,7 @@ dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : n
       timeSpent: formData.timeSpent || 0,
       notes: formData.notes.trim(),
       attachments: formData.attachments,
-linkedTasks: formData.linkedTasks
+      linkedTasks: formData.linkedTasks
     };
 
     await onSave(task?.Id, taskData)
@@ -384,6 +416,26 @@ linkedTasks: formData.linkedTasks
           rows={4}
           disabled={isLoading}
         />
+{/* Team Selection */}
+        {teams && teams.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Team
+            </label>
+            <Select
+              value={formData.teamId || selectedTeam || ''}
+              onChange={(e) => handleInputChange('teamId', e.target.value || null)}
+              disabled={isLoading}
+            >
+              <option value="">👤 Personal Task</option>
+              {teams.map(team => (
+                <option key={team.Id} value={team.Id}>
+                  {team.icon} {team.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+        )}
 
         {/* Tags */}
 <div className="space-y-2">
@@ -528,25 +580,30 @@ linkedTasks: formData.linkedTasks
 
 {/* Assignment */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+<label className="block text-sm font-medium text-gray-700 mb-2">
             Assigned To
           </label>
           <Select
-            value={formData.assignedTo?.id || ""}
+            value={formData.assignedTo?.Id || ""}
             onChange={(e) => {
-              const userId = e.target.value
-              const user = mockUsers.find(u => u.id === parseInt(userId))
-              handleInputChange("assignedTo", user || null)
+              const memberId = e.target.value
+              // Find member from current team
+              const currentTeam = teams?.find(t => t.Id === parseInt(formData.teamId || selectedTeam))
+              const member = currentTeam?.members?.find(m => m.Id === parseInt(memberId))
+              handleInputChange("assignedTo", member || null)
             }}
             disabled={isLoading}
           >
-            <option value="">👤 Assign to yourself</option>
-            {mockUsers.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.name} ({user.email})
-              </option>
-            ))}
-</Select>
+            <option value="">👤 Unassigned</option>
+            {(() => {
+              const currentTeam = teams?.find(t => t.Id === parseInt(formData.teamId || selectedTeam))
+              return currentTeam?.members?.filter(m => m.status === 'Active').map(member => (
+                <option key={member.Id} value={member.Id}>
+                  {member.name} ({member.email})
+                </option>
+              )) || []
+            })()}
+          </Select>
         </div>
 
 {/* Due Date and Time */}
@@ -744,7 +801,7 @@ linkedTasks: formData.linkedTasks
             <option value="Medium">🟡 Medium</option>
             <option value="Low">🟢 Low</option>
           </Select>
-</div>
+        </div>
 
         {/* Status Field */}
         <Select
