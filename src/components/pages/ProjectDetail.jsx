@@ -13,11 +13,12 @@ import ProjectDashboard from '@/components/molecules/ProjectDashboard'
 import TaskList from '@/components/organisms/TaskList'
 import TaskEditModal from '@/components/molecules/TaskEditModal'
 import toast from '@/utils/toast'
-
+import MemberCard from '@/components/molecules/MemberCard'
+import MemberManagementModal from '@/components/molecules/MemberManagementModal'
 function ProjectDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const [project, setProject] = useState(null)
+const [project, setProject] = useState(null)
   const [tasks, setTasks] = useState([])
   const [projectStats, setProjectStats] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -25,14 +26,15 @@ function ProjectDetail() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
-
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
+  const [editingMember, setEditingMember] = useState(null)
   useEffect(() => {
     if (id) {
       loadProjectData()
     }
   }, [id])
 
-  const loadProjectData = async () => {
+const loadProjectData = async () => {
     try {
       setLoading(true)
       setError(null)
@@ -46,12 +48,37 @@ function ProjectDetail() {
       setProject(projectData)
       setProjectStats(projectStatsData)
       setTasks(allTasks.filter(task => task.projectId === parseInt(id)))
-} catch (err) {
+    } catch (err) {
       setError(err.message)
       toast.error('Failed to load project data')
     } finally {
       setLoading(false)
     }
+  }
+
+  // Member management handlers
+  const handleAddMember = () => {
+    setEditingMember(null)
+    setIsMemberModalOpen(true)
+  }
+
+  const handleEditMember = (member) => {
+    setEditingMember(member)
+    setIsMemberModalOpen(true)
+  }
+
+  const handleRemoveMember = async (memberId) => {
+    try {
+      await projectService.removeMember(id, memberId)
+      toast.success('Member removed successfully')
+      loadProjectData()
+    } catch (error) {
+      toast.error(error.message || 'Failed to remove member')
+    }
+  }
+
+  const handleMemberModalSuccess = () => {
+    loadProjectData()
   }
 
   const handleCreateTask = () => {
@@ -263,44 +290,34 @@ if (completed) {
         </div>
       )}
 
-      {activeTab === 'members' && (
+{activeTab === 'members' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Project Members</h3>
-            <Button size="sm">
+            <Button size="sm" onClick={handleAddMember}>
               <ApperIcon name="UserPlus" size={16} />
               Add Member
             </Button>
           </div>
           
-          {project.members && project.members.length > 0 ? (
+{project.members && project.members.length > 0 ? (
             <div className="space-y-4">
               {project.members.map(member => (
-                <div key={member.Id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">{member.name}</div>
-                      <div className="text-sm text-gray-500">{member.email}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline">{member.role}</Badge>
-                    <Button variant="ghost" size="sm">
-                      <ApperIcon name="MoreHorizontal" size={16} />
-                    </Button>
-                  </div>
-                </div>
+                <MemberCard
+                  key={member.Id}
+                  member={member}
+                  onEdit={handleEditMember}
+                  onRemove={handleRemoveMember}
+                  canManageMembers={true}
+                />
               ))}
             </div>
-          ) : (
+) : (
             <div className="text-center py-12">
               <ApperIcon name="Users" size={48} className="mx-auto text-gray-400 mb-4" />
               <h4 className="text-lg font-medium text-gray-900 mb-2">No members yet</h4>
               <p className="text-gray-600 mb-4">Add team members to collaborate on this project</p>
-              <Button>
+              <Button onClick={handleAddMember}>
                 <ApperIcon name="UserPlus" size={16} />
                 Add First Member
               </Button>
@@ -319,6 +336,15 @@ if (completed) {
         task={editingTask}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
+/>
+
+      {/* Member Management Modal */}
+      <MemberManagementModal
+        isOpen={isMemberModalOpen}
+        onClose={() => setIsMemberModalOpen(false)}
+        onSuccess={handleMemberModalSuccess}
+        projectId={id}
+        editingMember={editingMember}
       />
     </div>
   )
