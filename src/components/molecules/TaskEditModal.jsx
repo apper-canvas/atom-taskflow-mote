@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import { format } from 'date-fns'
-import Modal from '@/components/atoms/Modal'
-import Input from '@/components/atoms/Input'
-import Textarea from '@/components/atoms/Textarea'
-import Select from '@/components/atoms/Select'
-import Button from '@/components/atoms/Button'
-import ApperIcon from '@/components/ApperIcon'
-import TagSelector from '@/components/molecules/TagSelector'
-import { taskService } from '@/services/api/taskService'
-
+import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
+import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
+import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Textarea from "@/components/atoms/Textarea";
+import Modal from "@/components/atoms/Modal";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import TagSelector from "@/components/molecules/TagSelector";
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
     title: "",
@@ -17,24 +17,28 @@ const [formData, setFormData] = useState({
     priority: "Medium",
     dueDate: "",
     parentTaskId: null,
-    tags: []
+    tags: [],
+    isRecurring: false,
+    recurrence: null
   })
   
   const [availableTasks, setAvailableTasks] = useState([])
   const [isSubtaskMode, setIsSubtaskMode] = useState(false)
   const [errors, setErrors] = useState({})
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
   useEffect(() => {
 if (task) {
-setFormData({
+      setFormData({
         title: task.title || "",
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
-        tags: task.tags || []
+        tags: task.tags || [],
+        isRecurring: task.isRecurring || false,
+        recurrence: task.recurrence || null
       })
       setIsSubtaskMode(!!task.parentTaskId)
     } else {
@@ -54,6 +58,7 @@ setFormData({
     loadAvailableTasks()
     setErrors({})
     setShowDeleteConfirm(false)
+    setShowRecurringModal(false)
   }, [task, isOpen])
 
 const loadAvailableTasks = async () => {
@@ -77,6 +82,29 @@ const handleInputChange = (field, value) => {
     if (field === 'parentTaskId') {
       setIsSubtaskMode(!!value)
     }
+  }
+
+  const handleRecurringToggle = () => {
+    if (formData.isRecurring) {
+      // Disable recurring
+      setFormData(prev => ({
+        ...prev,
+        isRecurring: false,
+        recurrence: null
+      }))
+    } else {
+      // Enable recurring - open modal
+      setShowRecurringModal(true)
+    }
+  }
+
+  const handleRecurringSave = (taskId, recurringData) => {
+    setFormData(prev => ({
+      ...prev,
+      isRecurring: true,
+      recurrence: recurringData.recurrence
+    }))
+    setShowRecurringModal(false)
   }
 
   const handleTagsChange = (newTags) => {
@@ -108,7 +136,9 @@ const taskData = {
       description: formData.description.trim(),
       dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
-      tags: formData.tags
+      tags: formData.tags,
+      isRecurring: formData.isRecurring,
+      recurrence: formData.recurrence
     }
 
     await onSave(task?.Id, taskData)
@@ -190,6 +220,43 @@ const taskData = {
             disabled={isLoading}
           />
         </div>
+
+        {/* Recurring Task Toggle */}
+        {!isSubtaskMode && (
+          <div className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Recurring Task</label>
+                <p className="text-xs text-gray-500">Set up this task to repeat on a schedule</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {formData.isRecurring && formData.recurrence && (
+                  <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
+                    ✓ Configured
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  variant={formData.isRecurring ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={handleRecurringToggle}
+                  disabled={isLoading}
+                >
+                  <ApperIcon name="RotateCw" size={16} />
+                  {formData.isRecurring ? "Edit Schedule" : "Make Recurring"}
+                </Button>
+              </div>
+            </div>
+            {formData.isRecurring && formData.recurrence && (
+              <div className="mt-3 text-sm text-gray-600 bg-gray-50 p-3 rounded">
+                <strong>Schedule:</strong> {formData.recurrence.pattern} every {formData.recurrence.interval} 
+                {formData.recurrence.pattern === 'weekly' && formData.recurrence.daysOfWeek.length > 0 && (
+                  <span> on {formData.recurrence.daysOfWeek.map(d => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]).join(', ')}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Category and Priority */}
         <div className="grid grid-cols-2 gap-4">
@@ -274,7 +341,7 @@ const taskData = {
           )}
 
           {/* Save/Cancel Buttons */}
-          <div className="flex items-center gap-3 ml-auto">
+<div className="flex items-center gap-3 ml-auto">
             <Button
               type="button"
               variant="ghost"
@@ -297,6 +364,15 @@ const taskData = {
           </div>
         </div>
       </form>
+
+      {/* Recurring Task Configuration Modal */}
+      <RecurringTaskModal
+        isOpen={showRecurringModal}
+        onClose={() => setShowRecurringModal(false)}
+        task={formData.isRecurring ? { ...formData } : null}
+        onSave={handleRecurringSave}
+isLoading={isLoading}
+      />
     </Modal>
   )
 }

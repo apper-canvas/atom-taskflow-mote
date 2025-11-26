@@ -22,8 +22,8 @@ export const taskService = {
   async create(taskData) {
     await delay()
     const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
-    const newTask = {
-Id: maxId + 1,
+const newTask = {
+      Id: maxId + 1,
       title: taskData.title || "",
       description: taskData.description || "",
       category: taskData.category || "Personal",
@@ -33,6 +33,8 @@ Id: maxId + 1,
       tags: taskData.tags || [],
       completed: false,
       completedAt: null,
+      isRecurring: taskData.isRecurring || false,
+      recurrence: taskData.recurrence || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -52,6 +54,8 @@ async update(id, updates) {
       ...tasks[index],
       ...updates,
       tags: updates.tags || tasks[index].tags || [],
+      isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
+      recurrence: updates.recurrence !== undefined ? updates.recurrence : tasks[index].recurrence,
       updatedAt: new Date().toISOString()
     }
     

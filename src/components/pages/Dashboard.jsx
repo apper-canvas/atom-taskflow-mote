@@ -229,7 +229,7 @@ const handleSaveTask = async (taskId, taskData) => {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+<div className="flex items-center gap-3">
             <motion.button
               onClick={handleCreateNewTask}
               whileHover={{ scale: 1.02 }}
@@ -239,7 +239,7 @@ const handleSaveTask = async (taskId, taskData) => {
               <ApperIcon name="Plus" size={18} />
               New Task
             </motion.button>
-          </div>
+</div>
         </motion.div>
 
         {/* Stats */}
@@ -291,8 +291,8 @@ const handleSaveTask = async (taskId, taskData) => {
         </div>
 
         {/* Task List */}
-        <TaskList
-tasks={filteredTasks}
+<TaskList
+          tasks={filteredTasks}
           onToggleComplete={handleToggleComplete}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
