@@ -221,7 +221,7 @@ if (loading) return <Loading />;
   if (error) return <ErrorView message={error} onRetry={handleRetry} />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -104,10 +104,10 @@ function Layout() {
 
             <div className="w-10" />
           </div>
-        </div>
+</div>
 
         {/* Page Content */}
-        <main className="min-h-screen">
+        <main>
           <Outlet />
         </main>
       </div>
