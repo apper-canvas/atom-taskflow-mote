@@ -1,9 +1,9 @@
-import React, { useState, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ApperIcon from '@/components/ApperIcon';
-import Button from '@/components/atoms/Button';
-import { cn } from '@/utils/cn';
-import toast from '@/utils/toast';
+import React, { useCallback, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
+import Button from "@/components/atoms/Button";
+import toast from "@/utils/toast";
+import { cn } from "@/utils/cn";
 
 const FileAttachmentManager = ({ 
   attachments = [], 
@@ -14,6 +14,8 @@ const FileAttachmentManager = ({
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({});
+  const [renameModal, setRenameModal] = useState({ isOpen: false, file: null, newName: '' });
+  const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
 
   const supportedTypes = {
@@ -95,15 +97,22 @@ const FileAttachmentManager = ({
         });
       }, 100);
 
-      // Create file data object
+// Create file data object
       const fileData = {
         Id: Date.now() + Math.random(),
         name: file.name,
+        originalName: file.name,
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
         url: URL.createObjectURL(file), // For preview purposes
-        category: supportedTypes[file.type]?.category || 'other'
+        category: supportedTypes[file.type]?.category || 'other',
+        version: 1,
+        comments: [],
+        sharedWith: [],
+        permissions: { read: true, write: true, delete: true },
+        uploadedAt: new Date().toISOString(),
+        uploadedBy: 'current-user' // This would come from auth context
       };
 
       // Add to attachments after simulated processing
@@ -150,11 +159,39 @@ const FileAttachmentManager = ({
     }
   };
 
-  const removeFile = (fileToRemove) => {
+const removeFile = (fileToRemove) => {
     const updatedFiles = attachments.filter(file => file.Id !== fileToRemove.Id);
     onChange(updatedFiles);
     toast.success('File removed successfully');
   };
+
+  const renameFile = (fileToRename, newName) => {
+    if (!newName.trim()) {
+      toast.error('File name cannot be empty');
+      return;
+    }
+    
+    const updatedFiles = attachments.map(file => 
+      file.Id === fileToRename.Id 
+        ? { ...file, name: newName.trim() }
+        : file
+    );
+    onChange(updatedFiles);
+    setRenameModal({ isOpen: false, file: null, newName: '' });
+    toast.success('File renamed successfully');
+  };
+
+  const openRenameModal = (file) => {
+    setRenameModal({ 
+      isOpen: true, 
+      file, 
+      newName: file.name.replace(/\.[^/.]+$/, "") // Remove extension
+    });
+  };
+
+  const filteredAttachments = attachments.filter(file =>
+    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getFileIcon = (file) => {
     return supportedTypes[file.type]?.icon || 'File';
@@ -255,7 +292,7 @@ const FileAttachmentManager = ({
         )}
       </AnimatePresence>
 
-      {/* File List */}
+{/* File List */}
       {attachments.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
@@ -266,10 +303,26 @@ const FileAttachmentManager = ({
               Total: {formatFileSize(getTotalSize())}
             </span>
           </div>
+
+          {/* File Search */}
+          <div className="relative">
+            <ApperIcon 
+              name="Search" 
+              size={16} 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+            />
+            <input
+              type="text"
+              placeholder="Search files..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
           
-          <div className="grid gap-2">
+<div className="grid gap-2">
             <AnimatePresence>
-              {attachments.map((file, index) => (
+              {filteredAttachments.map((file, index) => (
                 <motion.div
                   key={file.Id}
                   initial={{ opacity: 0, y: 10 }}
@@ -291,12 +344,22 @@ const FileAttachmentManager = ({
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1">
+<div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openRenameModal(file)}
+                      className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 p-1"
+                      title="Rename file"
+                    >
+                      <ApperIcon name="Edit" size={16} />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => removeFile(file)}
                       className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1"
+                      title="Remove file"
                     >
                       <ApperIcon name="X" size={16} />
                     </Button>
@@ -305,6 +368,61 @@ const FileAttachmentManager = ({
               ))}
             </AnimatePresence>
           </div>
+</div>
+      )}
+
+      {/* Rename Modal */}
+      {renameModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <ApperIcon name="Edit" size={20} className="text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Rename File</h3>
+                <p className="text-sm text-gray-500">Enter a new name for this file</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  File Name
+                </label>
+                <input
+                  type="text"
+                  value={renameModal.newName}
+                  onChange={(e) => setRenameModal(prev => ({ ...prev, newName: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter new file name"
+                  autoFocus
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Extension: .{renameModal.file?.name.split('.').pop()}
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setRenameModal({ isOpen: false, file: null, newName: '' })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => renameFile(renameModal.file, `${renameModal.newName}.${renameModal.file?.name.split('.').pop()}`)}
+                  disabled={!renameModal.newName.trim()}
+                >
+                  Rename
+                </Button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

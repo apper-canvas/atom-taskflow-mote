@@ -20,17 +20,36 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const downloadFile = () => {
+const downloadFile = (customName = null) => {
     if (file.url) {
       const link = document.createElement('a');
       link.href = file.url;
-      link.download = file.name;
+      link.download = customName || file.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       toast.success('File download started');
     } else {
       toast.error('File not available for download');
+    }
+  };
+
+  const shareFile = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: file.name,
+        text: `Check out this file: ${file.name}`,
+        url: file.url
+      }).catch(err => {
+        toast.error('Error sharing file');
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(file.url).then(() => {
+        toast.success('File link copied to clipboard');
+      }).catch(() => {
+        toast.error('Unable to share file');
+      });
     }
   };
 
@@ -171,15 +190,24 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+<div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={downloadFile}
+              onClick={() => downloadFile()}
               className="flex items-center gap-2"
             >
               <ApperIcon name="Download" size={16} />
               Download
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={shareFile}
+              className="flex items-center gap-2"
+            >
+              <ApperIcon name="Share" size={16} />
+              Share
             </Button>
             <Button
               variant="ghost"
@@ -198,9 +226,9 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
             {renderPreview()}
           </div>
 
-          {/* File Details */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">File Details</h4>
+{/* File Details */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+            <h4 className="text-sm font-medium text-gray-700">File Details</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-500">Name:</span>
@@ -219,6 +247,52 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
                 <span className="text-gray-900 ml-2">
                   {file.lastModified ? new Date(file.lastModified).toLocaleString() : 'Unknown'}
                 </span>
+              </div>
+              {file.version && (
+                <div>
+                  <span className="text-gray-500">Version:</span>
+                  <span className="text-gray-900 ml-2">{file.version}</span>
+                </div>
+              )}
+              {file.uploadedBy && (
+                <div>
+                  <span className="text-gray-500">Uploaded By:</span>
+                  <span className="text-gray-900 ml-2">{file.uploadedBy}</span>
+                </div>
+              )}
+            </div>
+
+            {/* File Actions */}
+            <div className="pt-3 border-t border-gray-200">
+              <h5 className="text-sm font-medium text-gray-700 mb-2">Actions</h5>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.info('File history feature coming soon')}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="History" size={14} />
+                  View History
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.info('Comments feature coming soon')}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="MessageCircle" size={14} />
+                  Comments ({file.comments?.length || 0})
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toast.info('Permissions feature coming soon')}
+                  className="flex items-center gap-2"
+                >
+                  <ApperIcon name="Lock" size={14} />
+                  Permissions
+                </Button>
               </div>
             </div>
           </div>

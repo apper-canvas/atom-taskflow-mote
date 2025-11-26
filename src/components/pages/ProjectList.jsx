@@ -173,14 +173,28 @@ if (loading) return <Loading />
       </div>
 
       {/* Filters and Search */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1">
+<div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex-1 relative">
           <Input
-            placeholder="Search projects..."
+            placeholder="Search projects and files..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             icon="Search"
           />
+          {searchTerm && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto">
+              <div className="p-2 border-b border-gray-100">
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Search Results</p>
+              </div>
+              <div className="p-2 space-y-1">
+                <div className="text-xs text-gray-500 px-2 py-1">Projects matching "{searchTerm}"</div>
+                <div className="text-xs text-gray-400 px-2 py-1">File search results would appear here</div>
+                <div className="text-xs text-blue-600 px-2 py-1 cursor-pointer hover:bg-blue-50 rounded">
+                  Advanced file search →
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <Select
           value={sortBy}
