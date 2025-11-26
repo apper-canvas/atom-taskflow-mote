@@ -442,9 +442,9 @@ const handleSaveTask = async (taskId, taskData) => {
           isLoading={modalLoading}
         />
       </div>
+</div>
     </div>
   )
-}
 }
 
 export default Dashboard
