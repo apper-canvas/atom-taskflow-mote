@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { taskService } from "@/services/api/taskService";
+import { projectService } from "@/services/api/projectService";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
@@ -32,8 +33,9 @@ const [formData, setFormData] = useState({
     parentTaskId: null,
     tags: [],
     isRecurring: false,
-    recurrence: null,
+recurrence: null,
     assignedTo: null,
+    projectId: null,
     reminders: [
       { type: "on_due", enabled: false },
       { type: "1_day_before", enabled: false },
@@ -82,6 +84,7 @@ dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "
         timeSpent: task.timeSpent || 0,
         notes: task.notes || "",
 attachments: task.attachments || [],
+        projectId: task.projectId || null,
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
@@ -103,7 +106,9 @@ attachments: task.attachments || [],
     setShowRecurringModal(false)
   }, [task, isOpen])
 
-const loadAvailableTasks = async () => {
+const [availableProjects, setAvailableProjects] = useState([])
+
+  const loadAvailableTasks = async () => {
     try {
       const allTasks = await taskService.getAll()
       // Only show top-level tasks (not subtasks) as potential parents
@@ -111,6 +116,17 @@ const loadAvailableTasks = async () => {
       setAvailableTasks(parentTasks)
     } catch (error) {
       console.error('Failed to load tasks:', error)
+    }
+  }
+
+  const loadAvailableProjects = async () => {
+    try {
+      const projects = await projectService.getAll()
+      // Only show active projects
+      const activeProjects = projects.filter(p => p.status === 'Active')
+      setAvailableProjects(activeProjects)
+    } catch (error) {
+      console.error('Failed to load projects:', error)
     }
   }
 
@@ -122,6 +138,13 @@ const handleInputChange = (field, value) => {
     // Toggle subtask mode when parentTaskId changes
     if (field === 'parentTaskId') {
       setIsSubtaskMode(!!value)
+    }
+    // When project changes, inherit project's default category if available
+    if (field === 'projectId' && value) {
+      const selectedProject = availableProjects.find(p => p.Id === parseInt(value))
+      if (selectedProject && selectedProject.defaultCategory && !isSubtaskMode) {
+        setFormData(prev => ({ ...prev, category: selectedProject.defaultCategory }))
+      }
     }
   }
 
@@ -245,7 +268,8 @@ const handleTagsChange = (newTags) => {
     if (!validateForm()) return
 
 const taskData = {
-      ...formData,
+...formData,
+      projectId: formData.projectId ? parseInt(formData.projectId) : null,
       title: formData.title.trim(),
       description: formData.description.trim(),
 dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
@@ -285,6 +309,23 @@ linkedTasks: formData.linkedTasks
     >
 <form onSubmit={handleSubmit} className="space-y-6">
         {/* Parent Task Selection for Subtasks */}
+{/* Project Selection */}
+        {(!task || !task.Id) && (
+          <Select
+            label="Project"
+            value={formData.projectId || ""}
+            onChange={(e) => handleInputChange("projectId", e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="">No Project</option>
+            {availableProjects.map(project => (
+              <option key={project.Id} value={project.Id}>
+                <span style={{color: project.color}}>{project.icon || '📂'}</span> {project.name}
+              </option>
+            ))}
+          </Select>
+        )}
+
         {(!task || !task.Id) && (
           <Select
             label="Task Type"

@@ -1,9 +1,15 @@
-import { createBrowserRouter } from "react-router-dom"
-import { Suspense, lazy } from "react"
+import { createBrowserRouter } from "react-router-dom";
+import React, { Suspense, lazy } from "react";
 
 const Layout = lazy(() => import("@/components/organisms/Layout"))
 const Dashboard = lazy(() => import("@/components/pages/Dashboard"))
 const NotFound = lazy(() => import("@/components/pages/NotFound"))
+
+// Project pages
+const ProjectList = lazy(() => import("@/components/pages/ProjectList"))
+const ProjectDetail = lazy(() => import("@/components/pages/ProjectDetail"))
+const ProjectSettings = lazy(() => import("@/components/pages/ProjectSettings"))
+const ProjectTimeline = lazy(() => import("@/components/pages/ProjectTimeline"))
 
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={
@@ -23,8 +29,24 @@ const SuspenseWrapper = ({ children }) => (
 const mainRoutes = [
   {
     path: "",
-    index: true,
-    element: <SuspenseWrapper><Dashboard /></SuspenseWrapper>
+    element: <SuspenseWrapper><Dashboard /></SuspenseWrapper>,
+    index: true
+  },
+  {
+    path: "projects",
+    element: <SuspenseWrapper><ProjectList /></SuspenseWrapper>
+  },
+  {
+    path: "projects/:id",
+    element: <SuspenseWrapper><ProjectDetail /></SuspenseWrapper>
+  },
+  {
+    path: "projects/:id/settings",
+    element: <SuspenseWrapper><ProjectSettings /></SuspenseWrapper>
+  },
+  {
+    path: "projects/:id/timeline",
+    element: <SuspenseWrapper><ProjectTimeline /></SuspenseWrapper>
   },
   {
     path: "*",

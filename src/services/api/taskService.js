@@ -1,4 +1,4 @@
-import tasksData from "@/services/mockData/tasks.json"
+import tasksData from "@/services/mockData/tasks.json";
 
 let tasks = [...tasksData]
 
@@ -21,9 +21,10 @@ export const taskService = {
 
   async create(taskData) {
     await delay()
-    const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
-const newTask = {
+const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
+    const newTask = {
       Id: maxId + 1,
+      projectId: taskData.projectId || null,
       title: taskData.title || "",
       description: taskData.description || "",
       category: taskData.category || "Personal",
@@ -62,7 +63,7 @@ async update(id, updates) {
       throw new Error(`Task with Id ${id} not found`)
     }
     
-const updatedTask = {
+    const updatedTask = {
       ...tasks[index],
       ...updates,
       tags: updates.tags || tasks[index].tags || [],
@@ -210,9 +211,10 @@ saveToLocalStorage() {
 const loadedTasks = JSON.parse(stored)
         // Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
-...task,
+          ...task,
           tags: task.tags || [],
           assignedTo: task.assignedTo || null,
+          projectId: task.projectId || null,
           dueDateTime: task.dueDateTime || task.dueDate || null,
           reminders: task.reminders || [],
           estimatedTime: task.estimatedTime || null,

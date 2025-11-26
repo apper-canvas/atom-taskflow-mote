@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { taskService } from "@/services/api/taskService";
+import { projectService } from "@/services/api/projectService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
@@ -24,6 +25,7 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedPriority, setSelectedPriority] = useState("all")
 const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedProject, setSelectedProject] = useState("all")
   const [selectedTag, setSelectedTag] = useState("all")
   const [viewMode, setViewMode] = useState("list")
   
@@ -31,13 +33,19 @@ const [selectedStatus, setSelectedStatus] = useState("all")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [modalLoading, setModalLoading] = useState(false)
-  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
-  // Load tasks
+const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
+  const [projects, setProjects] = useState([])
+  
+  // Load tasks and projects
   const loadTasks = async () => {
     try {
       setError("")
-      const data = await taskService.getAll()
-      setTasks(data)
+const [taskData, projectData] = await Promise.all([
+        taskService.getAll(),
+        projectService.getAll()
+      ])
+      setTasks(taskData)
+      setProjects(projectData)
     } catch (err) {
       console.error("Failed to load tasks:", err)
       setError(err.message || "Failed to load tasks")
@@ -67,10 +75,14 @@ return tasks.filter(task => {
 
       const matchesTag = selectedTag === "all" || 
                         (task.tags && task.tags.some(tag => tag.Id === parseInt(selectedTag)))
+
+      const matchesProject = selectedProject === "all" || 
+                            (task.projectId && task.projectId === parseInt(selectedProject)) ||
+                            (selectedProject === "unassigned" && !task.projectId)
       
-return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesTag
+      return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesTag && matchesProject
     })
-  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus, selectedTag])
+  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus, selectedTag, selectedProject])
   // Handlers
   const handleAddTask = async (taskData) => {
     try {
@@ -266,6 +278,9 @@ const handleSaveTask = async (taskId, taskData) => {
             onStatusChange={setSelectedStatus}
             selectedTag={selectedTag}
             onTagChange={setSelectedTag}
+            selectedProject={selectedProject}
+            onProjectChange={setSelectedProject}
+            projects={projects}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
           />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import tagService from "@/services/api/tagService";
 import ApperIcon from "@/components/ApperIcon";
 import Input from "@/components/atoms/Input";
 import { cn } from "@/utils/cn";
@@ -15,6 +16,9 @@ const FilterBar = ({
   onStatusChange,
   selectedTag,
   onTagChange,
+  selectedProject,
+  onProjectChange,
+  projects = [],
   viewMode,
   onViewModeChange 
 }) => {
@@ -22,7 +26,7 @@ const FilterBar = ({
     { value: "all", label: "All Tasks", icon: "List", count: 0 },
     { value: "Personal", label: "Personal", icon: "Home", count: 0 },
     { value: "Work", label: "Work", icon: "Briefcase", count: 0 },
-    { value: "Other", label: "Other", icon: "Folder", count: 0 }
+{ value: "Other", label: "Other", icon: "Folder", count: 0 }
   ];
 
   const priorities = ["all", "High", "Medium", "Low"];
@@ -31,6 +35,17 @@ const FilterBar = ({
     { value: "all", label: "All" },
     { value: "active", label: "Active" },
     { value: "completed", label: "Completed" }
+  ]
+
+  const projectOptions = [
+    { value: "all", label: "All Projects" },
+    { value: "unassigned", label: "No Project" },
+    ...projects.map(project => ({
+      value: project.Id.toString(),
+      label: project.name,
+      icon: project.icon,
+      color: project.color
+    }))
   ]
 
   // Load available tags for filtering
@@ -88,7 +103,23 @@ const FilterBar = ({
       </div>
 
 {/* Additional Filters */}
-      <div className="flex flex-wrap items-center gap-4">
+<div className="flex flex-wrap items-center gap-4">
+        {/* Project Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Project:</span>
+          <select
+            value={selectedProject}
+            onChange={(e) => onProjectChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[140px]"
+          >
+            {projectOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.icon && option.value !== "all" && option.value !== "unassigned" ? `${option.icon} ` : ""}{option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Priority Filter */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">Priority:</span>

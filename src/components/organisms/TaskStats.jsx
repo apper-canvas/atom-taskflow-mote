@@ -1,6 +1,7 @@
-import { motion } from "framer-motion"
-import ApperIcon from "@/components/ApperIcon"
-import Chart from "react-apexcharts"
+import { motion } from "framer-motion";
+import Chart from "react-apexcharts";
+import React from "react";
+import ApperIcon from "@/components/ApperIcon";
 
 const TaskStats = ({ tasks }) => {
   const totalTasks = tasks.length
@@ -8,8 +9,19 @@ const TaskStats = ({ tasks }) => {
   const activeTasks = totalTasks - completedTasks
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
-  // Count tasks by category
+// Count tasks by category and project
 const categoryStats = {
+    Personal: tasks.filter(task => task.category === "Personal").length,
+    Work: tasks.filter(task => task.category === "Work").length,
+    Other: tasks.filter(task => task.category === "Other").length
+  }
+
+  const projectStats = {
+    withProject: tasks.filter(task => task.projectId).length,
+    withoutProject: tasks.filter(task => !task.projectId).length
+  }
+
+  const oldCategoryStats = {
     Personal: tasks.filter(task => task.category === "Personal").length,
     Work: tasks.filter(task => task.category === "Work").length,
     Other: tasks.filter(task => task.category === "Other").length
@@ -28,6 +40,17 @@ const categoryCompletionStats = {
     Other: {
       total: tasks.filter(task => task.category === "Other").length,
       completed: tasks.filter(task => task.category === "Other" && (task.completed || task.status === "Completed")).length,
+    }
+  }
+
+  const projectCompletionStats = {
+    withProject: {
+      total: tasks.filter(task => task.projectId).length,
+      completed: tasks.filter(task => task.projectId && (task.completed || task.status === "Completed")).length,
+    },
+    withoutProject: {
+      total: tasks.filter(task => !task.projectId).length,
+      completed: tasks.filter(task => !task.projectId && (task.completed || task.status === "Completed")).length,
     }
   }
 
@@ -232,8 +255,44 @@ const barOptions = {
     }
   ]
 
-  return (
-    <div className="space-y-6 mb-6">
+return (
+    <>
+      {/* Project Organization Stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="bg-white rounded-xl shadow-lg p-6 border border-gray-100"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <ApperIcon name="FolderOpen" className="text-indigo-600" size={20} />
+          <h3 className="text-lg font-semibold text-gray-800">Project Organization</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg">
+            <div className="text-2xl font-bold text-indigo-600">{projectStats.withProject}</div>
+            <div className="text-sm text-gray-600">In Projects</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {projectCompletionStats.withProject.total > 0 
+                ? `${Math.round((projectCompletionStats.withProject.completed / projectCompletionStats.withProject.total) * 100)}% Complete`
+                : 'No tasks'
+              }
+            </div>
+          </div>
+          <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-slate-50 rounded-lg">
+            <div className="text-2xl font-bold text-gray-600">{projectStats.withoutProject}</div>
+            <div className="text-sm text-gray-600">Unassigned</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {projectCompletionStats.withoutProject.total > 0 
+                ? `${Math.round((projectCompletionStats.withoutProject.completed / projectCompletionStats.withoutProject.total) * 100)}% Complete`
+                : 'No tasks'
+              }
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="space-y-6 mb-6">
       {/* Summary Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
@@ -324,7 +383,8 @@ const barOptions = {
           </div>
         </motion.div>
       )}
-    </div>
+</div>
+    </>
   )
 }
 
