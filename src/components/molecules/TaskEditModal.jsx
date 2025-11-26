@@ -39,17 +39,17 @@ const [formData, setFormData] = useState({
     ],
     estimatedTime: null,
     actualTime: 0,
-    timeSpent: 0,
+timeSpent: 0,
     notes: "",
-notes: "",
     attachments: [],
     linkedTasks: []
   });
   
-  const [availableTasks, setAvailableTasks] = useState([])
+const [availableTasks, setAvailableTasks] = useState([])
   const [isSubtaskMode, setIsSubtaskMode] = useState(false)
   const [errors, setErrors] = useState({})
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
 useEffect(() => {
 if (task) {
       setFormData({
@@ -141,7 +141,6 @@ const handleInputChange = (field, value) => {
       isRecurring: true,
       recurrence: recurringData.recurrence
     }))
-    setShowRecurringModal(false)
 setShowRecurringModal(false)
   }
 
@@ -218,9 +217,11 @@ setShowRecurringModal(false)
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleTagsChange = (newTags) => {
+const handleTagsChange = (newTags) => {
     setFormData(prev => ({ ...prev, tags: newTags }))
   }
+
+  const validateForm = () => {
     const newErrors = {}
     
     if (!formData.title.trim()) {
