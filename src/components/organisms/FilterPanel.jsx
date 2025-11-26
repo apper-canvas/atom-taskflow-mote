@@ -7,7 +7,7 @@ import Select from '@/components/atoms/Select'
 import Modal from '@/components/atoms/Modal'
 import { filterService } from '@/services/api/filterService'
 import { projectService } from '@/services/api/projectService'
-import { tagService } from '@/services/api/tagService'
+import tagService from '@/services/api/tagService'
 import { cn } from '@/utils/cn'
 import { showToast } from '@/utils/toast'
 
