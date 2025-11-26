@@ -18,7 +18,6 @@ import toast, { showToast } from "@/utils/toast";
 function Dashboard() {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
 const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
@@ -43,11 +42,10 @@ const [loading, setLoading] = useState(true);
 const loadTasks = async () => {
     try {
       setError("");
-      const [taskData, projectData] = await Promise.all([
+const [taskData, projectData] = await Promise.all([
         taskService.getAll(),
         projectService.getAll()
       ]);
-]);
       setTasks(taskData);
       setProjects(projectData);
     } catch (err) {
@@ -103,7 +101,6 @@ return matchesSearch && matchesCategory && matchesPriority && matchesStatus && m
   };
 const handleToggleComplete = async (taskId, completed) => {
     try {
-try {
       const updatedTask = await taskService.update(taskId, { completed });
       setTasks(prev => prev.map(task => 
         task.Id === taskId ? updatedTask : task
@@ -140,7 +137,6 @@ const handleToggleSubtask = async (subtaskId, completed, parentTaskId) => {
   };
 const handleCreateSubtask = async (parentTaskId) => {
     const parentTask = tasks.find(t => t.Id === parentTaskId);
-const parentTask = tasks.find(t => t.Id === parentTaskId);
     if (parentTask) {
       setEditingTask({ 
         parentTaskId, 
@@ -157,7 +153,6 @@ const handleEditTask = (task) => {
   };
 const handleSaveTask = async (taskId, taskData) => {
     try {
-try {
       setModalLoading(true);
       
       if (taskId) {
