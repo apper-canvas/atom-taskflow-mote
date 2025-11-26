@@ -178,11 +178,14 @@ setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id))
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+<div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Notifications</h1>
-              <p className="text-gray-600">Manage your notifications and preferences</p>
+              <p className="text-gray-600">
+                Manage your notifications and preferences
+                {filter === 'priority' && ' • Showing priority notifications only'}
+              </p>
             </div>
             <Button
               onClick={() => navigate('/notifications/preferences')}
@@ -198,7 +201,7 @@ setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id))
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
             <div className="flex flex-wrap items-center gap-4 justify-between">
               <div className="flex items-center gap-4">
-                <Select
+<Select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                   className="min-w-32"
@@ -206,6 +209,7 @@ setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id))
                   <option value="all">All</option>
                   <option value="unread">Unread</option>
                   <option value="read">Read</option>
+                  <option value="priority">Priority Only</option>
                 </Select>
                 <Select
                   value={sortBy}

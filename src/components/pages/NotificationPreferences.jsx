@@ -14,7 +14,8 @@ const NotificationPreferences = () => {
   const [preferences, setPreferences] = useState({
     emailFrequency: 'instant',
     pushNotifications: true,
-    soundEnabled: true,
+soundEnabled: true,
+    priorityBasedNotifications: false,
     quietHoursEnabled: false,
     quietHoursStart: '22:00',
     quietHoursEnd: '08:00',
@@ -182,16 +183,52 @@ await notificationService.updatePreferences(preferences);
                 </label>
               </div>
 
-              <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium text-gray-900">Notification Sounds</h3>
                   <p className="text-sm text-gray-600">Play sound when receiving notifications</p>
                 </div>
+                <div className="flex items-center gap-3">
+                  {preferences.soundEnabled && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await notificationService.playNotificationSound();
+                          toast.success('Sound test played');
+                        } catch (error) {
+                          toast.error('Unable to play sound');
+                        }
+                      }}
+                      className="text-xs px-3 py-1"
+                    >
+                      <ApperIcon name="Volume2" size={14} className="mr-1" />
+                      Test Sound
+                    </Button>
+                  )}
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={preferences.soundEnabled}
+                      onChange={(e) => setPreferences(prev => ({ ...prev, soundEnabled: e.target.checked }))}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">Priority-Based Notifications</h3>
+                  <p className="text-sm text-gray-600">Only receive notifications for high priority tasks</p>
+                </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={preferences.soundEnabled}
-                    onChange={(e) => setPreferences(prev => ({ ...prev, soundEnabled: e.target.checked }))}
+                    checked={preferences.priorityBasedNotifications}
+                    onChange={(e) => setPreferences(prev => ({ ...prev, priorityBasedNotifications: e.target.checked }))}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>

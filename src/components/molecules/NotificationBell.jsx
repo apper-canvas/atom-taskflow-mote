@@ -31,7 +31,7 @@ const NotificationBell = () => {
 
   const loadNotifications = async () => {
     try {
-      setLoading(true);
+setLoading(true);
       const data = await notificationService.getRecent();
       setNotifications(data);
       const unread = data.filter(n => !n.isRead).length;

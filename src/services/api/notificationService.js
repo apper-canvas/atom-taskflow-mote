@@ -1,5 +1,4 @@
-import notificationsData from '@/services/mockData/notifications.json';
-
+import notificationsData from "@/services/mockData/notifications.json";
 // Simulate API delay
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -8,6 +7,7 @@ let userPreferences = {
   emailFrequency: 'instant',
   pushNotifications: true,
   soundEnabled: true,
+  priorityBasedNotifications: false,
   quietHoursEnabled: false,
   quietHoursStart: '22:00',
   quietHoursEnd: '08:00',
@@ -34,10 +34,20 @@ export const notificationService = {
     return [...notifications].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   },
 
-  // Get recent notifications (for bell dropdown)
+// Get recent notifications (for bell dropdown)
   async getRecent(limit = 10) {
     await delay();
-    return [...notifications]
+    let filteredNotifications = [...notifications];
+    
+    // Apply priority-based filtering if enabled
+    if (userPreferences.priorityBasedNotifications) {
+      filteredNotifications = filteredNotifications.filter(notification => {
+        // Only show notifications for high priority tasks
+        return notification.metadata?.priority === 'High' || !notification.metadata?.priority;
+      });
+    }
+    
+    return filteredNotifications
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, limit);
   },
@@ -219,6 +229,46 @@ export const notificationService = {
       n.isRead = false;
       n.snoozedUntil = null;
       return n;
-    });
+});
+  },
+
+  // Play notification sound
+  async playNotificationSound() {
+    if (!userPreferences.soundEnabled) return;
+    
+    try {
+      // Create audio context
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create oscillator for notification sound
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      // Connect nodes
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Configure sound (pleasant notification chime)
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(400, audioContext.currentTime + 0.1);
+      
+      // Configure volume envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+      
+      // Play sound
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+      
+      // Clean up
+      setTimeout(() => {
+        audioContext.close();
+      }, 500);
+      
+    } catch (error) {
+      console.error('Failed to play notification sound:', error);
+      throw new Error('Audio playback failed');
+    }
   }
 };
