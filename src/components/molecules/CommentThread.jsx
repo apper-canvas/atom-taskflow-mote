@@ -12,8 +12,9 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [comments, setComments] = useState([]);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic
+const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic
+  const [selectedTopic, setSelectedTopic] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
 
@@ -64,12 +65,16 @@ let filteredComments = comments;
       case 'unread':
         filteredComments = filteredComments.filter(c => c.isUnread);
         break;
-      case 'topic':
+case 'topic':
         if (selectedTopic) {
           filteredComments = filteredComments.filter(c => c.topic === selectedTopic);
         }
         break;
       default:
+        // Reset selectedTopic when switching away from topic filter
+        if (filterType !== 'topic' && selectedTopic) {
+          setSelectedTopic('');
+        }
         break;
     }
 
@@ -337,8 +342,24 @@ const renderComment = (comment, isReply = false) => (
           <option value="all">All Comments</option>
           <option value="pinned">Pinned</option>
           <option value="resolved">Resolved</option>
-          <option value="unread">Unread</option>
+<option value="unread">Unread</option>
+          <option value="topic">By Topic</option>
         </select>
+        
+        {/* Topic Selection Dropdown - Only show when topic filter is selected */}
+        {filterType === 'topic' && (
+          <select
+            value={selectedTopic}
+            onChange={(e) => setSelectedTopic(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">Select Topic</option>
+            {/* Extract unique topics from comments */}
+            {[...new Set(comments.map(c => c.topic).filter(Boolean))].map(topic => (
+              <option key={topic} value={topic}>{topic}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Comments List */}
