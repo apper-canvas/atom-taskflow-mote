@@ -839,10 +839,9 @@ onChange={(e) => setSearchTerm(e.target.value)}
                     </div>
                   </motion.div>
                 ))
-              )}
-</div>
-</div>
-        )}
+)}
+        </div>
+      )}
       
       {/* Rename Modal */}
       {/* Rename Modal */}
