@@ -14,6 +14,7 @@ import FilePreviewModal from "@/components/molecules/FilePreviewModal";
 import TagSelector from "@/components/molecules/TagSelector";
 import NotificationBell from "@/components/molecules/NotificationBell";
 import QuickTemplateSelector from "@/components/molecules/QuickTemplateSelector";
+// Mock users data - in real app, this would come from user service
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
   { id: 2, name: "Sarah Johnson", email: "sarah@company.com" },
@@ -21,6 +22,7 @@ const mockUsers = [
   { id: 4, name: "Lisa Wong", email: "lisa@company.com" },
   { id: 5, name: "David Brown", email: "david@company.com" }
 ];
+
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
     title: "",
@@ -575,104 +577,7 @@ linkedTasks: formData.linkedTasks
           />
         </div>
 
-        {/* Reminder Section */}
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-medium text-gray-700">
-              Reminder Options
-            </label>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="reminderEnabled"
-                checked={formData.reminderEnabled}
-                onChange={(e) => handleInputChange("reminderEnabled", e.target.checked)}
-                disabled={isLoading}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <label htmlFor="reminderEnabled" className="ml-2 text-sm text-gray-700">
-                Enable Reminder
-              </label>
-            </div>
-          </div>
-
-          {formData.reminderEnabled && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Reminder Date & Time
-                </label>
-                <Input
-                  type="datetime-local"
-                  value={formData.reminderDateTime}
-                  onChange={(e) => handleInputChange("reminderDateTime", e.target.value)}
-                  disabled={isLoading}
-                  className="w-full"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">
-                  Notification Method
-                </label>
-                <Select
-                  value={formData.reminderMethod}
-                  onChange={(e) => handleInputChange("reminderMethod", e.target.value)}
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  <option value="notification">Browser Notification</option>
-                  <option value="email">Email Reminder</option>
-                  <option value="both">Both Notification & Email</option>
-                </Select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Reminders */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Reminders
-          </label>
-          <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
-            {formData.reminders.map((reminder, index) => (
-              <div key={reminder.type} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={reminder.enabled}
-                  onChange={(e) => {
-                    const newReminders = [...formData.reminders]
-                    newReminders[index].enabled = e.target.checked
-                    handleInputChange("reminders", newReminders)
-                  }}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <span className="text-sm">
-                  {reminder.type === "on_due" && "On due date"}
-                  {reminder.type === "1_day_before" && "1 day before"}
-                  {reminder.type === "1_hour_before" && "1 hour before"}
-                  {reminder.type === "custom" && "Custom:"}
-                </span>
-                {reminder.type === "custom" && (
-                  <input
-                    type="number"
-                    value={reminder.minutes}
-                    onChange={(e) => {
-                      const newReminders = [...formData.reminders]
-                      newReminders[index].minutes = parseInt(e.target.value) || 60
-                      handleInputChange("reminders", newReminders)
-                    }}
-                    className="w-16 px-2 py-1 text-xs border rounded"
-                    placeholder="60"
-                  />
-                )}
-                {reminder.type === "custom" && <span className="text-xs text-gray-500">minutes before</span>}
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Time Estimation */}
+{/* Time Estimation */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -733,8 +638,51 @@ linkedTasks: formData.linkedTasks
           </div>
         </div>
 
+        {/* Reminders */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Reminders
+          </label>
+          <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+            {formData.reminders.map((reminder, index) => (
+              <div key={reminder.type} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={reminder.enabled}
+                  onChange={(e) => {
+                    const newReminders = [...formData.reminders]
+                    newReminders[index].enabled = e.target.checked
+                    handleInputChange("reminders", newReminders)
+                  }}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="text-sm">
+                  {reminder.type === "on_due" && "On due date"}
+                  {reminder.type === "1_day_before" && "1 day before"}
+                  {reminder.type === "1_hour_before" && "1 hour before"}
+                  {reminder.type === "custom" && "Custom:"}
+                </span>
+                {reminder.type === "custom" && (
+                  <input
+                    type="number"
+                    value={reminder.minutes}
+                    onChange={(e) => {
+                      const newReminders = [...formData.reminders]
+                      newReminders[index].minutes = parseInt(e.target.value) || 60
+                      handleInputChange("reminders", newReminders)
+                    }}
+                    className="w-16 px-2 py-1 text-xs border rounded"
+                    placeholder="60"
+                  />
+                )}
+                {reminder.type === "custom" && <span className="text-xs text-gray-500">minutes before</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Category and Priority */}
-<div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <Select
             label="Category"
             value={formData.category}
@@ -757,7 +705,7 @@ linkedTasks: formData.linkedTasks
             <option value="Medium">🟡 Medium</option>
             <option value="Low">🟢 Low</option>
           </Select>
-</div>
+        </div>
 
         {/* Status Field */}
         <Select
@@ -772,8 +720,9 @@ linkedTasks: formData.linkedTasks
           <option value="On Hold">⏸️ On Hold</option>
           <option value="Cancelled">❌ Cancelled</option>
         </Select>
-{/* Due Date */}
-<Input
+
+        {/* Due Date */}
+        <Input
           label="Due Date (Optional)"
           type="datetime-local"
           value={formData.dueDate}
@@ -783,7 +732,7 @@ linkedTasks: formData.linkedTasks
         />
 
         {/* Reminder Section */}
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between mb-3">
             <label className="block text-sm font-medium text-gray-700">
               Reminder Options
@@ -791,13 +740,13 @@ linkedTasks: formData.linkedTasks
             <div className="flex items-center">
               <input
                 type="checkbox"
-                id="reminderEnabledSecond"
+                id="reminderEnabled"
                 checked={formData.reminderEnabled}
                 onChange={(e) => handleInputChange("reminderEnabled", e.target.checked)}
                 disabled={isLoading}
                 className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
               />
-              <label htmlFor="reminderEnabledSecond" className="ml-2 text-sm text-gray-700">
+              <label htmlFor="reminderEnabled" className="ml-2 text-sm text-gray-700">
                 Enable Reminder
               </label>
             </div>
@@ -912,10 +861,11 @@ linkedTasks: formData.linkedTasks
         file={previewFile}
         isOpen={!!previewFile}
 onClose={() => setPreviewFile(null)}
-onClose={() => setPreviewFile(null)}
       />
         </div>
       </div>
     </Modal>
   );
+}
+
 export default TaskEditModal;
