@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { projectService } from "@/services/api/projectService";
-import { teamService } from "@/services/api/teamService";
-import ApperIcon from "@/components/ApperIcon";
-import Modal from "@/components/atoms/Modal";
-import Select from "@/components/atoms/Select";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import toast from "@/utils/toast";
+import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import Modal from '@/components/atoms/Modal'
+import Input from '@/components/atoms/Input'
+import Select from '@/components/atoms/Select'
+import Button from '@/components/atoms/Button'
+import ApperIcon from '@/components/ApperIcon'
+import toast from '@/utils/toast'
+import { projectService } from '@/services/api/projectService'
 
-function MemberManagementModal({ isOpen, onClose, onSuccess, projectId, teamId, editingMember = null, context = 'project' }) {
+function MemberManagementModal({ isOpen, onClose, onSuccess, projectId, editingMember = null }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,13 +17,8 @@ function MemberManagementModal({ isOpen, onClose, onSuccess, projectId, teamId, 
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
 
-  // Role options - different for teams vs projects
-  const roleOptions = context === 'team' ? [
-    { value: 'Owner', label: 'Owner', description: 'Full access to team and settings' },
-    { value: 'Admin', label: 'Admin', description: 'Can manage members and team settings' },
-    { value: 'Member', label: 'Member', description: 'Can create and edit tasks' },
-    { value: 'Viewer', label: 'Viewer', description: 'Can only view team content' }
-  ] : [
+  // Role options
+  const roleOptions = [
     { value: 'Owner', label: 'Owner', description: 'Full access to project and settings' },
     { value: 'Admin', label: 'Admin', description: 'Can manage members and project settings' },
     { value: 'Member', label: 'Member', description: 'Can create and edit tasks' },
@@ -90,21 +84,13 @@ function MemberManagementModal({ isOpen, onClose, onSuccess, projectId, teamId, 
 
     setLoading(true)
     try {
-if (editingMember) {
+      if (editingMember) {
         // Update existing member role
-        if (context === 'team' && teamId) {
-          await teamService.updateMemberRole(teamId, editingMember.Id, formData.role)
-        } else if (projectId) {
-          await projectService.updateMemberRole(projectId, editingMember.Id, formData.role)
-        }
+        await projectService.updateMemberRole(projectId, editingMember.Id, formData.role)
         toast.success('Member role updated successfully')
       } else {
         // Add new member
-        if (context === 'team' && teamId) {
-          await teamService.addMember(teamId, formData)
-        } else if (projectId) {
-          await projectService.addMember(projectId, formData)
-        }
+        await projectService.addMember(projectId, formData)
         toast.success('Member added successfully')
       }
       
@@ -139,7 +125,7 @@ if (editingMember) {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
-{editingMember ? 'Edit Member' : `Add ${context === 'team' ? 'Team' : 'Project'} Member`}
+              {editingMember ? 'Edit Member' : 'Add Team Member'}
             </h3>
             <button
               onClick={handleClose}
@@ -216,7 +202,7 @@ if (editingMember) {
             onClick={handleSubmit}
             loading={loading}
             disabled={loading}
->
+          >
             <ApperIcon name={editingMember ? "Save" : "UserPlus"} size={16} />
             {editingMember ? 'Update Member' : 'Add Member'}
           </Button>

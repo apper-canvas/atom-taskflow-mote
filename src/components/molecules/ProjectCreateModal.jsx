@@ -18,8 +18,7 @@ function ProjectCreateModal({ isOpen, onClose, onSubmit }) {
     endDate: '',
     status: 'Active',
     useTemplate: false,
-    templateId: '',
-    teamId: null
+    templateId: ''
   })
   const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(false)
@@ -78,7 +77,7 @@ function ProjectCreateModal({ isOpen, onClose, onSubmit }) {
   const handleSubmit = async () => {
     if (!validateForm()) return
 
-try {
+    try {
       setLoading(true)
       
       if (formData.useTemplate && formData.templateId) {
@@ -89,8 +88,7 @@ try {
           icon: formData.icon,
           startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
           endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-          status: formData.status,
-          teamId: formData.teamId
+          status: formData.status
         })
       } else {
         await onSubmit({
@@ -100,8 +98,7 @@ try {
           icon: formData.icon,
           startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
           endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-          status: formData.status,
-          teamId: formData.teamId
+          status: formData.status
         })
       }
       
@@ -151,22 +148,7 @@ try {
       title="Create New Project"
       size="lg"
     >
-<div className="p-6 space-y-6">
-        {/* Team Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Assign to Team (Optional)
-          </label>
-          <Select
-            value={formData.teamId || ''}
-            onChange={(e) => handleInputChange('teamId', e.target.value || null)}
-            disabled={loading}
-          >
-            <option value="">🏠 Personal Project</option>
-            {/* Teams would be loaded and mapped here */}
-          </Select>
-        </div>
-
+      <div className="p-6 space-y-6">
         {/* Template Selection */}
         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>

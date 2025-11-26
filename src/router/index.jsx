@@ -11,11 +11,6 @@ const ProjectDetail = lazy(() => import("@/components/pages/ProjectDetail"))
 const ProjectSettings = lazy(() => import("@/components/pages/ProjectSettings"))
 const ProjectTimeline = lazy(() => import("@/components/pages/ProjectTimeline"))
 
-// Team pages
-const TeamList = lazy(() => import("@/components/pages/TeamList"))
-const TeamDetail = lazy(() => import("@/components/pages/TeamDetail"))
-const TeamCreate = lazy(() => import("@/components/pages/TeamCreate"))
-
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -52,18 +47,6 @@ const mainRoutes = [
   {
     path: "projects/:id/timeline",
     element: <SuspenseWrapper><ProjectTimeline /></SuspenseWrapper>
-},
-  {
-    path: "teams",
-    element: <SuspenseWrapper><TeamList /></SuspenseWrapper>
-  },
-  {
-    path: "teams/create",
-    element: <SuspenseWrapper><TeamCreate /></SuspenseWrapper>
-  },
-  {
-    path: "teams/:id",
-    element: <SuspenseWrapper><TeamDetail /></SuspenseWrapper>
   },
   {
     path: "*",
