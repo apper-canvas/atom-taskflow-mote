@@ -10,7 +10,7 @@ const TaskList = ({
   onEdit, 
   onDelete, 
   viewMode = "list",
-  showCompleted = true,
+showCompleted = true,
   onCreateTask,
   onToggleSubtask,
   onCreateSubtask
@@ -21,7 +21,7 @@ const TaskList = ({
   if (tasks.length === 0) {
     return (
       <Empty
-        title="No tasks found"
+title="No tasks found"
         description="No tasks match your current filters. Try adjusting your search or create a new task!"
         actionText="Create your first task"
         onAction={onCreateTask}
@@ -30,7 +30,7 @@ const TaskList = ({
   }
 
   const renderTasksByCategory = () => {
-    const categories = ["Personal", "Work", "Other"]
+const categories = ["Personal", "Work", "Other"]
     const tasksByCategory = categories.reduce((acc, category) => {
       acc[category] = tasks.filter(task => task.category === category && !task.completed)
       return acc

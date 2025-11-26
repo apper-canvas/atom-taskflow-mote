@@ -28,11 +28,12 @@ const newTask = {
       description: taskData.description || "",
       category: taskData.category || "Personal",
       priority: taskData.priority || "Medium",
+      status: taskData.status || "Not Started",
       dueDate: taskData.dueDate || null,
       parentTaskId: taskData.parentTaskId || null,
       tags: taskData.tags || [],
-      completed: false,
-      completedAt: null,
+      completed: taskData.status === "Completed" || false,
+      completedAt: taskData.status === "Completed" ? new Date().toISOString() : null,
       isRecurring: taskData.isRecurring || false,
       recurrence: taskData.recurrence || null,
       createdAt: new Date().toISOString(),
@@ -59,8 +60,19 @@ async update(id, updates) {
       updatedAt: new Date().toISOString()
     }
     
-    // Handle completion status
-    if (updates.completed !== undefined) {
+    // Handle status and completion synchronization
+    if (updates.status !== undefined) {
+      updatedTask.status = updates.status
+      updatedTask.completed = updates.status === "Completed"
+      updatedTask.completedAt = updates.status === "Completed" 
+        ? new Date().toISOString() 
+        : null
+    }
+    
+    // Handle direct completion status changes
+    if (updates.completed !== undefined && updates.status === undefined) {
+      updatedTask.completed = updates.completed
+      updatedTask.status = updates.completed ? "Completed" : "Not Started"
       updatedTask.completedAt = updates.completed 
         ? new Date().toISOString() 
         : null

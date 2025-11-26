@@ -15,6 +15,7 @@ const [formData, setFormData] = useState({
     description: "",
     category: "Personal",
     priority: "Medium",
+    status: "Not Started",
     dueDate: "",
     parentTaskId: null,
     tags: [],
@@ -34,6 +35,7 @@ if (task) {
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
+        status: task.status || "Not Started",
         dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
@@ -77,7 +79,6 @@ const handleInputChange = (field, value) => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
     }
-    
     // Toggle subtask mode when parentTaskId changes
     if (field === 'parentTaskId') {
       setIsSubtaskMode(!!value)
@@ -198,7 +199,7 @@ const taskData = {
         />
 
         {/* Description */}
-        <Textarea
+<Textarea
           label="Description (Optional)"
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
@@ -259,7 +260,7 @@ const taskData = {
         )}
 
         {/* Category and Priority */}
-        <div className="grid grid-cols-2 gap-4">
+<div className="grid grid-cols-2 gap-4">
           <Select
             label="Category"
             value={formData.category}
@@ -277,11 +278,26 @@ const taskData = {
             onChange={(e) => handleInputChange("priority", e.target.value)}
             disabled={isLoading}
           >
+            <option value="Urgent">🚨 Urgent</option>
             <option value="High">🔴 High</option>
             <option value="Medium">🟡 Medium</option>
             <option value="Low">🟢 Low</option>
           </Select>
-        </div>
+</div>
+
+        {/* Status Field */}
+        <Select
+          label="Status"
+          value={formData.status}
+          onChange={(e) => handleInputChange("status", e.target.value)}
+          disabled={isLoading}
+        >
+          <option value="Not Started">⏸️ Not Started</option>
+          <option value="In Progress">🔄 In Progress</option>
+          <option value="Completed">✅ Completed</option>
+          <option value="On Hold">⏸️ On Hold</option>
+          <option value="Cancelled">❌ Cancelled</option>
+        </Select>
 
         {/* Due Date */}
         <Input

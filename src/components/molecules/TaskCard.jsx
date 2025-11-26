@@ -82,7 +82,8 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
   }
 
   const getPriorityColor = (priority) => {
-    switch (priority) {
+switch (priority) {
+      case "Urgent": return "#dc2626"
       case "High": return "#ef4444"
       case "Medium": return "#f59e0b"
       case "Low": return "#10b981"
@@ -129,8 +130,8 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
         shadow: "0 8px 25px rgba(0,0,0,0.12)"
     }}
     className={cn(
-        "bg-white rounded-xl p-4 shadow-sm border border-gray-200 transition-all duration-200 hover:border-blue-300",
-        task.completed && "opacity-60",
+"bg-white rounded-xl p-4 shadow-sm border border-gray-200 transition-all duration-200 hover:border-blue-300",
+        (task.completed || task.status === "Completed") && "opacity-60",
         `border-l-4 border-l-[${getPriorityColor(task.priority)}]`
     )}
     style={{
@@ -204,16 +205,35 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                         {task.subtaskProgress}% complete
                                         </div>
                 </div>}
-                {task.description && <p
+{task.description && <p
                     className={cn(
                         "text-sm text-gray-600 mb-3 leading-relaxed",
-                        task.completed && "text-gray-400",
+                        (task.completed || task.status === "Completed") && "text-gray-400",
                         isSubtask && "text-xs"
                     )}>
                     {task.description}
                 </p>}
                 {/* Task Meta */}
 <div className="flex items-center gap-3 flex-wrap">
+                    {/* Status Badge */}
+                    {task.status && (
+                        <div className={cn(
+                            "px-2 py-1 rounded-full text-xs font-medium",
+                            task.status === "Not Started" && "text-gray-700 bg-gray-100",
+                            task.status === "In Progress" && "text-blue-700 bg-blue-100",
+                            task.status === "Completed" && "text-green-700 bg-green-100",
+                            task.status === "On Hold" && "text-yellow-700 bg-yellow-100",
+                            task.status === "Cancelled" && "text-red-700 bg-red-100"
+                        )}>
+                            {task.status === "Not Started" && "⏸️"}
+                            {task.status === "In Progress" && "🔄"}
+                            {task.status === "Completed" && "✅"}
+                            {task.status === "On Hold" && "⏸️"}
+                            {task.status === "Cancelled" && "❌"}
+                            {" "}{task.status}
+                        </div>
+                    )}
+
                     {/* Category Badge */}
                     <Badge
                         variant={getCategoryColor(task.category)}
@@ -257,11 +277,16 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                     <div
                         className={cn(
                             "text-xs px-2 py-1 rounded-full font-medium",
+task.priority === "Urgent" && "text-red-800 bg-red-200",
                             task.priority === "High" && "text-red-700 bg-red-100",
                             task.priority === "Medium" && "text-amber-700 bg-amber-100",
                             task.priority === "Low" && "text-green-700 bg-green-100"
                         )}>
-                        {task.priority}
+                        {task.priority === "Urgent" && "🚨"}
+                        {task.priority === "High" && "🔴"}
+                        {task.priority === "Medium" && "🟡"}
+                        {task.priority === "Low" && "🟢"}
+                        {" "}{task.priority}
                     </div>
                     {/* Subtask actions for parent tasks */}
                     {isParentTask && <button
@@ -313,7 +338,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-red-600 font-medium">Delete this task?</span>
                     <Button
-                        type="button"
+type="button"
                         variant="danger"
                         size="sm"
                         onClick={() => onDelete(task.Id)}

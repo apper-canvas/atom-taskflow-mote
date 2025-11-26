@@ -7,8 +7,9 @@ import Select from "@/components/atoms/Select";
 
 const QuickAddTask = ({ onAddTask, isLoading = false }) => {
   const [title, setTitle] = useState("")
-  const [category, setCategory] = useState("Personal")
+const [category, setCategory] = useState("Personal")
   const [priority, setPriority] = useState("Medium")
+  const [status, setStatus] = useState("Not Started")
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -16,9 +17,10 @@ const QuickAddTask = ({ onAddTask, isLoading = false }) => {
     if (!title.trim()) return
 
     await onAddTask({
-      title: title.trim(),
+title: title.trim(),
       category,
       priority,
+      status,
       description: ""
     })
 
@@ -101,7 +103,7 @@ const QuickAddTask = ({ onAddTask, isLoading = false }) => {
                       onChange={(e) => setCategory(e.target.value)}
                       className="text-sm"
                     >
-                      <option value="Personal">🏠 Personal</option>
+<option value="Personal">🏠 Personal</option>
                       <option value="Work">💼 Work</option>
                       <option value="Other">📂 Other</option>
                     </Select>
@@ -113,9 +115,25 @@ const QuickAddTask = ({ onAddTask, isLoading = false }) => {
                       onChange={(e) => setPriority(e.target.value)}
                       className="text-sm"
                     >
+<option value="Urgent">🚨 Urgent</option>
                       <option value="High">🔴 High</option>
                       <option value="Medium">🟡 Medium</option>
                       <option value="Low">🟢 Low</option>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Select
+                      label="Status"
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      disabled={isLoading}
+                    >
+                      <option value="Not Started">⏸️ Not Started</option>
+                      <option value="In Progress">🔄 In Progress</option>
+                      <option value="Completed">✅ Completed</option>
+                      <option value="On Hold">⏸️ On Hold</option>
+                      <option value="Cancelled">❌ Cancelled</option>
                     </Select>
                   </div>
                 </div>

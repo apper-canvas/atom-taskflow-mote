@@ -16,26 +16,27 @@ const categoryStats = {
   }
 
   // Calculate completion rates by category
-  const categoryCompletionStats = {
+const categoryCompletionStats = {
     Personal: {
       total: tasks.filter(task => task.category === "Personal").length,
-      completed: tasks.filter(task => task.category === "Personal" && task.completed).length,
+      completed: tasks.filter(task => task.category === "Personal" && (task.completed || task.status === "Completed")).length,
     },
     Work: {
       total: tasks.filter(task => task.category === "Work").length,
-      completed: tasks.filter(task => task.category === "Work" && task.completed).length,
+      completed: tasks.filter(task => task.category === "Work" && (task.completed || task.status === "Completed")).length,
     },
     Other: {
       total: tasks.filter(task => task.category === "Other").length,
-      completed: tasks.filter(task => task.category === "Other" && task.completed).length,
+      completed: tasks.filter(task => task.category === "Other" && (task.completed || task.status === "Completed")).length,
     }
   }
 
   // Count tasks by priority
-  const priorityStats = {
-    High: tasks.filter(task => task.priority === "High" && !task.completed).length,
-    Medium: tasks.filter(task => task.priority === "Medium" && !task.completed).length,
-    Low: tasks.filter(task => task.priority === "Low" && !task.completed).length
+const priorityStats = {
+    Urgent: tasks.filter(task => task.priority === "Urgent" && !task.completed && task.status !== "Completed").length,
+    High: tasks.filter(task => task.priority === "High" && !task.completed && task.status !== "Completed").length,
+    Medium: tasks.filter(task => task.priority === "Medium" && !task.completed && task.status !== "Completed").length,
+    Low: tasks.filter(task => task.priority === "Low" && !task.completed && task.status !== "Completed").length
   }
   const stats = [
     {
@@ -72,7 +73,7 @@ const categoryStats = {
     }
   ]
 // Chart configurations
-  const donutOptions = {
+const donutOptions = {
     chart: {
       type: 'donut',
       height: 300,
@@ -147,7 +148,7 @@ const categoryStats = {
     return stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0
   })
 
-  const barOptions = {
+const barOptions = {
     chart: {
       type: 'bar',
       height: 300,
