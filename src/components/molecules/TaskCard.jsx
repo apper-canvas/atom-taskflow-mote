@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
+import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import { cn } from "@/utils/cn";
-import { taskService } from "@/services/api/taskService";
 import { toast } from "@/utils/toast";
+import { cn } from "@/utils/cn";
 const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask }) => {
-  const [showSubtasks, setShowSubtasks] = useState(false)
-  const [subtasks, setSubtasks] = useState([])
-  const [loadingSubtasks, setLoadingSubtasks] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSubtasks, setShowSubtasks] = useState(false);
+  const [subtasks, setSubtasks] = useState([]);
+  const [loadingSubtasks, setLoadingSubtasks] = useState(false);
 
   // Check if this task has subtasks or subtask progress
   const hasSubtasks = task.subtaskCount > 0 || task.parentTaskId
@@ -295,9 +297,9 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
             }}
             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200">
             <ApperIcon name="Edit2" size={16} />
-        </motion.button>
+</motion.button>
         <motion.button
-            onClick={() => onDelete(task.Id)}
+            onClick={!showDeleteConfirm ? () => setShowDeleteConfirm(true) : () => onDelete(task.Id)}
             whileHover={{
                 scale: 1.1
             }}
@@ -305,11 +307,33 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                 scale: 0.9
             }}
             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200">
-            <ApperIcon name="Trash2" size={16} />
+            {!showDeleteConfirm ? (
+                <ApperIcon name="Trash2" size={16} />
+            ) : (
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-red-600 font-medium">Delete this task?</span>
+                    <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        onClick={() => onDelete(task.Id)}
+                        className="ml-2">
+                        <ApperIcon name="Trash2" size={14} />
+                        Yes
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowDeleteConfirm(false)}>
+                        Cancel
+                    </Button>
+                </div>
+            )}
         </motion.button>
     </div>
 </motion.div>
-  )
-}
+  );
+};
 
-export default TaskCard
+export default TaskCard;
