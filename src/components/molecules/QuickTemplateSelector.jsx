@@ -5,7 +5,7 @@ import Badge from '@/components/atoms/Badge'
 import Button from '@/components/atoms/Button'
 import Input from '@/components/atoms/Input'
 import { taskService } from '@/services/api/taskService'
-import { showToast } from '@/utils/toast'
+import { toast } from '@/utils/toast'
 
 const QuickTemplateSelector = ({ onSelectTemplate, onCancel, isVisible }) => {
   const [templates, setTemplates] = useState([])
@@ -39,10 +39,10 @@ const QuickTemplateSelector = ({ onSelectTemplate, onCancel, isVisible }) => {
     try {
       const task = await taskService.createFromTemplate(templateId)
       onSelectTemplate(task)
-      showToast("Task created from template! 🎉", "success")
+toast.success("Task created from template! 🎉")
     } catch (error) {
       console.error('Failed to use template:', error)
-      showToast("Failed to use template. Please try again.", "error")
+toast.error("Failed to use template. Please try again.")
     }
   }
 
