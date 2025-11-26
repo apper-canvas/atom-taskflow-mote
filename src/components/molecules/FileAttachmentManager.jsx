@@ -900,7 +900,7 @@ onChange={(e) => setSearchTerm(e.target.value)}
           </motion.div>
         </div>
       )}
-      {/* Create Folder Modal */}
+{/* Create Folder Modal */}
       <Modal
         isOpen={createFolderModal.isOpen}
         onClose={() => setCreateFolderModal({ isOpen: false, name: '' })}
@@ -1020,11 +1020,11 @@ onChange={(e) => setSearchTerm(e.target.value)}
             >
               Archive
             </Button>
+</Button>
           </div>
         </div>
       </Modal>
     </div>
   );
 };
-
 export default FileAttachmentManager;

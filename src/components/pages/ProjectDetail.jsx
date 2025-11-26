@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { differenceInDays, format } from "date-fns";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
-import { fileService } from "@/services/api/fileService";
+import fileService from "@/services/api/fileService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
@@ -491,8 +491,8 @@ Settings
             </div>
           </motion.div>
         </div>
-      )}
-</div>
+)}
+    </div>
   )
 }
 
