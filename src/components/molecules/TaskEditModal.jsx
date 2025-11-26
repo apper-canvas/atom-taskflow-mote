@@ -515,7 +515,6 @@ linkedTasks: formData.linkedTasks
         </div>
 
         {/* Reminders */}
-{/* Reminders Section - Always visible in edit mode */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Reminders
@@ -531,10 +530,9 @@ linkedTasks: formData.linkedTasks
                     newReminders[index].enabled = e.target.checked
                     handleInputChange("reminders", newReminders)
                   }}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                  disabled={isLoading}
+                  className="w-4 h-4 text-blue-600"
                 />
-                <span className="text-sm text-gray-700">
+                <span className="text-sm">
                   {reminder.type === "on_due" && "On due date"}
                   {reminder.type === "1_day_before" && "1 day before"}
                   {reminder.type === "1_hour_before" && "1 hour before"}
@@ -549,10 +547,8 @@ linkedTasks: formData.linkedTasks
                       newReminders[index].minutes = parseInt(e.target.value) || 60
                       handleInputChange("reminders", newReminders)
                     }}
-                    className="w-16 px-2 py-1 text-xs border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-16 px-2 py-1 text-xs border rounded"
                     placeholder="60"
-                    min="1"
-                    disabled={isLoading}
                   />
                 )}
                 {reminder.type === "custom" && <span className="text-xs text-gray-500">minutes before</span>}
