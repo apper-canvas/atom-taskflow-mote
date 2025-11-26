@@ -10,7 +10,7 @@ const TaskList = ({
   onEdit, 
   onDelete, 
   viewMode = "list",
-  showCompleted = true,
+showCompleted = true,
   onCreateTask,
   onToggleSubtask,
   onCreateSubtask
@@ -179,7 +179,7 @@ const categories = ["Personal", "Work", "Other"]
     </div>
   )
 
-return (
+  return (
     <div className="space-y-6">
       {viewMode === "category" ? renderTasksByCategory() : renderTasksList()}
     </div>
