@@ -10,7 +10,7 @@ import Input from '@/components/atoms/Input'
 import Select from '@/components/atoms/Select'
 import Textarea from '@/components/atoms/Textarea'
 import Modal from '@/components/atoms/Modal'
-import { showToast } from '@/utils/toast'
+import { toast } from '@/utils/toast'
 
 function ProjectSettings() {
   const { id } = useParams()
@@ -44,9 +44,9 @@ function ProjectSettings() {
         endDate: projectData.endDate ? projectData.endDate.split('T')[0] : '',
         settings: projectData.settings || {}
       })
-    } catch (err) {
+} catch (err) {
       setError(err.message)
-      showToast('Failed to load project', 'error')
+      toast.error('Failed to load project')
     } finally {
       setLoading(false)
     }
@@ -74,23 +74,23 @@ function ProjectSettings() {
         ...formData,
         startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null
-      })
+})
       setProject(updatedProject)
-      showToast('Project settings updated successfully!', 'success')
+      toast.success('Project settings updated successfully!')
     } catch (err) {
-      showToast('Failed to update project settings', 'error')
+      toast.error('Failed to update project settings')
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    try {
+try {
       await projectService.delete(id)
-      showToast('Project deleted successfully', 'success')
+      toast.success('Project deleted successfully')
       navigate('/projects')
     } catch (err) {
-      showToast('Failed to delete project', 'error')
+      toast.error('Failed to delete project')
     }
   }
 
