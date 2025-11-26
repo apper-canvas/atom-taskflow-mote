@@ -9,6 +9,15 @@ import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import TagSelector from "@/components/molecules/TagSelector";
+
+// Mock users for assignment
+const mockUsers = [
+  { id: 1, name: "John Smith", email: "john@company.com" },
+  { id: 2, name: "Sarah Johnson", email: "sarah@company.com" },
+  { id: 3, name: "Mike Chen", email: "mike@company.com" },
+  { id: 4, name: "Lisa Wong", email: "lisa@company.com" },
+  { id: 5, name: "David Brown", email: "david@company.com" }
+];
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
     title: "",
@@ -17,10 +26,21 @@ const [formData, setFormData] = useState({
     priority: "Medium",
     status: "Not Started",
     dueDate: "",
+    dueDateTime: "",
     parentTaskId: null,
     tags: [],
     isRecurring: false,
-    recurrence: null
+    recurrence: null,
+    assignedTo: null,
+    reminders: [
+      { type: "on_due", enabled: false },
+      { type: "1_day_before", enabled: false },
+      { type: "1_hour_before", enabled: false },
+      { type: "custom", enabled: false, minutes: 60 }
+    ],
+    estimatedTime: null,
+    actualTime: 0,
+    timeSpent: 0
   })
   
   const [availableTasks, setAvailableTasks] = useState([])
@@ -28,7 +48,7 @@ const [formData, setFormData] = useState({
   const [errors, setErrors] = useState({})
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showRecurringModal, setShowRecurringModal] = useState(false)
-  useEffect(() => {
+useEffect(() => {
 if (task) {
       setFormData({
         title: task.title || "",
@@ -37,10 +57,21 @@ if (task) {
         priority: task.priority || "Medium",
         status: task.status || "Not Started",
         dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
+        dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
         isRecurring: task.isRecurring || false,
-        recurrence: task.recurrence || null
+        recurrence: task.recurrence || null,
+        assignedTo: task.assignedTo || null,
+        reminders: task.reminders || [
+          { type: "on_due", enabled: false },
+          { type: "1_day_before", enabled: false },
+          { type: "1_hour_before", enabled: false },
+          { type: "custom", enabled: false, minutes: 60 }
+        ],
+        estimatedTime: task.estimatedTime || null,
+        actualTime: task.actualTime || 0,
+        timeSpent: task.timeSpent || 0
       })
       setIsSubtaskMode(!!task.parentTaskId)
     } else {
@@ -135,11 +166,17 @@ const taskData = {
       ...formData,
       title: formData.title.trim(),
       description: formData.description.trim(),
-      dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
+      dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
+      dueDateTime: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
       tags: formData.tags,
       isRecurring: formData.isRecurring,
-      recurrence: formData.recurrence
+      recurrence: formData.recurrence,
+      assignedTo: formData.assignedTo,
+      reminders: formData.reminders,
+      estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : null,
+      actualTime: formData.actualTime || 0,
+      timeSpent: formData.timeSpent || 0
     }
 
     await onSave(task?.Id, taskData)
@@ -258,6 +295,146 @@ const taskData = {
             )}
           </div>
         )}
+
+{/* Assignment */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Assigned To
+          </label>
+          <Select
+            value={formData.assignedTo?.id || ""}
+            onChange={(e) => {
+              const userId = e.target.value
+              const user = mockUsers.find(u => u.id === parseInt(userId))
+              handleInputChange("assignedTo", user || null)
+            }}
+            disabled={isLoading}
+          >
+            <option value="">👤 Assign to yourself</option>
+            {mockUsers.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.email})
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        {/* Due Date and Time */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Due Date & Time
+          </label>
+          <Input
+            type="datetime-local"
+            value={formData.dueDateTime}
+            onChange={(e) => handleInputChange("dueDateTime", e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+
+        {/* Reminders */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Reminders
+          </label>
+          <div className="space-y-2 p-3 bg-gray-50 rounded-lg">
+            {formData.reminders.map((reminder, index) => (
+              <div key={reminder.type} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={reminder.enabled}
+                  onChange={(e) => {
+                    const newReminders = [...formData.reminders]
+                    newReminders[index].enabled = e.target.checked
+                    handleInputChange("reminders", newReminders)
+                  }}
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="text-sm">
+                  {reminder.type === "on_due" && "On due date"}
+                  {reminder.type === "1_day_before" && "1 day before"}
+                  {reminder.type === "1_hour_before" && "1 hour before"}
+                  {reminder.type === "custom" && "Custom:"}
+                </span>
+                {reminder.type === "custom" && (
+                  <input
+                    type="number"
+                    value={reminder.minutes}
+                    onChange={(e) => {
+                      const newReminders = [...formData.reminders]
+                      newReminders[index].minutes = parseInt(e.target.value) || 60
+                      handleInputChange("reminders", newReminders)
+                    }}
+                    className="w-16 px-2 py-1 text-xs border rounded"
+                    placeholder="60"
+                  />
+                )}
+                {reminder.type === "custom" && <span className="text-xs text-gray-500">minutes before</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Time Estimation */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Estimated Time (minutes)
+            </label>
+            <Input
+              type="number"
+              value={formData.estimatedTime || ""}
+              onChange={(e) => handleInputChange("estimatedTime", e.target.value)}
+              placeholder="120"
+              disabled={isLoading}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Time Spent (minutes)
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={formData.timeSpent || 0}
+                onChange={(e) => handleInputChange("timeSpent", parseInt(e.target.value) || 0)}
+                disabled={isLoading}
+              />
+              {task?.Id && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    // Toggle time tracking functionality would go here
+                    const isTracking = !task.isTracking
+                    console.log("Toggle time tracking:", isTracking)
+                  }}
+                >
+                  {task.isTracking ? "⏸️" : "▶️"}
+                </Button>
+              )}
+            </div>
+            {formData.estimatedTime && formData.timeSpent > 0 && (
+              <div className="mt-2">
+                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                  <span>Progress</span>
+                  <span>{Math.round((formData.timeSpent / formData.estimatedTime) * 100)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${
+                      formData.timeSpent > formData.estimatedTime ? 'bg-red-500' : 'bg-blue-500'
+                    }`}
+                    style={{
+                      width: `${Math.min((formData.timeSpent / formData.estimatedTime) * 100, 100)}%`
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Category and Priority */}
 <div className="grid grid-cols-2 gap-4">

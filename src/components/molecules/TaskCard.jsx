@@ -213,6 +213,59 @@ switch (priority) {
                     )}>
                     {task.description}
                 </p>}
+
+                {/* Assignment Info */}
+                {task.assignedTo && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <ApperIcon name="User" size={14} className="text-blue-500" />
+                    <span className="text-xs text-blue-600 font-medium">
+                      {task.assignedTo.name}
+                    </span>
+                  </div>
+                )}
+
+                {/* Time Progress */}
+                {task.estimatedTime && (
+                  <div className="mb-3">
+                    <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
+                      <span>Time Progress</span>
+                      <span>
+                        {task.timeSpent || 0}m / {task.estimatedTime}m
+                        {task.isTracking && <span className="ml-1 text-green-500">●</span>}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          (task.timeSpent || 0) > task.estimatedTime ? 'bg-red-400' : 'bg-blue-400'
+                        }`}
+                        style={{
+                          width: `${Math.min(((task.timeSpent || 0) / task.estimatedTime) * 100, 100)}%`
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Due Date Warning */}
+                {task.dueDateTime && !task.completed && (
+                  <div className="flex items-center gap-1 text-xs mb-2">
+                    <ApperIcon 
+                      name={isPast(new Date(task.dueDateTime)) ? "AlertTriangle" : "Clock"} 
+                      size={12} 
+                      className={isPast(new Date(task.dueDateTime)) ? "text-red-500" : "text-orange-500"} 
+                    />
+                    <span className={cn(
+                      "font-medium",
+                      isPast(new Date(task.dueDateTime)) ? "text-red-500" : "text-orange-500"
+                    )}>
+                      {isPast(new Date(task.dueDateTime)) ? "Overdue" : 
+                       isToday(new Date(task.dueDateTime)) ? "Due today" :
+                       isTomorrow(new Date(task.dueDateTime)) ? "Due tomorrow" :
+                       `Due ${format(new Date(task.dueDateTime), "MMM d")}`}
+                    </span>
+                  </div>
+                )}
                 {/* Task Meta */}
 <div className="flex items-center gap-3 flex-wrap">
                     {/* Status Badge */}

@@ -1,11 +1,24 @@
 [
   {
-    "Id": 1,
+"Id": 1,
     "title": "Complete project proposal presentation",
     "description": "Finalize slides and prepare talking points for the Q3 project proposal meeting with stakeholders",
     "category": "Work",
     "priority": "High",
     "dueDate": "2024-02-15T09:00:00.000Z",
+    "dueDateTime": "2024-02-15T09:00:00.000Z",
+    "assignedTo": { "id": 1, "name": "John Smith", "email": "john@company.com", "avatar": "" },
+    "reminders": [
+      { "type": "on_due", "enabled": true },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": true, "minutes": 120 }
+    ],
+    "estimatedTime": 240,
+    "actualTime": 180,
+    "timeSpent": 180,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 1, "name": "urgent", "color": "#ef4444", "icon": "AlertCircle" },
       { "Id": 2, "name": "meeting", "color": "#3b82f6", "icon": "Users" }
@@ -16,12 +29,25 @@
     "updatedAt": "2024-02-10T08:30:00.000Z"
   },
   {
-    "Id": 2,
+"Id": 2,
     "title": "Buy groceries for dinner party",
     "description": "Get ingredients for Saturday's dinner party - wine, appetizers, main course items, and dessert",
     "category": "Personal",
     "priority": "Medium",
     "dueDate": "2024-02-14T18:00:00.000Z",
+    "dueDateTime": "2024-02-14T18:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": false },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": false, "minutes": 30 }
+    ],
+    "estimatedTime": 120,
+    "actualTime": 0,
+    "timeSpent": 0,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 5, "name": "planning", "color": "#10b981", "icon": "Calendar" }
     ],
@@ -30,13 +56,26 @@
     "createdAt": "2024-02-08T15:20:00.000Z",
     "updatedAt": "2024-02-08T15:20:00.000Z"
   },
-  {
+{
     "Id": 3,
     "title": "Schedule dentist appointment",
     "description": "Call Dr. Smith's office to schedule routine cleaning and checkup",
     "category": "Personal",
     "priority": "Low",
     "dueDate": "2024-02-20T17:00:00.000Z",
+    "dueDateTime": "2024-02-20T17:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": false },
+      { "type": "1_day_before", "enabled": false },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": false, "minutes": 60 }
+    ],
+    "estimatedTime": 30,
+    "actualTime": 15,
+    "timeSpent": 15,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [],
     "completed": true,
     "completedAt": "2024-02-09T14:15:00.000Z",
@@ -44,12 +83,25 @@
     "updatedAt": "2024-02-09T14:15:00.000Z"
   },
   {
-    "Id": 4,
+"Id": 4,
     "title": "Review Q1 budget reports",
     "description": "Analyze spending patterns and prepare recommendations for Q2 budget allocation",
     "category": "Work",
     "priority": "Medium",
     "dueDate": "2024-02-18T16:00:00.000Z",
+    "dueDateTime": "2024-02-18T16:00:00.000Z",
+    "assignedTo": { "id": 2, "name": "Sarah Johnson", "email": "sarah@company.com", "avatar": "" },
+    "reminders": [
+      { "type": "on_due", "enabled": true },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": true },
+      { "type": "custom", "enabled": false, "minutes": 30 }
+    ],
+    "estimatedTime": 180,
+    "actualTime": 90,
+    "timeSpent": 90,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 6, "name": "review", "color": "#06b6d4", "icon": "Eye" }
     ],
@@ -59,12 +111,25 @@
     "updatedAt": "2024-02-07T11:45:00.000Z"
   },
   {
-    "Id": 5,
+"Id": 5,
     "title": "Research vacation destinations",
     "description": "Look into summer vacation options, compare prices and activities for family trip",
     "category": "Other",
     "priority": "Low",
     "dueDate": "2024-03-01T12:00:00.000Z",
+    "dueDateTime": "2024-03-01T12:00:00.000Z",
+    "assignedTo": { "id": 3, "name": "Mike Chen", "email": "mike@company.com", "avatar": "" },
+    "reminders": [
+      { "type": "on_due", "enabled": false },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": true, "minutes": 1440 }
+    ],
+    "estimatedTime": 300,
+    "actualTime": 45,
+    "timeSpent": 45,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 3, "name": "research", "color": "#8b5cf6", "icon": "Search" },
       { "Id": 5, "name": "planning", "color": "#10b981", "icon": "Calendar" }
@@ -75,12 +140,25 @@
     "updatedAt": "2024-02-06T19:30:00.000Z"
   },
   {
-    "Id": 6,
+"Id": 6,
     "title": "Update team documentation",
     "description": "Revise project guidelines and onboarding materials for new team members",
     "category": "Work",
     "priority": "Medium",
     "dueDate": "2024-02-22T17:00:00.000Z",
+    "dueDateTime": "2024-02-22T17:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": true },
+      { "type": "1_day_before", "enabled": false },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": true, "minutes": 480 }
+    ],
+    "estimatedTime": 360,
+    "actualTime": 120,
+    "timeSpent": 120,
+    "isTracking": true,
+    "trackingStartedAt": "2024-02-15T14:30:00.000Z",
     "tags": [
       { "Id": 6, "name": "review", "color": "#06b6d4", "icon": "Eye" }
     ],
@@ -90,12 +168,25 @@
     "updatedAt": "2024-02-09T09:15:00.000Z"
   },
   {
-    "Id": 7,
+"Id": 7,
     "title": "Organize home office",
     "description": "Sort through papers, organize desk supplies, and set up better filing system",
     "category": "Personal",
     "priority": "Low",
     "dueDate": "2024-02-25T20:00:00.000Z",
+    "dueDateTime": "2024-02-25T20:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": false },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": false, "minutes": 60 }
+    ],
+    "estimatedTime": 180,
+    "actualTime": 0,
+    "timeSpent": 0,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 5, "name": "planning", "color": "#10b981", "icon": "Calendar" }
     ],
@@ -105,12 +196,25 @@
     "updatedAt": "2024-02-08T20:00:00.000Z"
   },
   {
-    "Id": 8,
+"Id": 8,
     "title": "Prepare tax documents",
     "description": "Gather all 2023 tax documents, receipts, and forms for accountant meeting",
     "category": "Other",
     "priority": "High",
     "dueDate": "2024-02-28T17:00:00.000Z",
+    "dueDateTime": "2024-02-28T17:00:00.000Z",
+    "assignedTo": { "id": 4, "name": "Lisa Wong", "email": "lisa@company.com", "avatar": "" },
+    "reminders": [
+      { "type": "on_due", "enabled": true },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": true },
+      { "type": "custom", "enabled": true, "minutes": 2880 }
+    ],
+    "estimatedTime": 240,
+    "actualTime": 60,
+    "timeSpent": 60,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 1, "name": "urgent", "color": "#ef4444", "icon": "AlertCircle" }
     ],
@@ -120,12 +224,25 @@
     "updatedAt": "2024-02-01T12:00:00.000Z"
   },
   {
-    "Id": 9,
+"Id": 9,
     "title": "Plan weekend hiking trip",
     "description": "Research trails, check weather, pack gear for Saturday's hiking adventure",
     "category": "Personal",
     "priority": "Medium",
     "dueDate": "2024-02-16T08:00:00.000Z",
+    "dueDateTime": "2024-02-16T08:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": false },
+      { "type": "1_day_before", "enabled": false },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": false, "minutes": 120 }
+    ],
+    "estimatedTime": 60,
+    "actualTime": 45,
+    "timeSpent": 45,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 3, "name": "research", "color": "#8b5cf6", "icon": "Search" },
       { "Id": 5, "name": "planning", "color": "#10b981", "icon": "Calendar" }
@@ -136,12 +253,25 @@
     "updatedAt": "2024-02-10T19:30:00.000Z"
   },
   {
-    "Id": 10,
+"Id": 10,
     "title": "Send birthday card to mom",
     "description": "Buy and mail birthday card for mom's birthday next week",
     "category": "Personal",
     "priority": "High",
     "dueDate": "2024-02-12T12:00:00.000Z",
+    "dueDateTime": "2024-02-12T12:00:00.000Z",
+    "assignedTo": null,
+    "reminders": [
+      { "type": "on_due", "enabled": true },
+      { "type": "1_day_before", "enabled": true },
+      { "type": "1_hour_before", "enabled": false },
+      { "type": "custom", "enabled": true, "minutes": 60 }
+    ],
+    "estimatedTime": 30,
+    "actualTime": 0,
+    "timeSpent": 0,
+    "isTracking": false,
+    "trackingStartedAt": null,
     "tags": [
       { "Id": 1, "name": "urgent", "color": "#ef4444", "icon": "AlertCircle" }
     ],

@@ -30,12 +30,20 @@ const newTask = {
       priority: taskData.priority || "Medium",
       status: taskData.status || "Not Started",
       dueDate: taskData.dueDate || null,
+      dueDateTime: taskData.dueDateTime || null,
       parentTaskId: taskData.parentTaskId || null,
       tags: taskData.tags || [],
       completed: taskData.status === "Completed" || false,
       completedAt: taskData.status === "Completed" ? new Date().toISOString() : null,
       isRecurring: taskData.isRecurring || false,
       recurrence: taskData.recurrence || null,
+      assignedTo: taskData.assignedTo || null,
+      reminders: taskData.reminders || [],
+      estimatedTime: taskData.estimatedTime || null,
+      actualTime: taskData.actualTime || 0,
+      timeSpent: taskData.timeSpent || 0,
+      isTracking: false,
+      trackingStartedAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -52,11 +60,18 @@ async update(id, updates) {
     }
     
     const updatedTask = {
-      ...tasks[index],
+...tasks[index],
       ...updates,
       tags: updates.tags || tasks[index].tags || [],
       isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
       recurrence: updates.recurrence !== undefined ? updates.recurrence : tasks[index].recurrence,
+      assignedTo: updates.assignedTo !== undefined ? updates.assignedTo : tasks[index].assignedTo,
+      reminders: updates.reminders !== undefined ? updates.reminders : (tasks[index].reminders || []),
+      estimatedTime: updates.estimatedTime !== undefined ? updates.estimatedTime : tasks[index].estimatedTime,
+      actualTime: updates.actualTime !== undefined ? updates.actualTime : (tasks[index].actualTime || 0),
+      timeSpent: updates.timeSpent !== undefined ? updates.timeSpent : (tasks[index].timeSpent || 0),
+      isTracking: updates.isTracking !== undefined ? updates.isTracking : (tasks[index].isTracking || false),
+      trackingStartedAt: updates.trackingStartedAt !== undefined ? updates.trackingStartedAt : tasks[index].trackingStartedAt,
       updatedAt: new Date().toISOString()
     }
     
@@ -186,11 +201,19 @@ saveToLocalStorage() {
     try {
       const stored = localStorage.getItem("taskflow-tasks")
       if (stored) {
-        const loadedTasks = JSON.parse(stored)
-        // Ensure all tasks have tags array
+const loadedTasks = JSON.parse(stored)
+        // Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
           ...task,
-          tags: task.tags || []
+          tags: task.tags || [],
+          assignedTo: task.assignedTo || null,
+          dueDateTime: task.dueDateTime || task.dueDate || null,
+          reminders: task.reminders || [],
+          estimatedTime: task.estimatedTime || null,
+          actualTime: task.actualTime || 0,
+          timeSpent: task.timeSpent || 0,
+          isTracking: task.isTracking || false,
+          trackingStartedAt: task.trackingStartedAt || null
         }))
         tasks.length = 0
         tasks.push(...migratedTasks)
