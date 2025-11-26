@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
 import ApperIcon from "@/components/ApperIcon";
@@ -14,53 +15,55 @@ import TaskEditModal from "@/components/molecules/TaskEditModal";
 import FilterBar from "@/components/molecules/FilterBar";
 import toast, { showToast } from "@/utils/toast";
 
-const Dashboard = () => {
-  const [tasks, setTasks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [createLoading, setCreateLoading] = useState(false)
+function Dashboard() {
+  const navigate = useNavigate();
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [createLoading, setCreateLoading] = useState(false);
   
   // Filters
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedPriority, setSelectedPriority] = useState("all")
-const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedProject, setSelectedProject] = useState("all")
-  const [selectedTag, setSelectedTag] = useState("all")
-  const [viewMode, setViewMode] = useState("list")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedPriority, setSelectedPriority] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedProject, setSelectedProject] = useState("all");
+  const [selectedTag, setSelectedTag] = useState("all");
+  const [viewMode, setViewMode] = useState("list");
   
   // Modal
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState(null)
-  const [modalLoading, setModalLoading] = useState(false)
-const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
-  const [projects, setProjects] = useState([])
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
   
   // Load tasks and projects
-  const loadTasks = async () => {
+const loadTasks = async () => {
     try {
-      setError("")
-const [taskData, projectData] = await Promise.all([
+      setError("");
+      const [taskData, projectData] = await Promise.all([
         taskService.getAll(),
         projectService.getAll()
-      ])
-      setTasks(taskData)
-      setProjects(projectData)
+      ]);
+]);
+      setTasks(taskData);
+      setProjects(projectData);
     } catch (err) {
-      console.error("Failed to load tasks:", err)
-      setError(err.message || "Failed to load tasks")
+      console.error("Failed to load tasks:", err);
+      setError(err.message || "Failed to load tasks");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  useEffect(() => {
-    loadTasks()
-  }, [])
-
+useEffect(() => {
+    loadTasks();
+  }, []);
   // Filter tasks
-  const filteredTasks = useMemo(() => {
-return tasks.filter(task => {
+const filteredTasks = useMemo(() => {
+    return tasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            (task.tags && task.tags.some(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -80,148 +83,147 @@ return tasks.filter(task => {
                             (task.projectId && task.projectId === parseInt(selectedProject)) ||
                             (selectedProject === "unassigned" && !task.projectId)
       
-      return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesTag && matchesProject
-    })
-  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus, selectedTag, selectedProject])
+return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesTag && matchesProject;
+    });
+  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus, selectedTag, selectedProject]);
+  
   // Handlers
   const handleAddTask = async (taskData) => {
     try {
-      setCreateLoading(true)
-      const newTask = await taskService.create(taskData)
-      setTasks(prev => [newTask, ...prev])
-      toast.success("Task created successfully! 🎉")
+      setCreateLoading(true);
+      const newTask = await taskService.create(taskData);
+      setTasks(prev => [newTask, ...prev]);
+      toast.success("Task created successfully! 🎉");
     } catch (err) {
-      console.error("Failed to create task:", err)
-      toast.error("Failed to create task. Please try again.")
+      console.error("Failed to create task:", err);
+      toast.error("Failed to create task. Please try again.");
     } finally {
-      setCreateLoading(false)
+      setCreateLoading(false);
     }
-  }
-
+  };
 const handleToggleComplete = async (taskId, completed) => {
     try {
-      const updatedTask = await taskService.update(taskId, { completed })
+try {
+      const updatedTask = await taskService.update(taskId, { completed });
       setTasks(prev => prev.map(task => 
         task.Id === taskId ? updatedTask : task
-      ))
+      ));
       
       if (completed) {
-        toast.success("Task completed! Great job! ✅")
+        toast.success("Task completed! Great job! ✅");
       } else {
-        toast.info("Task marked as active")
+        toast.info("Task marked as active");
       }
     } catch (err) {
-      console.error("Failed to update task:", err)
-      toast.error("Failed to update task. Please try again.")
+      console.error("Failed to update task:", err);
+      toast.error("Failed to update task. Please try again.");
     }
-  }
+  };
 
-  const handleToggleSubtask = async (subtaskId, completed, parentTaskId) => {
+const handleToggleSubtask = async (subtaskId, completed, parentTaskId) => {
     try {
-      const updatedSubtask = await taskService.update(subtaskId, { completed })
+      const updatedSubtask = await taskService.update(subtaskId, { completed });
       
       // Refresh all tasks to get updated parent task progress
-      const allTasks = await taskService.getAll()
-      setTasks(allTasks)
+      const allTasks = await taskService.getAll();
+      setTasks(allTasks);
       
       if (completed) {
-        toast.success("Subtask completed! ✅")
+        toast.success("Subtask completed! ✅");
       } else {
-        toast.info("Subtask marked as active")
+        toast.info("Subtask marked as active");
       }
     } catch (err) {
-      console.error("Failed to update subtask:", err)
-      toast.error("Failed to update subtask. Please try again.")
+      console.error("Failed to update subtask:", err);
+      toast.error("Failed to update subtask. Please try again.");
     }
-  }
-
+  };
 const handleCreateSubtask = async (parentTaskId) => {
-    const parentTask = tasks.find(t => t.Id === parentTaskId)
+    const parentTask = tasks.find(t => t.Id === parentTaskId);
+const parentTask = tasks.find(t => t.Id === parentTaskId);
     if (parentTask) {
       setEditingTask({ 
         parentTaskId, 
         category: parentTask.category, 
         priority: parentTask.priority 
-      })
-      setIsModalOpen(true)
+      });
+      setIsModalOpen(true);
     }
-  }
+  };
 
-  const handleEditTask = (task) => {
-    setEditingTask(task)
-    setIsModalOpen(true)
-  }
-
+const handleEditTask = (task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
 const handleSaveTask = async (taskId, taskData) => {
     try {
-      setModalLoading(true)
+try {
+      setModalLoading(true);
       
       if (taskId) {
         // Update existing task or subtask
-        const updatedTask = await taskService.update(taskId, taskData)
+        const updatedTask = await taskService.update(taskId, taskData);
         // Refresh all tasks to get updated parent progress if it's a subtask
-        const allTasks = await taskService.getAll()
-        setTasks(allTasks)
-        toast.success(taskData.parentTaskId ? "Subtask updated successfully! ✅" : "Task updated successfully! ✅")
+        const allTasks = await taskService.getAll();
+        setTasks(allTasks);
+        toast.success(taskData.parentTaskId ? "Subtask updated successfully! ✅" : "Task updated successfully! ✅");
       } else {
         // Create new task or subtask
         if (taskData.parentTaskId) {
-          const newSubtask = await taskService.createSubtask(taskData.parentTaskId, taskData)
+          const newSubtask = await taskService.createSubtask(taskData.parentTaskId, taskData);
           // Refresh all tasks to get updated parent progress
-          const allTasks = await taskService.getAll()
-          setTasks(allTasks)
-          toast.success("Subtask created successfully! 🎉")
+          const allTasks = await taskService.getAll();
+          setTasks(allTasks);
+          toast.success("Subtask created successfully! 🎉");
         } else {
-          const newTask = await taskService.create(taskData)
-          setTasks(prev => [newTask, ...prev])
-          toast.success("Task created successfully! 🎉")
+          const newTask = await taskService.create(taskData);
+          setTasks(prev => [newTask, ...prev]);
+          toast.success("Task created successfully! 🎉");
         }
       }
       
-      setIsModalOpen(false)
-      setEditingTask(null)
+      setIsModalOpen(false);
+      setEditingTask(null);
     } catch (err) {
-      console.error("Failed to save task:", err)
-      toast.error("Failed to save task. Please try again.")
+      console.error("Failed to save task:", err);
+      toast.error("Failed to save task. Please try again.");
     } finally {
-      setModalLoading(false)
+      setModalLoading(false);
     }
-  }
+  };
 
-  const handleDeleteTask = async (taskId) => {
+const handleDeleteTask = async (taskId) => {
     try {
-      setModalLoading(true)
-      await taskService.delete(taskId)
-      setTasks(prev => prev.filter(task => task.Id !== taskId))
-      toast.success("Task deleted successfully")
-      setIsModalOpen(false)
-      setEditingTask(null)
+      setModalLoading(true);
+      await taskService.delete(taskId);
+      setTasks(prev => prev.filter(task => task.Id !== taskId));
+      toast.success("Task deleted successfully");
+      setIsModalOpen(false);
+      setEditingTask(null);
     } catch (err) {
-      console.error("Failed to delete task:", err)
-      toast.error("Failed to delete task. Please try again.")
+      console.error("Failed to delete task:", err);
+      toast.error("Failed to delete task. Please try again.");
     } finally {
-      setModalLoading(false)
+      setModalLoading(false);
     }
-  }
+  };
 
-  const handleCreateNewTask = () => {
-    setEditingTask(null)
-    setIsModalOpen(true)
-  }
+const handleCreateNewTask = () => {
+    setEditingTask(null);
+    setIsModalOpen(true);
+  };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false)
-    setEditingTask(null)
-  }
+    setIsModalOpen(false);
+    setEditingTask(null);
+  };
 
   const handleRetry = () => {
-    setLoading(true)
-    loadTasks()
-  }
-
-  if (loading) return <Loading />
-  if (error) return <ErrorView message={error} onRetry={handleRetry} />
-
+    setLoading(true);
+    loadTasks();
+  };
+if (loading) return <Loading />;
+  if (error) return <ErrorView message={error} onRetry={handleRetry} />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -243,15 +245,25 @@ const handleSaveTask = async (taskId, taskData) => {
           
 <div className="flex items-center gap-3">
             <motion.button
-              onClick={handleCreateNewTask}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-            >
-              <ApperIcon name="Plus" size={18} />
-              New Task
-            </motion.button>
-</div>
+                onClick={() => navigate('/calendar')}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg shadow-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200"
+              >
+                <ApperIcon name="Calendar" size={18} />
+                Calendar
+              </motion.button>
+              
+              <motion.button
+                onClick={handleCreateNewTask}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              >
+                <ApperIcon name="Plus" size={18} />
+                New Task
+              </motion.button>
+            </div>
         </motion.div>
 
         {/* Stats */}
@@ -266,8 +278,8 @@ const handleSaveTask = async (taskId, taskData) => {
         </div>
 
         {/* Filters */}
-        <div className="mb-6">
-<FilterBar
+<div className="mb-6">
+          <FilterBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             selectedCategory={selectedCategory}
@@ -305,8 +317,8 @@ const handleSaveTask = async (taskId, taskData) => {
           />
         </div>
 
-        {/* Task List */}
-<TaskList
+{/* Task List */}
+        <TaskList
           tasks={filteredTasks}
           onToggleComplete={handleToggleComplete}
           onEdit={handleEditTask}
@@ -318,17 +330,17 @@ const handleSaveTask = async (taskId, taskData) => {
         />
 
         {/* Edit Modal */}
-        <TaskEditModal
-isOpen={isModalOpen}
+<TaskEditModal
+          isOpen={isModalOpen}
           onClose={handleCloseModal}
           task={editingTask}
           onSave={handleSaveTask}
           onDelete={handleDeleteTask}
           isLoading={modalLoading}
         />
-      </div>
+</div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

@@ -3,6 +3,7 @@ import React, { Suspense, lazy } from "react";
 
 const Layout = lazy(() => import("@/components/organisms/Layout"))
 const Dashboard = lazy(() => import("@/components/pages/Dashboard"))
+const Calendar = lazy(() => import("@/components/pages/Calendar"))
 const NotFound = lazy(() => import("@/components/pages/NotFound"))
 
 // Project pages
@@ -10,7 +11,6 @@ const ProjectList = lazy(() => import("@/components/pages/ProjectList"))
 const ProjectDetail = lazy(() => import("@/components/pages/ProjectDetail"))
 const ProjectSettings = lazy(() => import("@/components/pages/ProjectSettings"))
 const ProjectTimeline = lazy(() => import("@/components/pages/ProjectTimeline"))
-
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -31,6 +31,10 @@ const mainRoutes = [
     path: "",
     element: <SuspenseWrapper><Dashboard /></SuspenseWrapper>,
     index: true
+  },
+  {
+    path: "calendar",
+    element: <SuspenseWrapper><Calendar /></SuspenseWrapper>
   },
   {
     path: "projects",

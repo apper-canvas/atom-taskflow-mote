@@ -10,6 +10,53 @@ export const taskService = {
     return [...tasks]
   },
 
+  async getTasksByDateRange(startDate, endDate) {
+    await delay()
+    return tasks.filter(task => {
+      if (!task.dueDate && !task.dueDateTime) return false
+      
+      const taskDate = task.dueDateTime ? new Date(task.dueDateTime) : new Date(task.dueDate)
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      
+      return taskDate >= start && taskDate <= end
+    }).map(task => ({ ...task }))
+  },
+
+  async getTasksForDate(date) {
+    await delay()
+    const targetDate = new Date(date)
+    
+    return tasks.filter(task => {
+      if (!task.dueDate && !task.dueDateTime) return false
+      
+      const taskDate = task.dueDateTime ? new Date(task.dueDateTime) : new Date(task.dueDate)
+      return (
+        taskDate.getFullYear() === targetDate.getFullYear() &&
+        taskDate.getMonth() === targetDate.getMonth() &&
+        taskDate.getDate() === targetDate.getDate()
+      )
+    }).map(task => ({ ...task }))
+  },
+
+  async rescheduleTask(taskId, newDate) {
+    await delay()
+    const index = tasks.findIndex(t => t.Id === parseInt(taskId))
+    if (index === -1) {
+      throw new Error(`Task with Id ${taskId} not found`)
+    }
+    
+    const updatedTask = {
+      ...tasks[index],
+      dueDate: newDate,
+      updatedAt: new Date().toISOString()
+    }
+    
+    tasks[index] = updatedTask
+    this.saveToLocalStorage()
+    return { ...updatedTask }
+  },
+
   async getById(id) {
     await delay()
     const task = tasks.find(t => t.Id === parseInt(id))

@@ -170,7 +170,7 @@ const FilterBar = ({
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-2 ml-auto">
+<div className="flex items-center gap-2 ml-auto">
           <span className="text-sm font-medium text-gray-700">View:</span>
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
@@ -196,6 +196,18 @@ const FilterBar = ({
             >
               <ApperIcon name="Grid3X3" size={16} />
               Groups
+            </button>
+            <button
+              onClick={() => onViewModeChange("calendar")}
+              className={cn(
+                "px-3 py-1.5 text-sm rounded-md transition-all duration-200 flex items-center gap-2",
+                viewMode === "calendar"
+                  ? "bg-white shadow-sm text-blue-600 font-medium"
+                  : "text-gray-600 hover:text-gray-900"
+              )}
+            >
+              <ApperIcon name="Calendar" size={16} />
+              Calendar
             </button>
           </div>
         </div>
