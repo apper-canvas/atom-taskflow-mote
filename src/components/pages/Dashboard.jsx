@@ -396,26 +396,24 @@ onTagChange={setSelectedTag}
 onGroupByChange={setGroupBy}
               />
             </div>
-            
-            {/* Tag Management Button */}
+{/* Tag Management Button */}
             <div className="flex justify-end mb-4">
-        <div className="flex justify-end mb-4">
-          <Button
-            variant="outline"
-            onClick={() => setIsTagManagerOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <ApperIcon name="Tag" size={16} />
-            Manage Tags
-          </Button>
-        </div>
+              <Button
+                variant="outline"
+                onClick={() => setIsTagManagerOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <ApperIcon name="Tag" size={16} />
+                Manage Tags
+              </Button>
+            </div>
 
-        {/* Tag Manager Modal */}
-        <TagManager
-          isOpen={isTagManagerOpen}
-          onClose={() => setIsTagManagerOpen(false)}
-          onTagsChange={loadTasks}
-        />
+            {/* Tag Manager Modal */}
+            <TagManager
+              isOpen={isTagManagerOpen}
+              onClose={() => setIsTagManagerOpen(false)}
+              onTagsChange={loadTasks}
+            />
 {/* Task List */}
             <Suspense fallback={
               <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -476,9 +474,8 @@ onGroupByChange={setGroupBy}
             onToggleSubtask={handleToggleSubtask}
             onCreateSubtask={handleCreateSubtask}
             viewMode={viewMode}
-            onCreateTask={handleCreateNewTask}
+onCreateTask={handleCreateNewTask}
             groupBy={groupBy}
-groupBy={groupBy}
           />
         )}
             </Suspense>
