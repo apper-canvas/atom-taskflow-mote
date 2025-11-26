@@ -44,6 +44,9 @@ const newTask = {
       timeSpent: taskData.timeSpent || 0,
       isTracking: false,
       trackingStartedAt: null,
+      notes: taskData.notes || "",
+      attachments: taskData.attachments || [],
+      linkedTasks: taskData.linkedTasks || [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -59,8 +62,8 @@ async update(id, updates) {
       throw new Error(`Task with Id ${id} not found`)
     }
     
-    const updatedTask = {
-...tasks[index],
+const updatedTask = {
+      ...tasks[index],
       ...updates,
       tags: updates.tags || tasks[index].tags || [],
       isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
@@ -72,6 +75,9 @@ async update(id, updates) {
       timeSpent: updates.timeSpent !== undefined ? updates.timeSpent : (tasks[index].timeSpent || 0),
       isTracking: updates.isTracking !== undefined ? updates.isTracking : (tasks[index].isTracking || false),
       trackingStartedAt: updates.trackingStartedAt !== undefined ? updates.trackingStartedAt : tasks[index].trackingStartedAt,
+      notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
+      attachments: updates.attachments !== undefined ? updates.attachments : (tasks[index].attachments || []),
+      linkedTasks: updates.linkedTasks !== undefined ? updates.linkedTasks : (tasks[index].linkedTasks || []),
       updatedAt: new Date().toISOString()
     }
     
@@ -204,7 +210,7 @@ saveToLocalStorage() {
 const loadedTasks = JSON.parse(stored)
         // Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
-          ...task,
+...task,
           tags: task.tags || [],
           assignedTo: task.assignedTo || null,
           dueDateTime: task.dueDateTime || task.dueDate || null,
@@ -213,7 +219,10 @@ const loadedTasks = JSON.parse(stored)
           actualTime: task.actualTime || 0,
           timeSpent: task.timeSpent || 0,
           isTracking: task.isTracking || false,
-          trackingStartedAt: task.trackingStartedAt || null
+          trackingStartedAt: task.trackingStartedAt || null,
+          notes: task.notes || "",
+          attachments: task.attachments || [],
+          linkedTasks: task.linkedTasks || []
         }))
         tasks.length = 0
         tasks.push(...migratedTasks)

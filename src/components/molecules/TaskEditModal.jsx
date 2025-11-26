@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
@@ -8,8 +7,8 @@ import Modal from "@/components/atoms/Modal";
 import Select from "@/components/atoms/Select";
 import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
+import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import TagSelector from "@/components/molecules/TagSelector";
-
 // Mock users for assignment
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
@@ -40,14 +39,17 @@ const [formData, setFormData] = useState({
     ],
     estimatedTime: null,
     actualTime: 0,
-    timeSpent: 0
-  })
+    timeSpent: 0,
+    notes: "",
+notes: "",
+    attachments: [],
+    linkedTasks: []
+  });
   
   const [availableTasks, setAvailableTasks] = useState([])
   const [isSubtaskMode, setIsSubtaskMode] = useState(false)
   const [errors, setErrors] = useState({})
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showRecurringModal, setShowRecurringModal] = useState(false)
 useEffect(() => {
 if (task) {
       setFormData({
@@ -71,8 +73,11 @@ if (task) {
         ],
         estimatedTime: task.estimatedTime || null,
         actualTime: task.actualTime || 0,
-        timeSpent: task.timeSpent || 0
-      })
+        timeSpent: task.timeSpent || 0,
+        notes: task.notes || "",
+attachments: task.attachments || [],
+        linkedTasks: task.linkedTasks || []
+      });
       setIsSubtaskMode(!!task.parentTaskId)
     } else {
       // Check if we're creating a subtask (parentTaskId passed via task prop)
@@ -137,13 +142,85 @@ const handleInputChange = (field, value) => {
       recurrence: recurringData.recurrence
     }))
     setShowRecurringModal(false)
+setShowRecurringModal(false)
   }
+
+  const handleFileAttachment = (e) => {
+    const files = Array.from(e.target.files);
+    const fileData = files.map(file => ({
+      name: file.name,
+      size: formatFileSize(file.size),
+      type: file.type,
+      lastModified: file.lastModified
+    }));
+    setFormData(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, ...fileData]
+    }));
+  };
+
+  const removeAttachment = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleTaskSearch = async (e) => {
+    const searchTerm = e.target.value;
+    if (searchTerm.length > 2) {
+      try {
+        const allTasks = await taskService.getAll();
+        const filteredTasks = allTasks.filter(t => 
+          t.Id !== task?.Id && 
+          t.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        // Show search results (implementation depends on UI needs)
+      } catch (error) {
+        console.error('Error searching tasks:', error);
+      }
+    }
+  };
+
+  const addLinkedTask = (taskToLink, relationType = 'related') => {
+    const linkedTask = {
+      Id: taskToLink.Id,
+      title: taskToLink.title,
+      type: relationType
+    };
+    setFormData(prev => ({
+      ...prev,
+      linkedTasks: [...prev.linkedTasks, linkedTask]
+    }));
+  };
+
+  const removeLinkedTask = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      linkedTasks: prev.linkedTasks.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateLinkedTaskType = (index, newType) => {
+    setFormData(prev => ({
+      ...prev,
+      linkedTasks: prev.linkedTasks.map((task, i) => 
+        i === index ? { ...task, type: newType } : task
+      )
+    }));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const handleTagsChange = (newTags) => {
     setFormData(prev => ({ ...prev, tags: newTags }))
   }
-
-  const validateForm = () => {
     const newErrors = {}
     
     if (!formData.title.trim()) {
@@ -176,12 +253,14 @@ const taskData = {
       reminders: formData.reminders,
       estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : null,
       actualTime: formData.actualTime || 0,
-      timeSpent: formData.timeSpent || 0
-    }
+      timeSpent: formData.timeSpent || 0,
+      notes: formData.notes.trim(),
+      attachments: formData.attachments,
+linkedTasks: formData.linkedTasks
+    };
 
     await onSave(task?.Id, taskData)
   }
-
   const handleDelete = async () => {
     await onDelete(task?.Id)
     setShowDeleteConfirm(false)
@@ -235,8 +314,8 @@ const taskData = {
           autoFocus
         />
 
-        {/* Description */}
-<Textarea
+{/* Description */}
+        <Textarea
           label="Description (Optional)"
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
@@ -246,8 +325,19 @@ const taskData = {
           disabled={isLoading}
         />
 
+        {/* Notes */}
+        <Textarea
+          label="Notes & Comments (Optional)"
+          value={formData.notes}
+          onChange={(e) => handleInputChange("notes", e.target.value)}
+          error={errors.notes}
+          placeholder="Add notes, comments, or additional context..."
+          rows={4}
+          disabled={isLoading}
+        />
+
         {/* Tags */}
-        <div className="space-y-2">
+<div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             Tags (Optional)
           </label>
@@ -257,6 +347,97 @@ const taskData = {
             placeholder="Add tags to organize your task..."
             disabled={isLoading}
           />
+        </div>
+
+        {/* File Attachments */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            File Attachments (Optional)
+          </label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+            <input
+              type="file"
+              multiple
+              onChange={handleFileAttachment}
+              className="hidden"
+              id="file-upload"
+              disabled={isLoading}
+            />
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <div className="space-y-2">
+                <ApperIcon name="Upload" size={24} className="mx-auto text-gray-400" />
+                <p className="text-sm text-gray-600">Click to upload files or drag and drop</p>
+                <p className="text-xs text-gray-400">PDF, DOC, IMG files supported</p>
+              </div>
+            </label>
+            {formData.attachments.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {formData.attachments.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div className="flex items-center gap-2">
+                      <ApperIcon name="File" size={16} />
+                      <span className="text-sm text-gray-700">{file.name}</span>
+                      <span className="text-xs text-gray-500">({file.size})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <ApperIcon name="X" size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Task Linking */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Related Tasks (Optional)
+          </label>
+          <div className="border border-gray-300 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <ApperIcon name="Search" size={16} className="text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search tasks to link..."
+                className="flex-1 border-0 focus:ring-0 text-sm"
+                onChange={handleTaskSearch}
+              />
+            </div>
+            {formData.linkedTasks.length > 0 && (
+              <div className="space-y-1 mt-2">
+                {formData.linkedTasks.map((linkedTask, index) => (
+                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <div className="flex items-center gap-2">
+                      <ApperIcon name="Link" size={14} />
+                      <span className="text-sm text-gray-700">{linkedTask.title}</span>
+                      <select
+                        value={linkedTask.type}
+                        onChange={(e) => updateLinkedTaskType(index, e.target.value)}
+                        className="text-xs border-gray-300 rounded px-2 py-1"
+                      >
+                        <option value="related">Related</option>
+                        <option value="depends_on">Depends on</option>
+                        <option value="blocks">Blocks</option>
+                        <option value="duplicate">Duplicate</option>
+                      </select>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeLinkedTask(index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <ApperIcon name="X" size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Recurring Task Toggle */}
@@ -316,10 +497,10 @@ const taskData = {
                 {user.name} ({user.email})
               </option>
             ))}
-          </Select>
+</Select>
         </div>
 
-        {/* Due Date and Time */}
+{/* Due Date and Time */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Due Date & Time
@@ -374,7 +555,6 @@ const taskData = {
             ))}
           </div>
         </div>
-
         {/* Time Estimation */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
@@ -475,8 +655,7 @@ const taskData = {
           <option value="On Hold">⏸️ On Hold</option>
           <option value="Cancelled">❌ Cancelled</option>
         </Select>
-
-        {/* Due Date */}
+{/* Due Date */}
         <Input
           label="Due Date (Optional)"
           type="datetime-local"

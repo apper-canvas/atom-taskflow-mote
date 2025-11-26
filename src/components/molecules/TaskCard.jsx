@@ -8,6 +8,7 @@ import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
 import { toast } from "@/utils/toast";
 import { cn } from "@/utils/cn";
+
 const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSubtasks, setShowSubtasks] = useState(false);
@@ -110,6 +111,11 @@ switch (priority) {
   const isOverdue = dueDateInfo?.isOverdue
   const isDueSoon = dueDateInfo && !isOverdue && (dueDateInfo === "Today" || dueDateInfo === "Tomorrow")
 
+// State for expandable sections
+  const [showNotes, setShowNotes] = useState(false);
+  const [showAttachments, setShowAttachments] = useState(false);
+  const [showLinkedTasks, setShowLinkedTasks] = useState(false);
+
   return (
     <motion.div
     layout
@@ -169,7 +175,7 @@ switch (priority) {
                 </motion.div>}
             </motion.button>
             {/* Task Content */}
-            <div className="flex-1 min-w-0">
+<div className="flex-1 min-w-0">
                 <div className="flex items-start gap-2 mb-2">
                     <h3
                         className={cn(
@@ -186,6 +192,33 @@ switch (priority) {
                         <ApperIcon name={showSubtasks ? "ChevronDown" : "ChevronRight"} size={12} />
                         {task.subtaskCount}subtask{task.subtaskCount !== 1 ? "s" : ""}
                     </button>}
+                    
+                    {/* Feature indicators */}
+                    <div className="flex items-center gap-1">
+                        {task.notes && (
+                            <button
+                                onClick={() => setShowNotes(!showNotes)}
+                                className="text-xs text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-1 rounded-full transition-colors">
+                                <ApperIcon name="FileText" size={12} />
+                            </button>
+                        )}
+                        {task.attachments && task.attachments.length > 0 && (
+                            <button
+                                onClick={() => setShowAttachments(!showAttachments)}
+                                className="text-xs text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded-full transition-colors">
+                                <ApperIcon name="Paperclip" size={12} />
+                                {task.attachments.length}
+                            </button>
+                        )}
+                        {task.linkedTasks && task.linkedTasks.length > 0 && (
+                            <button
+                                onClick={() => setShowLinkedTasks(!showLinkedTasks)}
+                                className="text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 px-2 py-1 rounded-full transition-colors">
+                                <ApperIcon name="Link" size={12} />
+                                {task.linkedTasks.length}
+                            </button>
+                        )}
+                    </div>
                 </div>
                 {/* Subtask progress bar for parent tasks */}
                 {isParentTask && task.subtaskProgress !== undefined && <div className="mb-3">
@@ -213,6 +246,70 @@ switch (priority) {
                     )}>
                     {task.description}
                 </p>}
+
+                {/* Expandable Notes Section */}
+                {showNotes && task.notes && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-3 p-3 bg-amber-50 rounded-lg border border-amber-200"
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <ApperIcon name="FileText" size={14} className="text-amber-600" />
+                            <span className="text-sm font-medium text-amber-800">Notes</span>
+                        </div>
+                        <p className="text-sm text-amber-700 whitespace-pre-wrap">{task.notes}</p>
+                    </motion.div>
+                )}
+
+                {/* Expandable Attachments Section */}
+                {showAttachments && task.attachments && task.attachments.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-3 p-3 bg-purple-50 rounded-lg border border-purple-200"
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <ApperIcon name="Paperclip" size={14} className="text-purple-600" />
+                            <span className="text-sm font-medium text-purple-800">Attachments</span>
+                        </div>
+                        <div className="space-y-2">
+                            {task.attachments.map((attachment, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm text-purple-700">
+                                    <ApperIcon name="File" size={12} />
+                                    <span className="truncate">{attachment.name}</span>
+                                    <span className="text-xs text-purple-500">({attachment.size})</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Expandable Linked Tasks Section */}
+                {showLinkedTasks && task.linkedTasks && task.linkedTasks.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200"
+                    >
+                        <div className="flex items-center gap-2 mb-2">
+                            <ApperIcon name="Link" size={14} className="text-green-600" />
+                            <span className="text-sm font-medium text-green-800">Related Tasks</span>
+                        </div>
+                        <div className="space-y-1">
+                            {task.linkedTasks.map((linkedTask, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm text-green-700">
+                                    <ApperIcon name="ArrowRight" size={12} />
+                                    <span className="truncate">{linkedTask.title}</span>
+                                    <Badge variant="secondary" size="xs">{linkedTask.type}</Badge>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Assignment Info */}
                 {task.assignedTo && (
@@ -349,8 +446,8 @@ task.priority === "Urgent" && "text-red-800 bg-red-200",
                         <ApperIcon name="Plus" size={12} />Add subtask
                                         </button>}
                 </div>
-                {/* Expanded subtasks */}
-{showSubtasks && isParentTask && <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-2">
+{/* Expanded subtasks */}
+                {showSubtasks && isParentTask && <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-2">
                     {loadingSubtasks ? <div className="text-sm text-gray-500">Loading subtasks...</div> : subtasks.length > 0 ? subtasks.map(subtask => <div key={subtask.Id} className="bg-gray-50 rounded-lg p-3">
                         <TaskCard
                             task={subtask}
@@ -360,7 +457,7 @@ task.priority === "Urgent" && "text-red-800 bg-red-200",
                     </div>) : <div className="text-sm text-gray-500 italic">No subtasks yet. Click "Add subtask" to create one.
                                           </div>}
                 </div>}
-            </div>
+</div>
         </div>
     </div>
     {/* Actions */}
