@@ -6,7 +6,7 @@ import Input from '@/components/atoms/Input'
 import Modal from '@/components/atoms/Modal'
 import Badge from '@/components/atoms/Badge'
 import tagService from '@/services/api/tagService'
-import { showToast } from '@/utils/toast'
+import toast from '@/utils/toast'
 import { cn } from '@/utils/cn'
 
 const TagManager = ({ isOpen, onClose, onTagsChange }) => {
@@ -51,7 +51,7 @@ const TagManager = ({ isOpen, onClose, onTagsChange }) => {
       const data = await tagService.getAll()
       setTags(data)
     } catch (error) {
-      showToast.error('Failed to load tags')
+toast.error('Failed to load tags')
       console.error('Error loading tags:', error)
     } finally {
       setLoading(false)
@@ -84,11 +84,11 @@ const TagManager = ({ isOpen, onClose, onTagsChange }) => {
       if (editingTag) {
         // Update existing tag
         await tagService.update(editingTag.Id, formData)
-        showToast.success('Tag updated successfully')
+toast.success('Tag updated successfully')
       } else {
         // Create new tag
         await tagService.create(formData)
-        showToast.success('Tag created successfully')
+toast.success('Tag created successfully')
       }
       
       // Reload tags and close modal
@@ -100,7 +100,7 @@ const TagManager = ({ isOpen, onClose, onTagsChange }) => {
         onTagsChange()
       }
     } catch (error) {
-      showToast.error(error.message || 'Failed to save tag')
+toast.error(error.message || 'Failed to save tag')
       setFormErrors({ submit: error.message })
     } finally {
       setFormLoading(false)
@@ -122,7 +122,7 @@ const TagManager = ({ isOpen, onClose, onTagsChange }) => {
     try {
       setDeletingTagId(tagId)
       await tagService.delete(tagId)
-      showToast.success('Tag deleted successfully')
+toast.success('Tag deleted successfully')
       
       // Reload tags
       await loadTags()
@@ -132,7 +132,7 @@ const TagManager = ({ isOpen, onClose, onTagsChange }) => {
         onTagsChange()
       }
     } catch (error) {
-      showToast.error(error.message || 'Failed to delete tag')
+toast.error(error.message || 'Failed to delete tag')
     } finally {
       setDeletingTagId(null)
     }
