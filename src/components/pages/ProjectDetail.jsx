@@ -16,6 +16,7 @@ import MemberCard from "@/components/molecules/MemberCard";
 import ProjectDashboard from "@/components/molecules/ProjectDashboard";
 import MemberManagementModal from "@/components/molecules/MemberManagementModal";
 import TaskEditModal from "@/components/molecules/TaskEditModal";
+import CommentThread from "@/components/molecules/CommentThread";
 import toast from "@/utils/toast";
 
 function ProjectDetail() {
@@ -33,9 +34,9 @@ function ProjectDetail() {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
 const [editingMember, setEditingMember] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [projectFiles, setProjectFiles] = useState([])
+const [projectFiles, setProjectFiles] = useState([])
   const [projectExternalLinks, setProjectExternalLinks] = useState([])
-  
+  const [selectedTaskForComments, setSelectedTaskForComments] = useState(null)
   useEffect(() => {
     if (id) {
       loadProjectData()
@@ -343,9 +344,10 @@ className={project?.isFavorite ? 'fill-current' : ''}
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-8">
         <nav className="flex space-x-8">
-          {[
+{[
             { id: 'overview', label: 'Overview', icon: 'BarChart3' },
             { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
+            { id: 'comments', label: 'Comments', icon: 'MessageCircle' },
             { id: 'members', label: 'Members', icon: 'Users' }
           ].map(tab => (
             <button
@@ -359,7 +361,7 @@ className={project?.isFavorite ? 'fill-current' : ''}
             >
               <ApperIcon name={tab.icon} size={16} />
               {tab.label}
-</button>
+            </button>
           ))}
         </nav>
       </div>
@@ -381,7 +383,66 @@ className={project?.isFavorite ? 'fill-current' : ''}
           />
         </div>
       )}
-{activeTab === 'members' && (
+{activeTab === 'comments' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Task Comments</h3>
+              {selectedTaskForComments && (
+                <button
+                  onClick={() => setSelectedTaskForComments(null)}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  View All Tasks
+                </button>
+              )}
+            </div>
+            
+            {!selectedTaskForComments ? (
+              <div className="space-y-4">
+                {tasks.filter(task => task.commentCount > 0).length === 0 ? (
+                  <div className="text-center py-12">
+                    <ApperIcon name="MessageCircle" size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">No comments yet on any tasks</p>
+                  </div>
+                ) : (
+                  tasks.filter(task => task.commentCount > 0).map(task => (
+                    <div
+                      key={task.Id}
+                      className="bg-white rounded-lg border border-gray-200 p-4 hover:border-gray-300 transition-colors cursor-pointer"
+                      onClick={() => setSelectedTaskForComments(task)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 mb-1">{task.title}</h4>
+                          <p className="text-sm text-gray-500">{task.description}</p>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-500 ml-4">
+                          <div className="flex items-center gap-1">
+                            <ApperIcon name="MessageCircle" size={16} />
+                            <span>{task.commentCount}</span>
+                          </div>
+                          {task.hasUnreadComments && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="mb-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-2">{selectedTaskForComments.title}</h4>
+                  <p className="text-gray-600">{selectedTaskForComments.description}</p>
+                </div>
+                <CommentThread taskId={selectedTaskForComments.Id} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'members' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Project Members</h3>

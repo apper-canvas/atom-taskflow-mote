@@ -1,0 +1,130 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import ApperIcon from '@/components/ApperIcon';
+import commentService from '@/services/api/commentService';
+
+const MentionDropdown = ({ query, onSelect, onClose }) => {
+  const [members, setMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  useEffect(() => {
+    // Filter members based on query
+    if (!query.trim()) {
+      setFilteredMembers(members.slice(0, 5)); // Show first 5 if no query
+    } else {
+      const filtered = members.filter(member =>
+        member.name.toLowerCase().includes(query.toLowerCase()) ||
+        member.email.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 5);
+      setFilteredMembers(filtered);
+    }
+  }, [query, members]);
+
+  const loadMembers = async () => {
+    try {
+      setLoading(true);
+      const teamMembers = await commentService.getTeamMembers();
+      setMembers(teamMembers);
+    } catch (error) {
+      console.error('Failed to load team members:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(part => part.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const getAvatarColor = (name) => {
+    const colors = [
+      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
+      'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500'
+    ];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
+  if (loading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 min-w-64"
+      >
+        <div className="flex items-center justify-center py-2">
+          <div className="w-4 h-4 border border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          <span className="ml-2 text-sm text-gray-500">Loading members...</span>
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-64 max-h-64 overflow-y-auto"
+      >
+        {filteredMembers.length === 0 ? (
+          <div className="p-3 text-center text-sm text-gray-500">
+            {query ? `No members found for "${query}"` : 'No team members available'}
+          </div>
+        ) : (
+          <div className="py-1">
+            {filteredMembers.map(member => (
+              <button
+                key={member.Id}
+                onClick={() => onSelect(member)}
+                className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${getAvatarColor(member.name)}`}>
+                  {member.avatar ? (
+                    <img 
+                      src={member.avatar} 
+                      alt={member.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    getInitials(member.name)
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900 text-sm">
+                    {member.name}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {member.email}
+                  </div>
+                </div>
+                <ApperIcon name="AtSign" size={16} className="text-gray-400" />
+              </button>
+            ))}
+          </div>
+        )}
+        
+        <div className="border-t border-gray-100 px-3 py-2 bg-gray-50">
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <ApperIcon name="Info" size={12} />
+            <span>Press Enter to mention, Esc to cancel</span>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+export default MentionDropdown;

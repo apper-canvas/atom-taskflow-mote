@@ -191,7 +191,18 @@ switch (priority) {
                         className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-full transition-colors">
                         <ApperIcon name={showSubtasks ? "ChevronDown" : "ChevronRight"} size={12} />
                         {task.subtaskCount}subtask{task.subtaskCount !== 1 ? "s" : ""}
-                    </button>}
+</button>}
+                    
+                    {/* Comment Count Badge */}
+                    {task.commentCount > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <ApperIcon name="MessageCircle" size={12} />
+                        <span>{task.commentCount}</span>
+                        {task.hasUnreadComments && (
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        )}
+                      </div>
+                    )}
                     
                     {/* Feature indicators */}
 <div className="flex items-center gap-1">

@@ -1,5 +1,4 @@
 import tasksData from "@/services/mockData/tasks.json";
-import React from "react";
 let tasks = [...tasksData]
 
 const delay = () => new Promise(resolve => setTimeout(resolve, 300))
@@ -54,6 +53,9 @@ isRecurring: taskData.isRecurring || false,
       })) : [],
 linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
       externalLinks: Array.isArray(taskData.externalLinks) ? taskData.externalLinks : [],
+      commentCount: 0,
+      hasUnreadComments: false,
+      lastCommentAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -70,7 +72,7 @@ async update(id, updates) {
     }
     
     const updatedTask = {
-      ...tasks[index],
+...tasks[index],
       ...updates,
 tags: updates.tags || tasks[index].tags || [],
       isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
@@ -97,6 +99,9 @@ notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
 externalLinks: updates.externalLinks !== undefined ?
         (Array.isArray(updates.externalLinks) ? updates.externalLinks : []) :
         (Array.isArray(tasks[index].externalLinks) ? tasks[index].externalLinks : []),
+      commentCount: updates.commentCount !== undefined ? updates.commentCount : (tasks[index].commentCount || 0),
+      hasUnreadComments: updates.hasUnreadComments !== undefined ? updates.hasUnreadComments : (tasks[index].hasUnreadComments || false),
+      lastCommentAt: updates.lastCommentAt !== undefined ? updates.lastCommentAt : tasks[index].lastCommentAt,
       updatedAt: new Date().toISOString()
     }
     
@@ -227,7 +232,7 @@ saveToLocalStorage() {
       const stored = localStorage.getItem("taskflow-tasks")
       if (stored) {
 const loadedTasks = JSON.parse(stored)
-        // Ensure all tasks have required fields for new features
+// Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
           ...task,
           tags: task.tags || [],
@@ -250,7 +255,10 @@ notes: task.notes || "",
             storageLocation: att.storageLocation || 'local'
           })) : [],
           linkedTasks: Array.isArray(task.linkedTasks) ? task.linkedTasks : [],
-          externalLinks: Array.isArray(task.externalLinks) ? task.externalLinks : []
+          externalLinks: Array.isArray(task.externalLinks) ? task.externalLinks : [],
+          commentCount: task.commentCount || 0,
+          hasUnreadComments: task.hasUnreadComments || false,
+          lastCommentAt: task.lastCommentAt || null
         }))
         tasks.length = 0
         tasks.push(...migratedTasks)
@@ -470,7 +478,26 @@ initialize() {
     return results;
   }
 }
+// Update comment statistics for a task
+export const updateTaskCommentStats = async (taskId, commentCount, hasUnread = false, lastCommentAt = null) => {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  const index = tasks.findIndex(task => task.Id === parseInt(taskId));
+  if (index === -1) {
+    throw new Error('Task not found');
+  }
 
+  tasks[index] = {
+    ...tasks[index],
+    commentCount: commentCount || 0,
+    hasUnreadComments: hasUnread,
+    lastCommentAt: lastCommentAt || tasks[index].lastCommentAt,
+    updatedAt: new Date().toISOString()
+};
+
+  taskService.saveToLocalStorage();
+  return tasks[index];
+};
 // Template Management
 
 // Template Management

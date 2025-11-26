@@ -410,7 +410,7 @@ linkedTasks: formData.linkedTasks
         />
 
 {/* Description */}
-        <Textarea
+<Textarea
           label="Description (Optional)"
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
@@ -430,6 +430,7 @@ linkedTasks: formData.linkedTasks
           rows={4}
           disabled={isLoading}
         />
+/>
 
         {/* Tags */}
 <div className="space-y-2">
