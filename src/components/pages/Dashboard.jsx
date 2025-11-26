@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import TagManager from "@/components/molecules/TagManager";
-import taskService from "@/services/api/taskService";
+import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
@@ -9,6 +8,7 @@ import Button from "@/components/atoms/Button";
 import TaskList from "@/components/organisms/TaskList";
 import TaskStats from "@/components/organisms/TaskStats";
 import QuickAddTask from "@/components/molecules/QuickAddTask";
+import TagManager from "@/components/molecules/TagManager";
 import TaskEditModal from "@/components/molecules/TaskEditModal";
 import FilterBar from "@/components/molecules/FilterBar";
 import toast, { showToast } from "@/utils/toast";

@@ -7,7 +7,7 @@ import Select from '@/components/atoms/Select'
 import Button from '@/components/atoms/Button'
 import ApperIcon from '@/components/ApperIcon'
 import TagSelector from '@/components/molecules/TagSelector'
-import taskService from '@/services/api/taskService'
+import { taskService } from '@/services/api/taskService'
 
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
