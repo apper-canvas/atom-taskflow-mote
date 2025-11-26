@@ -487,12 +487,12 @@ className={project?.isFavorite ? 'fill-current' : ''}
               >
                 Delete Project
 </Button>
-            </div>
+</div>
           </motion.div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default ProjectDetail
+export default ProjectDetail;
