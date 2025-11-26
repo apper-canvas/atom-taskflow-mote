@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
-import QuickTemplateSelector from "@/components/molecules/QuickTemplateSelector";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
@@ -14,6 +13,7 @@ import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import FilePreviewModal from "@/components/molecules/FilePreviewModal";
 import TagSelector from "@/components/molecules/TagSelector";
 import NotificationBell from "@/components/molecules/NotificationBell";
+import QuickTemplateSelector from "@/components/molecules/QuickTemplateSelector";
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
   { id: 2, name: "Sarah Johnson", email: "sarah@company.com" },
@@ -915,7 +915,7 @@ onClose={() => setPreviewFile(null)}
       />
       </div>
     </Modal>
-  )
-}
+  );
+};
 
-export default TaskEditModal
+export default TaskEditModal;

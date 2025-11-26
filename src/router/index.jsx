@@ -47,19 +47,8 @@ const createLazyComponent = (importFunc, componentName) => {
   );
 };
 
-// Lazy loaded components
-const Layout = createLazyComponent(() => import("@/components/organisms/Layout"), "Layout")
-const Dashboard = createLazyComponent(() => import("@/components/pages/Dashboard"), "Dashboard")
-const NotFound = createLazyComponent(() => import("@/components/pages/NotFound"), "NotFound")
-// Project pages
-const ProjectList = createLazyComponent(() => import("@/components/pages/ProjectList"), "ProjectList")
-const ProjectDetail = createLazyComponent(() => import("@/components/pages/ProjectDetail"), "ProjectDetail")
-const ProjectSettings = createLazyComponent(() => import("@/components/pages/ProjectSettings"), "ProjectSettings")
-const ProjectTimeline = createLazyComponent(() => import("@/components/pages/ProjectTimeline"), "ProjectTimeline")
-
-// Notification pages
-const NotificationCenter = createLazyComponent(() => import("@/components/pages/NotificationCenter"), "NotificationCenter")
-const NotificationPreferences = createLazyComponent(() => import("@/components/pages/NotificationPreferences"), "NotificationPreferences")
+// Components are already imported directly at the top of the file
+// Using direct imports instead of lazy loading for better performance
 
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={

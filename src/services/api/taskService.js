@@ -265,8 +265,9 @@ notes: task.notes || "",
       this.saveToLocalStorage()
     }
 }
-  }
-}, // Added missing comma here
+}
+
+// Template Management
 
 // Template Management
 taskService.getTemplates = async function() {
