@@ -221,24 +221,26 @@ if (loading) return <Loading />;
   if (error) return <ErrorView message={error} onRetry={handleRetry} />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-8">
-        {/* Header */}
-<motion.div
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        {/* Compact Header - Logo, Title, and Actions in single row */}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4"
+          className="flex items-center justify-between mb-6"
         >
-          <div className="flex items-center gap-4 mb-4 sm:mb-0">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <ApperIcon name="CheckSquare" size={24} className="text-white" />
+          {/* Left: Logo, Title, Subtitle */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <ApperIcon name="CheckSquare" size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">TaskFlow</h1>
-              <p className="text-gray-600">Organize your life, one task at a time</p>
+              <h1 className="text-2xl font-bold text-gray-900 leading-tight">TaskFlow</h1>
+              <p className="text-sm text-gray-600">Organize your life, one task at a time</p>
             </div>
           </div>
           
-<div className="flex items-center gap-3">
+          {/* Right: Action Buttons */}
+          <div className="flex items-center gap-3">
             <motion.button
                 onClick={() => navigate('/calendar')}
                 whileHover={{ scale: 1.02 }}
