@@ -263,16 +263,16 @@ notes: task.notes || "",
   },
 
   // Initialize storage
-  initialize() {
+initialize() {
     if (!this.loadFromLocalStorage()) {
-if (!this.loadFromLocalStorage()) {
-      this.saveToLocalStorage()
+      this.saveToLocalStorage();
     }
   },
 
   // Automation Features
 
-  // Create follow-up task automatically
+// Create follow-up task automatically
+  async createFollowupTask(parentTaskId, followupData = {}) {
     await delay();
     
     const parentTask = tasks.find(t => t.Id === parentTaskId);
