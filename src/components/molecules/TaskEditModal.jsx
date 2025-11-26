@@ -427,10 +427,9 @@ linkedTasks: formData.linkedTasks
           onChange={(e) => handleInputChange("notes", e.target.value)}
           error={errors.notes}
           placeholder="Add notes, comments, or additional context..."
-          rows={4}
+rows={4}
           disabled={isLoading}
         />
-/>
 
         {/* Tags */}
 <div className="space-y-2">
