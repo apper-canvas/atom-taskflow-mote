@@ -6,36 +6,73 @@ import Textarea from "@/components/atoms/Textarea"
 import Select from "@/components/atoms/Select"
 import Button from "@/components/atoms/Button"
 import ApperIcon from "@/components/ApperIcon"
+import { taskService } from "@/services/api/taskService"
 
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     title: "",
     description: "",
     category: "Personal",
     priority: "Medium",
-    dueDate: ""
+    dueDate: "",
+    parentTaskId: null
   })
+  
+  const [availableTasks, setAvailableTasks] = useState([])
+  const [isSubtaskMode, setIsSubtaskMode] = useState(false)
   const [errors, setErrors] = useState({})
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     if (task) {
-      setFormData({
+setFormData({
         title: task.title || "",
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
-        dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : ""
+        dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
+        parentTaskId: task.parentTaskId || null
       })
+      setIsSubtaskMode(!!task.parentTaskId)
+    } else {
+      // Check if we're creating a subtask (parentTaskId passed via task prop)
+      if (task?.parentTaskId) {
+        setFormData(prev => ({
+          ...prev,
+          parentTaskId: task.parentTaskId,
+          category: task.category || prev.category,
+          priority: task.priority || prev.priority
+        }))
+        setIsSubtaskMode(true)
+      }
     }
+    
+    // Load available parent tasks for subtask creation
+    loadAvailableTasks()
     setErrors({})
     setShowDeleteConfirm(false)
   }, [task, isOpen])
+
+const loadAvailableTasks = async () => {
+    try {
+      const allTasks = await taskService.getAll()
+      // Only show top-level tasks (not subtasks) as potential parents
+      const parentTasks = allTasks.filter(t => !t.parentTaskId && !t.completed)
+      setAvailableTasks(parentTasks)
+    } catch (error) {
+      console.error('Failed to load tasks:', error)
+    }
+  }
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
+    }
+    
+    // Toggle subtask mode when parentTaskId changes
+    if (field === 'parentTaskId') {
+      setIsSubtaskMode(!!value)
     }
   }
 
@@ -58,11 +95,12 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = fa
     e.preventDefault()
     if (!validateForm()) return
 
-    const taskData = {
+const taskData = {
       ...formData,
       title: formData.title.trim(),
       description: formData.description.trim(),
-      dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null
+      dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
+      parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null
     }
 
     await onSave(task?.Id, taskData)
@@ -82,14 +120,41 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = fa
       title={isEdit ? "Edit Task" : "Create New Task"}
       size="lg"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
+<form onSubmit={handleSubmit} className="space-y-6">
+        {/* Parent Task Selection for Subtasks */}
+        {(!task || !task.Id) && (
+          <Select
+            label="Task Type"
+            value={formData.parentTaskId || ""}
+            onChange={(e) => handleInputChange("parentTaskId", e.target.value)}
+            disabled={isLoading}
+          >
+            <option value="">📝 Main Task</option>
+            {availableTasks.map(parentTask => (
+              <option key={parentTask.Id} value={parentTask.Id}>
+                📋 Subtask of "{parentTask.title}"
+              </option>
+            ))}
+          </Select>
+        )}
+
+        {/* Subtask indicator for existing subtasks */}
+        {isSubtaskMode && task?.Id && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center gap-2 text-blue-700">
+              <ApperIcon name="ArrowRight" size={16} />
+              <span className="text-sm font-medium">This is a subtask</span>
+            </div>
+          </div>
+        )}
+
         {/* Title */}
         <Input
-          label="Task Title"
+          label={isSubtaskMode ? "Subtask Title" : "Task Title"}
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
           error={errors.title}
-          placeholder="What needs to be done?"
+          placeholder={isSubtaskMode ? "What step needs to be completed?" : "What needs to be done?"}
           disabled={isLoading}
           autoFocus
         />
@@ -100,7 +165,7 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = fa
           value={formData.description}
           onChange={(e) => handleInputChange("description", e.target.value)}
           error={errors.description}
-          placeholder="Add more details about this task..."
+          placeholder={isSubtaskMode ? "Add details about this step..." : "Add more details about this task..."}
           rows={3}
           disabled={isLoading}
         />
@@ -111,7 +176,7 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = fa
             label="Category"
             value={formData.category}
             onChange={(e) => handleInputChange("category", e.target.value)}
-            disabled={isLoading}
+            disabled={isLoading || isSubtaskMode}
           >
             <option value="Personal">🏠 Personal</option>
             <option value="Work">💼 Work</option>

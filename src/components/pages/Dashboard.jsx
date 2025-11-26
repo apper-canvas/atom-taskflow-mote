@@ -1,15 +1,15 @@
-import { useState, useEffect, useMemo } from "react"
-import { motion } from "framer-motion"
-import { toast } from "react-toastify"
-import ApperIcon from "@/components/ApperIcon"
-import Loading from "@/components/ui/Loading"
-import ErrorView from "@/components/ui/ErrorView"
-import TaskStats from "@/components/organisms/TaskStats"
-import QuickAddTask from "@/components/molecules/QuickAddTask"
-import FilterBar from "@/components/molecules/FilterBar"
-import TaskList from "@/components/organisms/TaskList"
-import TaskEditModal from "@/components/molecules/TaskEditModal"
-import { taskService } from "@/services/api/taskService"
+import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import TaskList from "@/components/organisms/TaskList";
+import TaskStats from "@/components/organisms/TaskStats";
+import QuickAddTask from "@/components/molecules/QuickAddTask";
+import TaskEditModal from "@/components/molecules/TaskEditModal";
+import FilterBar from "@/components/molecules/FilterBar";
 
 const Dashboard = () => {
   // State
@@ -81,7 +81,7 @@ const Dashboard = () => {
     }
   }
 
-  const handleToggleComplete = async (taskId, completed) => {
+const handleToggleComplete = async (taskId, completed) => {
     try {
       const updatedTask = await taskService.update(taskId, { completed })
       setTasks(prev => prev.map(task => 
@@ -99,27 +99,66 @@ const Dashboard = () => {
     }
   }
 
+  const handleToggleSubtask = async (subtaskId, completed, parentTaskId) => {
+    try {
+      const updatedSubtask = await taskService.update(subtaskId, { completed })
+      
+      // Refresh all tasks to get updated parent task progress
+      const allTasks = await taskService.getAll()
+      setTasks(allTasks)
+      
+      if (completed) {
+        toast.success("Subtask completed! ✅")
+      } else {
+        toast.info("Subtask marked as active")
+      }
+    } catch (err) {
+      console.error("Failed to update subtask:", err)
+      toast.error("Failed to update subtask. Please try again.")
+    }
+  }
+
+const handleCreateSubtask = async (parentTaskId) => {
+    const parentTask = tasks.find(t => t.Id === parentTaskId)
+    if (parentTask) {
+      setEditingTask({ 
+        parentTaskId, 
+        category: parentTask.category, 
+        priority: parentTask.priority 
+      })
+      setIsModalOpen(true)
+    }
+  }
+
   const handleEditTask = (task) => {
     setEditingTask(task)
     setIsModalOpen(true)
   }
 
-  const handleSaveTask = async (taskId, taskData) => {
+const handleSaveTask = async (taskId, taskData) => {
     try {
       setModalLoading(true)
       
       if (taskId) {
-        // Update existing task
+        // Update existing task or subtask
         const updatedTask = await taskService.update(taskId, taskData)
-        setTasks(prev => prev.map(task => 
-          task.Id === taskId ? updatedTask : task
-        ))
-        toast.success("Task updated successfully! ✅")
+        // Refresh all tasks to get updated parent progress if it's a subtask
+        const allTasks = await taskService.getAll()
+        setTasks(allTasks)
+        toast.success(taskData.parentTaskId ? "Subtask updated successfully! ✅" : "Task updated successfully! ✅")
       } else {
-        // Create new task
-        const newTask = await taskService.create(taskData)
-        setTasks(prev => [newTask, ...prev])
-        toast.success("Task created successfully! 🎉")
+        // Create new task or subtask
+        if (taskData.parentTaskId) {
+          const newSubtask = await taskService.createSubtask(taskData.parentTaskId, taskData)
+          // Refresh all tasks to get updated parent progress
+          const allTasks = await taskService.getAll()
+          setTasks(allTasks)
+          toast.success("Subtask created successfully! 🎉")
+        } else {
+          const newTask = await taskService.create(taskData)
+          setTasks(prev => [newTask, ...prev])
+          toast.success("Task created successfully! 🎉")
+        }
       }
       
       setIsModalOpen(false)
@@ -227,17 +266,19 @@ const Dashboard = () => {
 
         {/* Task List */}
         <TaskList
-          tasks={filteredTasks}
+tasks={filteredTasks}
           onToggleComplete={handleToggleComplete}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
+          onToggleSubtask={handleToggleSubtask}
+          onCreateSubtask={handleCreateSubtask}
           viewMode={viewMode}
           onCreateTask={handleCreateNewTask}
         />
 
         {/* Edit Modal */}
         <TaskEditModal
-          isOpen={isModalOpen}
+isOpen={isModalOpen}
           onClose={handleCloseModal}
           task={editingTask}
           onSave={handleSaveTask}

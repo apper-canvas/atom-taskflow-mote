@@ -1,7 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion"
-import TaskCard from "@/components/molecules/TaskCard"
-import Empty from "@/components/ui/Empty"
-import ApperIcon from "@/components/ApperIcon"
+import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
+import ApperIcon from "@/components/ApperIcon";
+import Empty from "@/components/ui/Empty";
+import TaskCard from "@/components/molecules/TaskCard";
 
 const TaskList = ({ 
   tasks, 
@@ -10,7 +11,9 @@ const TaskList = ({
   onDelete, 
   viewMode = "list",
   showCompleted = true,
-  onCreateTask 
+  onCreateTask,
+  onToggleSubtask,
+  onCreateSubtask
 }) => {
   const activeTasks = tasks.filter(task => !task.completed)
   const completedTasks = tasks.filter(task => task.completed)
@@ -79,12 +82,14 @@ const TaskList = ({
               <div className="grid gap-3">
                 <AnimatePresence>
                   {categoryTasks.map(task => (
-                    <TaskCard
+<TaskCard
                       key={task.Id}
                       task={task}
                       onToggleComplete={onToggleComplete}
                       onEdit={onEdit}
                       onDelete={onDelete}
+                      onToggleSubtask={onToggleSubtask}
+                      onCreateSubtask={onCreateSubtask}
                     />
                   ))}
                 </AnimatePresence>
@@ -120,12 +125,14 @@ const TaskList = ({
           <div className="grid gap-3">
             <AnimatePresence>
               {activeTasks.map(task => (
-                <TaskCard
+<TaskCard
                   key={task.Id}
                   task={task}
                   onToggleComplete={onToggleComplete}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onToggleSubtask={onToggleSubtask}
+                  onCreateSubtask={onCreateSubtask}
                 />
               ))}
             </AnimatePresence>
@@ -155,12 +162,14 @@ const TaskList = ({
           <div className="grid gap-3">
             <AnimatePresence>
               {completedTasks.map(task => (
-                <TaskCard
+<TaskCard
                   key={task.Id}
                   task={task}
                   onToggleComplete={onToggleComplete}
                   onEdit={onEdit}
                   onDelete={onDelete}
+                  onToggleSubtask={onToggleSubtask}
+                  onCreateSubtask={onCreateSubtask}
                 />
               ))}
             </AnimatePresence>
