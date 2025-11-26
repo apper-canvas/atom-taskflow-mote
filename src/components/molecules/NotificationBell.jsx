@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ApperIcon from '@/components/ApperIcon';
 import { notificationService } from '@/services/api/notificationService';
 import { formatDistanceToNow } from 'date-fns';
-import { showToast } from '@/utils/toast';
+import toast from '@/utils/toast';
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,10 +50,10 @@ const NotificationBell = () => {
         n.Id === notificationId ? { ...n, isRead: true } : n
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
-      showToast('Notification marked as read');
+toast('Notification marked as read');
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
-      showToast('Failed to mark as read', 'error');
+toast('Failed to mark as read', 'error');
     }
   };
 
@@ -61,11 +61,11 @@ const NotificationBell = () => {
     try {
       await notificationService.markAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-      showToast('All notifications marked as read');
+setUnreadCount(0);
+      toast('All notifications marked as read');
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
-      showToast('Failed to mark all as read', 'error');
+console.error('Failed to mark all notifications as read:', error);
+      toast('Failed to mark all as read', 'error');
     }
   };
 
