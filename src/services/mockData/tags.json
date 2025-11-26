@@ -1,0 +1,50 @@
+[
+  {
+    "Id": 1,
+    "name": "urgent",
+    "color": "#ef4444",
+    "icon": "AlertCircle",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  },
+  {
+    "Id": 2,
+    "name": "meeting",
+    "color": "#3b82f6",
+    "icon": "Users",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  },
+  {
+    "Id": 3,
+    "name": "research",
+    "color": "#8b5cf6",
+    "icon": "Search",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  },
+  {
+    "Id": 4,
+    "name": "creative",
+    "color": "#f59e0b",
+    "icon": "Lightbulb",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  },
+  {
+    "Id": 5,
+    "name": "planning",
+    "color": "#10b981",
+    "icon": "Calendar",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  },
+  {
+    "Id": 6,
+    "name": "review",
+    "color": "#06b6d4",
+    "icon": "Eye",
+    "createdAt": "2024-02-01T10:00:00.000Z",
+    "updatedAt": "2024-02-01T10:00:00.000Z"
+  }
+]

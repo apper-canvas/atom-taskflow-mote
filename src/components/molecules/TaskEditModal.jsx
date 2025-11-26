@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react"
-import { format } from "date-fns"
-import Modal from "@/components/atoms/Modal"
-import Input from "@/components/atoms/Input"
-import Textarea from "@/components/atoms/Textarea"
-import Select from "@/components/atoms/Select"
-import Button from "@/components/atoms/Button"
-import ApperIcon from "@/components/ApperIcon"
-import { taskService } from "@/services/api/taskService"
+import React, { useState, useEffect } from 'react'
+import { format } from 'date-fns'
+import Modal from '@/components/atoms/Modal'
+import Input from '@/components/atoms/Input'
+import Textarea from '@/components/atoms/Textarea'
+import Select from '@/components/atoms/Select'
+import Button from '@/components/atoms/Button'
+import ApperIcon from '@/components/ApperIcon'
+import TagSelector from '@/components/molecules/TagSelector'
+import taskService from '@/services/api/taskService'
 
 const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
 const [formData, setFormData] = useState({
@@ -15,7 +16,8 @@ const [formData, setFormData] = useState({
     category: "Personal",
     priority: "Medium",
     dueDate: "",
-    parentTaskId: null
+    parentTaskId: null,
+    tags: []
   })
   
   const [availableTasks, setAvailableTasks] = useState([])
@@ -24,14 +26,15 @@ const [formData, setFormData] = useState({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
-    if (task) {
+if (task) {
 setFormData({
         title: task.title || "",
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
-        parentTaskId: task.parentTaskId || null
+        parentTaskId: task.parentTaskId || null,
+        tags: task.tags || []
       })
       setIsSubtaskMode(!!task.parentTaskId)
     } else {
@@ -64,7 +67,7 @@ const loadAvailableTasks = async () => {
     }
   }
 
-  const handleInputChange = (field, value) => {
+const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
@@ -74,6 +77,10 @@ const loadAvailableTasks = async () => {
     if (field === 'parentTaskId') {
       setIsSubtaskMode(!!value)
     }
+  }
+
+  const handleTagsChange = (newTags) => {
+    setFormData(prev => ({ ...prev, tags: newTags }))
   }
 
   const validateForm = () => {
@@ -100,7 +107,8 @@ const taskData = {
       title: formData.title.trim(),
       description: formData.description.trim(),
       dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
-      parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null
+      parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
+      tags: formData.tags
     }
 
     await onSave(task?.Id, taskData)
@@ -169,6 +177,19 @@ const taskData = {
           rows={3}
           disabled={isLoading}
         />
+
+        {/* Tags */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Tags (Optional)
+          </label>
+          <TagSelector
+            selectedTags={formData.tags}
+            onChange={handleTagsChange}
+            placeholder="Add tags to organize your task..."
+            disabled={isLoading}
+          />
+        </div>
 
         {/* Category and Priority */}
         <div className="grid grid-cols-2 gap-4">

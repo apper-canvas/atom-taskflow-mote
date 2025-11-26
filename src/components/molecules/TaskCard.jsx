@@ -211,7 +211,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                     {task.description}
                 </p>}
                 {/* Task Meta */}
-                <div className="flex items-center gap-3 flex-wrap">
+<div className="flex items-center gap-3 flex-wrap">
                     {/* Category Badge */}
                     <Badge
                         variant={getCategoryColor(task.category)}
@@ -220,6 +220,28 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                         <ApperIcon name={getCategoryIcon(task.category)} size={12} />
                         {task.category}
                     </Badge>
+                    
+                    {/* Tags */}
+                    {task.tags && task.tags.length > 0 && (
+                        <div className="flex items-center gap-1 flex-wrap">
+                            {task.tags.map((tag) => (
+                                <Badge
+                                    key={tag.Id}
+                                    style={{ 
+                                        backgroundColor: tag.color + '20',
+                                        color: tag.color,
+                                        borderColor: tag.color + '40'
+                                    }}
+                                    size="sm"
+                                    className="border text-xs flex items-center gap-1"
+                                >
+                                    <ApperIcon name={tag.icon} size={10} />
+                                    {tag.name}
+                                </Badge>
+                            ))}
+                        </div>
+                    )}
+                    
                     {/* Due Date */}
                     {dueDateInfo && <div
                         className={cn(
@@ -248,7 +270,7 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
                                         </button>}
                 </div>
                 {/* Expanded subtasks */}
-                {showSubtasks && isParentTask && <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-2">
+{showSubtasks && isParentTask && <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-2">
                     {loadingSubtasks ? <div className="text-sm text-gray-500">Loading subtasks...</div> : subtasks.length > 0 ? subtasks.map(subtask => <div key={subtask.Id} className="bg-gray-50 rounded-lg p-3">
                         <TaskCard
                             task={subtask}

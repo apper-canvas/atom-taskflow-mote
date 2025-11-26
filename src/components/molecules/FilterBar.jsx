@@ -1,8 +1,8 @@
-import { motion } from "framer-motion"
-import ApperIcon from "@/components/ApperIcon"
-import Button from "@/components/atoms/Button"
-import Input from "@/components/atoms/Input"
-import { cn } from "@/utils/cn"
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
+import Input from "@/components/atoms/Input";
+import { cn } from "@/utils/cn";
 
 const FilterBar = ({ 
   searchTerm, 
@@ -13,6 +13,8 @@ const FilterBar = ({
   onPriorityChange,
   selectedStatus,
   onStatusChange,
+  selectedTag,
+  onTagChange,
   viewMode,
   onViewModeChange 
 }) => {
@@ -21,14 +23,29 @@ const FilterBar = ({
     { value: "Personal", label: "Personal", icon: "Home", count: 0 },
     { value: "Work", label: "Work", icon: "Briefcase", count: 0 },
     { value: "Other", label: "Other", icon: "Folder", count: 0 }
-  ]
+  ];
 
-  const priorities = ["all", "High", "Medium", "Low"]
+  const priorities = ["all", "High", "Medium", "Low"];
+  const [availableTags, setAvailableTags] = useState([]);
   const statuses = [
     { value: "all", label: "All" },
     { value: "active", label: "Active" },
     { value: "completed", label: "Completed" }
   ]
+
+  // Load available tags for filtering
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const tagService = (await import('@/services/api/tagService')).default
+        const tags = await tagService.getAll()
+        setAvailableTags(tags)
+      } catch (error) {
+        console.error('Failed to load tags for filtering:', error)
+      }
+    }
+    loadTags()
+  }, [])
 
   return (
     <motion.div
@@ -70,7 +87,7 @@ const FilterBar = ({
         ))}
       </div>
 
-      {/* Additional Filters */}
+{/* Additional Filters */}
       <div className="flex flex-wrap items-center gap-4">
         {/* Priority Filter */}
         <div className="flex items-center gap-2">
@@ -83,6 +100,23 @@ const FilterBar = ({
             {priorities.map((priority) => (
               <option key={priority} value={priority}>
                 {priority === "all" ? "All" : priority}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Tag Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Tag:</span>
+          <select
+            value={selectedTag}
+            onChange={(e) => onTagChange(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="all">All Tags</option>
+            {availableTags.map((tag) => (
+              <option key={tag.Id} value={tag.Id}>
+                {tag.name}
               </option>
             ))}
           </select>

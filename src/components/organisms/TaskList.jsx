@@ -126,14 +126,14 @@ const TaskList = ({
             <AnimatePresence>
               {activeTasks.map(task => (
 <TaskCard
-                  key={task.Id}
-                  task={task}
-                  onToggleComplete={onToggleComplete}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleSubtask={onToggleSubtask}
-                  onCreateSubtask={onCreateSubtask}
-                />
+                    key={task.Id}
+                    task={task}
+                    onToggleComplete={onToggleComplete}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleSubtask={onToggleSubtask}
+                    onCreateSubtask={onCreateSubtask}
+                  />
               ))}
             </AnimatePresence>
           </div>
@@ -163,14 +163,14 @@ const TaskList = ({
             <AnimatePresence>
               {completedTasks.map(task => (
 <TaskCard
-                  key={task.Id}
-                  task={task}
-                  onToggleComplete={onToggleComplete}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleSubtask={onToggleSubtask}
-                  onCreateSubtask={onCreateSubtask}
-                />
+                    key={task.Id}
+                    task={task}
+                    onToggleComplete={onToggleComplete}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleSubtask={onToggleSubtask}
+                    onCreateSubtask={onCreateSubtask}
+                  />
               ))}
             </AnimatePresence>
           </div>

@@ -30,6 +30,7 @@ Id: maxId + 1,
       priority: taskData.priority || "Medium",
       dueDate: taskData.dueDate || null,
       parentTaskId: taskData.parentTaskId || null,
+      tags: taskData.tags || [],
       completed: false,
       completedAt: null,
       createdAt: new Date().toISOString(),
@@ -50,6 +51,7 @@ async update(id, updates) {
     const updatedTask = {
       ...tasks[index],
       ...updates,
+      tags: updates.tags || tasks[index].tags || [],
       updatedAt: new Date().toISOString()
     }
     
@@ -156,7 +158,7 @@ async update(id, updates) {
   },
 
   // Local storage methods
-  saveToLocalStorage() {
+saveToLocalStorage() {
     try {
       localStorage.setItem("taskflow-tasks", JSON.stringify(tasks))
     } catch (error) {
@@ -168,7 +170,14 @@ async update(id, updates) {
     try {
       const stored = localStorage.getItem("taskflow-tasks")
       if (stored) {
-        tasks = JSON.parse(stored)
+        const loadedTasks = JSON.parse(stored)
+        // Ensure all tasks have tags array
+        const migratedTasks = loadedTasks.map(task => ({
+          ...task,
+          tags: task.tags || []
+        }))
+        tasks.length = 0
+        tasks.push(...migratedTasks)
         return true
       }
     } catch (error) {

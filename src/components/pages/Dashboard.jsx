@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { toast } from "react-toastify";
-import { taskService } from "@/services/api/taskService";
+import TagManager from "@/components/molecules/TagManager";
+import taskService from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
+import Button from "@/components/atoms/Button";
 import TaskList from "@/components/organisms/TaskList";
 import TaskStats from "@/components/organisms/TaskStats";
 import QuickAddTask from "@/components/molecules/QuickAddTask";
 import TaskEditModal from "@/components/molecules/TaskEditModal";
 import FilterBar from "@/components/molecules/FilterBar";
+import toast, { showToast } from "@/utils/toast";
 
 const Dashboard = () => {
-  // State
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -22,14 +23,15 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedPriority, setSelectedPriority] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
+const [selectedStatus, setSelectedStatus] = useState("all")
+  const [selectedTag, setSelectedTag] = useState("all")
   const [viewMode, setViewMode] = useState("list")
   
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [modalLoading, setModalLoading] = useState(false)
-
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false)
   // Load tasks
   const loadTasks = async () => {
     try {
@@ -50,9 +52,10 @@ const Dashboard = () => {
 
   // Filter tasks
   const filteredTasks = useMemo(() => {
-    return tasks.filter(task => {
+return tasks.filter(task => {
       const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           task.description.toLowerCase().includes(searchTerm.toLowerCase())
+                           task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           (task.tags && task.tags.some(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase())))
       
       const matchesCategory = selectedCategory === "all" || task.category === selectedCategory
       
@@ -61,11 +64,13 @@ const Dashboard = () => {
       const matchesStatus = selectedStatus === "all" || 
                            (selectedStatus === "active" && !task.completed) ||
                            (selectedStatus === "completed" && task.completed)
-      
-      return matchesSearch && matchesCategory && matchesPriority && matchesStatus
-    })
-  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus])
 
+      const matchesTag = selectedTag === "all" || 
+                        (task.tags && task.tags.some(tag => tag.Id === parseInt(selectedTag)))
+      
+return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesTag
+    })
+  }, [tasks, searchTerm, selectedCategory, selectedPriority, selectedStatus, selectedTag])
   // Handlers
   const handleAddTask = async (taskData) => {
     try {
@@ -250,7 +255,7 @@ const handleSaveTask = async (taskId, taskData) => {
 
         {/* Filters */}
         <div className="mb-6">
-          <FilterBar
+<FilterBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             selectedCategory={selectedCategory}
@@ -259,8 +264,29 @@ const handleSaveTask = async (taskId, taskData) => {
             onPriorityChange={setSelectedPriority}
             selectedStatus={selectedStatus}
             onStatusChange={setSelectedStatus}
+            selectedTag={selectedTag}
+            onTagChange={setSelectedTag}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+          />
+
+          {/* Tag Management Button */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsTagManagerOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <ApperIcon name="Tag" size={16} />
+              Manage Tags
+            </Button>
+          </div>
+
+          {/* Tag Manager Modal */}
+          <TagManager
+            isOpen={isTagManagerOpen}
+            onClose={() => setIsTagManagerOpen(false)}
+            onTagsChange={loadTasks}
           />
         </div>
 
