@@ -12,6 +12,7 @@ import QuickAddTask from "@/components/molecules/QuickAddTask";
 import TagManager from "@/components/molecules/TagManager";
 import TaskEditModal from "@/components/molecules/TaskEditModal";
 import FilterBar from "@/components/molecules/FilterBar";
+import NotificationBell from "@/components/molecules/NotificationBell";
 import toast, { showToast } from "@/utils/toast";
 
 const Dashboard = () => {
@@ -242,6 +243,7 @@ const handleSaveTask = async (taskId, taskData) => {
           </div>
           
 <div className="flex items-center gap-3">
+            <NotificationBell />
             <motion.button
               onClick={handleCreateNewTask}
               whileHover={{ scale: 1.02 }}
@@ -251,7 +253,7 @@ const handleSaveTask = async (taskId, taskData) => {
               <ApperIcon name="Plus" size={18} />
               New Task
             </motion.button>
-</div>
+          </div>
         </motion.div>
 
         {/* Stats */}

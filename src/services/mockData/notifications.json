@@ -1,0 +1,198 @@
+[
+  {
+    "Id": 1,
+    "type": "task_assigned",
+    "title": "New Task Assignment",
+    "message": "You have been assigned to 'Complete website redesign mockups'",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-15T10:30:00Z",
+    "taskId": 1,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Complete website redesign mockups",
+      "taskId": 1,
+      "assignedBy": "John Smith"
+    }
+  },
+  {
+    "Id": 2,
+    "type": "task_due",
+    "title": "Task Due Tomorrow",
+    "message": "The task 'Review client feedback' is due tomorrow at 5:00 PM",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-15T09:15:00Z",
+    "taskId": 3,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Review client feedback",
+      "taskId": 3,
+      "dueDate": "2024-01-16T17:00:00Z"
+    }
+  },
+  {
+    "Id": 3,
+    "type": "task_completed",
+    "title": "Task Completed",
+    "message": "Sarah completed the task 'Design system documentation'",
+    "isRead": true,
+    "readAt": "2024-01-15T08:45:00Z",
+    "createdAt": "2024-01-15T08:30:00Z",
+    "taskId": 8,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Design system documentation",
+      "taskId": 8,
+      "completedBy": "Sarah Johnson"
+    }
+  },
+  {
+    "Id": 4,
+    "type": "task_mentioned",
+    "title": "You were mentioned",
+    "message": "@you Please review the latest changes to the homepage design",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-15T07:20:00Z",
+    "taskId": 2,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Homepage design review",
+      "taskId": 2,
+      "mentionedBy": "Mike Chen"
+    }
+  },
+  {
+    "Id": 5,
+    "type": "task_comment",
+    "title": "New Comment",
+    "message": "Lisa added a comment: 'The color scheme looks great! Let's finalize this version.'",
+    "isRead": true,
+    "readAt": "2024-01-14T16:30:00Z",
+    "createdAt": "2024-01-14T16:15:00Z",
+    "taskId": 5,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Color palette selection",
+      "taskId": 5,
+      "commentBy": "Lisa Wang",
+      "comment": "The color scheme looks great! Let's finalize this version."
+    }
+  },
+  {
+    "Id": 6,
+    "type": "task_overdue",
+    "title": "Overdue Task",
+    "message": "The task 'Update user documentation' is now 2 days overdue",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-14T15:00:00Z",
+    "taskId": 12,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Update user documentation",
+      "taskId": 12,
+      "daysOverdue": 2,
+      "originalDueDate": "2024-01-12T17:00:00Z"
+    }
+  },
+  {
+    "Id": 7,
+    "type": "reminder",
+    "title": "Custom Reminder",
+    "message": "Don't forget to backup the project files before the weekend",
+    "isRead": true,
+    "readAt": "2024-01-14T12:00:00Z",
+    "createdAt": "2024-01-14T11:45:00Z",
+    "taskId": 15,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Project backup",
+      "taskId": 15,
+      "reminderType": "custom"
+    }
+  },
+  {
+    "Id": 8,
+    "type": "task_updated",
+    "title": "Task Updated",
+    "message": "The priority of 'Mobile app wireframes' has been changed to High",
+    "isRead": true,
+    "readAt": "2024-01-14T10:20:00Z",
+    "createdAt": "2024-01-14T10:15:00Z",
+    "taskId": 20,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Mobile app wireframes",
+      "taskId": 20,
+      "updatedBy": "Project Manager",
+      "changes": "Priority changed from Medium to High"
+    }
+  },
+  {
+    "Id": 9,
+    "type": "task_assigned",
+    "title": "New Task Assignment",
+    "message": "You have been assigned to 'Create user flow diagrams'",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-13T14:30:00Z",
+    "taskId": 25,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Create user flow diagrams",
+      "taskId": 25,
+      "assignedBy": "Design Lead"
+    }
+  },
+  {
+    "Id": 10,
+    "type": "task_due",
+    "title": "Task Due in 1 Hour",
+    "message": "The task 'Client presentation prep' is due in 1 hour",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-13T13:00:00Z",
+    "taskId": 30,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Client presentation prep",
+      "taskId": 30,
+      "dueDate": "2024-01-13T15:00:00Z",
+      "timeUntilDue": "1 hour"
+    }
+  },
+  {
+    "Id": 11,
+    "type": "task_comment",
+    "title": "New Comment",
+    "message": "Tom replied: 'I've uploaded the latest version. Please review when you have a chance.'",
+    "isRead": true,
+    "readAt": "2024-01-13T11:45:00Z",
+    "createdAt": "2024-01-13T11:30:00Z",
+    "taskId": 18,
+    "userId": 1,
+    "metadata": {
+      "taskTitle": "Asset review and approval",
+      "taskId": 18,
+      "commentBy": "Tom Rodriguez",
+      "comment": "I've uploaded the latest version. Please review when you have a chance."
+    }
+  },
+  {
+    "Id": 12,
+    "type": "reminder",
+    "title": "Weekly Reminder",
+    "message": "Time for your weekly project status update",
+    "isRead": false,
+    "readAt": null,
+    "createdAt": "2024-01-12T09:00:00Z",
+    "taskId": null,
+    "userId": 1,
+    "metadata": {
+      "reminderType": "weekly",
+      "recurrence": "weekly"
+    }
+  }
+]

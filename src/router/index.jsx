@@ -11,6 +11,10 @@ const ProjectDetail = lazy(() => import("@/components/pages/ProjectDetail"))
 const ProjectSettings = lazy(() => import("@/components/pages/ProjectSettings"))
 const ProjectTimeline = lazy(() => import("@/components/pages/ProjectTimeline"))
 
+// Notification pages
+const NotificationCenter = lazy(() => import("@/components/pages/NotificationCenter"))
+const NotificationPreferences = lazy(() => import("@/components/pages/NotificationPreferences"))
+
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -47,6 +51,14 @@ const mainRoutes = [
   {
     path: "projects/:id/timeline",
     element: <SuspenseWrapper><ProjectTimeline /></SuspenseWrapper>
+},
+  {
+    path: "notifications",
+    element: <SuspenseWrapper><NotificationCenter /></SuspenseWrapper>
+  },
+  {
+    path: "notifications/preferences",
+    element: <SuspenseWrapper><NotificationPreferences /></SuspenseWrapper>
   },
   {
     path: "*",
