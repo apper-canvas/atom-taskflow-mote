@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import ApperIcon from '@/components/ApperIcon'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import Select from '@/components/atoms/Select'
-import Modal from '@/components/atoms/Modal'
-import { filterService } from '@/services/api/filterService'
-import { projectService } from '@/services/api/projectService'
-import tagService from '@/services/api/tagService'
-import { cn } from '@/utils/cn'
-import { showToast } from '@/utils/toast'
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { projectService } from "@/services/api/projectService";
+import tagService from "@/services/api/tagService";
+import filterService from "@/services/api/filterService";
+import ApperIcon from "@/components/ApperIcon";
+import Modal from "@/components/atoms/Modal";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import toast from "@/utils/toast";
+import { cn } from "@/utils/cn";
 
 const FilterPanel = ({ 
   isCollapsed, 
@@ -55,16 +55,15 @@ const FilterPanel = ({
     }
   }
 
-  const handleSavedFilterClick = async (filter) => {
+const handleSavedFilterClick = async (filter) => {
     onFiltersChange(filter.filters)
     await filterService.trackFilterUsage(filter.Id)
-    showToast(`Applied filter: ${filter.name}`, 'info')
+    toast(`Applied filter: ${filter.name}`, 'info')
     await loadData() // Refresh to update usage counts
   }
-
-  const handleSaveFilter = async () => {
+const handleSaveFilter = async () => {
     if (!saveFilterName.trim()) {
-      showToast('Please enter a filter name', 'error')
+      toast('Please enter a filter name', 'error')
       return
     }
 
@@ -76,24 +75,23 @@ const FilterPanel = ({
       })
       setSaveFilterName('')
       setShowSaveModal(false)
-      showToast('Filter saved successfully!', 'success')
+      toast('Filter saved successfully!', 'success')
       await loadData()
     } catch (error) {
-      showToast('Failed to save filter', 'error')
+      toast('Failed to save filter', 'error')
     } finally {
       setLoading(false)
     }
   }
-
-  const handleDeleteFilter = async (filterId, e) => {
+const handleDeleteFilter = async (filterId, e) => {
     e.stopPropagation()
     if (confirm('Are you sure you want to delete this filter?')) {
       try {
         await filterService.deleteFilter(filterId)
-        showToast('Filter deleted successfully', 'success')
+        toast('Filter deleted successfully', 'success')
         await loadData()
       } catch (error) {
-        showToast('Failed to delete filter', 'error')
+        toast('Failed to delete filter', 'error')
       }
     }
   }
@@ -101,9 +99,8 @@ const FilterPanel = ({
   const clearAllFilters = () => {
     onFiltersChange({})
     onApplySmartView('all', {})
-    showToast('All filters cleared', 'info')
+    toast('All filters cleared', 'info')
   }
-
   const hasActiveFilters = Object.keys(filters).length > 0
 
   if (isCollapsed) {
