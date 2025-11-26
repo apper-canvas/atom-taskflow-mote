@@ -1,20 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
-import BoardView from "@/components/organisms/BoardView";
-import FilterPanel from "@/components/organisms/FilterPanel";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Button from "@/components/atoms/Button";
+import FilterPanel from "@/components/organisms/FilterPanel";
 import TaskList from "@/components/organisms/TaskList";
 import TaskStats from "@/components/organisms/TaskStats";
+import BoardView from "@/components/organisms/BoardView";
+import ProjectTimeline from "@/components/pages/ProjectTimeline";
 import QuickAddTask from "@/components/molecules/QuickAddTask";
 import TagManager from "@/components/molecules/TagManager";
 import TaskEditModal from "@/components/molecules/TaskEditModal";
 import FilterBar from "@/components/molecules/FilterBar";
 import toast, { showToast } from "@/utils/toast";
+
+// Lazy load view components
+const CalendarView = lazy(() => import('@/components/organisms/CalendarView'))
+const TableView = lazy(() => import('@/components/organisms/TableView'))
+const LazyProjectTimeline = lazy(() => import('@/components/pages/ProjectTimeline'))
+
 const Dashboard = () => {
 const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,7 +29,7 @@ const [tasks, setTasks] = useState([])
   const [createLoading, setCreateLoading] = useState(false)
   
   // Enhanced filtering state
-  const [searchTerm, setSearchTerm] = useState("")
+const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [selectedPriority, setSelectedPriority] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
@@ -34,6 +41,7 @@ const [tasks, setTasks] = useState([])
   const [activeSmartView, setActiveSmartView] = useState("all")
   const [advancedFilters, setAdvancedFilters] = useState({})
   const [filterPanelCollapsed, setFilterPanelCollapsed] = useState(false)
+  const [groupBy, setGroupBy] = useState(null)
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
@@ -377,7 +385,7 @@ const handleSaveTask = async (taskId, taskData) => {
                 selectedStatus={selectedStatus}
                 onStatusChange={setSelectedStatus}
                 selectedTag={selectedTag}
-                onTagChange={setSelectedTag}
+onTagChange={setSelectedTag}
                 selectedProject={selectedProject}
                 onProjectChange={setSelectedProject}
                 projects={projects}
@@ -385,11 +393,12 @@ const handleSaveTask = async (taskId, taskData) => {
                 onViewModeChange={setViewMode}
                 activeSmartView={activeSmartView}
                 onSmartViewChange={setActiveSmartView}
+onGroupByChange={setGroupBy}
               />
             </div>
-</div>
-
-        {/* Tag Management Button */}
+            
+            {/* Tag Management Button */}
+            <div className="flex justify-end mb-4">
         <div className="flex justify-end mb-4">
           <Button
             variant="outline"
@@ -407,10 +416,49 @@ const handleSaveTask = async (taskId, taskData) => {
           onClose={() => setIsTagManagerOpen(false)}
           onTagsChange={loadTasks}
         />
-
-        {/* Task List */}
-        {viewMode === 'board' ? (
-          <BoardView
+{/* Task List */}
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                <div className="text-center space-y-4">
+                  <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                </div>
+              </div>
+            }>
+              {viewMode === 'board' ? (
+                <BoardView
+                  tasks={filteredAndSortedTasks}
+                  onToggleComplete={handleToggleComplete}
+                  onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            onToggleSubtask={handleToggleSubtask}
+            onCreateSubtask={handleCreateSubtask}
+            onCreateTask={handleCreateNewTask}
+          />
+        ) : viewMode === 'table' ? (
+          <TableView
+            tasks={filteredAndSortedTasks}
+            onToggleComplete={handleToggleComplete}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            onToggleSubtask={handleToggleSubtask}
+            onCreateSubtask={handleCreateSubtask}
+            groupBy={groupBy}
+          />
+        ) : viewMode === 'calendar' ? (
+          <CalendarView
+            tasks={filteredAndSortedTasks}
+            onToggleComplete={handleToggleComplete}
+            onEdit={handleEditTask}
+            onDelete={handleDeleteTask}
+            onToggleSubtask={handleToggleSubtask}
+            onCreateSubtask={handleCreateSubtask}
+            onCreateTask={handleCreateNewTask}
+/>
+        ) : viewMode === 'timeline' ? (
+          <LazyProjectTimeline
             tasks={filteredAndSortedTasks}
             onToggleComplete={handleToggleComplete}
             onEdit={handleEditTask}
@@ -429,20 +477,24 @@ const handleSaveTask = async (taskId, taskData) => {
             onCreateSubtask={handleCreateSubtask}
             viewMode={viewMode}
             onCreateTask={handleCreateNewTask}
+            groupBy={groupBy}
+groupBy={groupBy}
           />
         )}
+            </Suspense>
 
-        {/* Edit Modal */}
-        <TaskEditModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          task={editingTask}
-          onSave={handleSaveTask}
-          onDelete={handleDeleteTask}
-          isLoading={modalLoading}
-        />
+            {/* Edit Modal */}
+            <TaskEditModal
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              task={editingTask}
+              onSave={handleSaveTask}
+              onDelete={handleDeleteTask}
+              isLoading={modalLoading}
+            />
+          </div>
+        </div>
       </div>
-</div>
     </div>
   )
 }
