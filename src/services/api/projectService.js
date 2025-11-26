@@ -1,5 +1,4 @@
 import projectsData from "@/services/mockData/projects.json";
-import React from "react";
 
 let projects = [...projectsData].map(project => ({
   ...project,
@@ -121,13 +120,13 @@ const projectService = {
           resolve()
         } else {
           reject(new Error('Project not found'))
-        }
+}
       }, 200)
-}, 200)
     })
   },
 
   // Get project templates
+  async getTemplates() {
     return new Promise((resolve) => {
       setTimeout(() => {
         const templates = [
