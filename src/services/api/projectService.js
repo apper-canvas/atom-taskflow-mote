@@ -1,6 +1,11 @@
-import projectsData from "@/services/mockData/projects.json"
+import projectsData from "@/services/mockData/projects.json";
+import React from "react";
 
-let projects = [...projectsData]
+let projects = [...projectsData].map(project => ({
+  ...project,
+  isFavorite: project.isFavorite || false,
+  isArchived: project.isArchived || false
+}))
 
 const projectService = {
   // Get all projects
@@ -33,11 +38,13 @@ const projectService = {
         const maxId = Math.max(...projects.map(p => p.Id), 0)
         const newProject = {
           Id: maxId + 1,
-          ...projectData,
+...projectData,
           status: projectData.status || 'Active',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           members: projectData.members || [],
+          isFavorite: false,
+          isArchived: false,
           settings: {
             isPublic: projectData.settings?.isPublic || false,
             allowMemberInvites: projectData.settings?.allowMemberInvites || true,
@@ -71,7 +78,40 @@ const projectService = {
     })
   },
 
-  // Delete project
+// Toggle project favorite status
+  async toggleFavorite(id) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const project = projects.find(p => p.Id === parseInt(id))
+        if (project) {
+          project.isFavorite = !project.isFavorite
+          project.updatedAt = new Date().toISOString()
+          resolve(project)
+        } else {
+          reject(new Error('Project not found'))
+        }
+      }, 200)
+    })
+  },
+
+  // Archive project
+  async archive(id) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const project = projects.find(p => p.Id === parseInt(id))
+        if (project) {
+          project.status = 'Archived'
+          project.isArchived = true
+          project.updatedAt = new Date().toISOString()
+          resolve(project)
+        } else {
+          reject(new Error('Project not found'))
+        }
+      }, 200)
+    })
+  },
+
+  // Delete project permanently
   async delete(id) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -83,11 +123,11 @@ const projectService = {
           reject(new Error('Project not found'))
         }
       }, 200)
+}, 200)
     })
   },
 
   // Get project templates
-  async getTemplates() {
     return new Promise((resolve) => {
       setTimeout(() => {
         const templates = [

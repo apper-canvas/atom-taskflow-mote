@@ -5,7 +5,8 @@ import { projectService } from '@/services/api/projectService'
 import ApperIcon from '@/components/ApperIcon'
 import Badge from '@/components/atoms/Badge'
 
-function ProjectCard({ project, onClick }) {
+function ProjectCard({ project, onClick, onToggleFavorite, onArchive, onDelete }) {
+  const [showMenu, setShowMenu] = useState(false)
   const [stats, setStats] = useState(null)
 
   useEffect(() => {
@@ -25,7 +26,7 @@ function ProjectCard({ project, onClick }) {
     switch (status) {
       case 'Active': return 'bg-green-100 text-green-800'
       case 'Completed': return 'bg-blue-100 text-blue-800'
-      case 'On Hold': return 'bg-yellow-100 text-yellow-800'
+case 'On Hold': return 'bg-yellow-100 text-yellow-800'
       case 'Archived': return 'bg-gray-100 text-gray-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -46,23 +47,86 @@ function ProjectCard({ project, onClick }) {
       onClick={() => onClick?.(project.Id)}
       className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 cursor-pointer transition-all hover:border-gray-300"
     >
-      {/* Header */}
+{/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div 
-            className="w-12 h-12 rounded-lg flex items-center justify-center text-xl shadow-sm"
+            className="w-12 h-12 rounded-lg flex items-center justify-center text-xl shadow-sm relative"
             style={{ backgroundColor: project.color + '20', color: project.color }}
           >
             {project.icon}
+            {project.isFavorite && (
+              <ApperIcon 
+                name="Star" 
+                size={16} 
+                className="absolute -top-1 -right-1 text-yellow-500 fill-current bg-white rounded-full p-0.5" 
+              />
+            )}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-1">{project.name}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-gray-900">{project.name}</h3>
+              {project.isFavorite && (
+                <ApperIcon name="Star" size={14} className="text-yellow-500 fill-current" />
+              )}
+            </div>
             <Badge className={getStatusColor(project.status)}>
               {project.status}
             </Badge>
           </div>
         </div>
-        <ApperIcon name="MoreHorizontal" size={18} className="text-gray-400" />
+        
+        {/* Action Menu */}
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowMenu(!showMenu)
+            }}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+          >
+            <ApperIcon name="MoreHorizontal" size={18} className="text-gray-400" />
+          </button>
+          
+          {showMenu && (
+            <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+              <button
+                onClick={(e) => {
+                  onToggleFavorite(project.Id, e)
+                  setShowMenu(false)
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
+              >
+                <ApperIcon 
+                  name="Star" 
+                  size={14} 
+                  className={project.isFavorite ? 'text-yellow-500 fill-current' : ''} 
+                />
+                {project.isFavorite ? 'Unfavorite' : 'Favorite'}
+              </button>
+              <button
+                onClick={(e) => {
+                  onArchive(project.Id, e)
+                  setShowMenu(false)
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
+              >
+                <ApperIcon name="Archive" size={14} />
+                Archive
+              </button>
+              <button
+                onClick={(e) => {
+                  onDelete(project, e)
+                  setShowMenu(false)
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+              >
+                <ApperIcon name="Trash2" size={14} />
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Description */}

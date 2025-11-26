@@ -15,10 +15,12 @@ import TaskEditModal from '@/components/molecules/TaskEditModal'
 import toast from '@/utils/toast'
 import MemberCard from '@/components/molecules/MemberCard'
 import MemberManagementModal from '@/components/molecules/MemberManagementModal'
+import { showToast } from '@/utils/toast'
+
 function ProjectDetail() {
   const { id } = useParams()
-  const navigate = useNavigate()
-const [project, setProject] = useState(null)
+const navigate = useNavigate()
+  const [project, setProject] = useState(null)
   const [tasks, setTasks] = useState([])
   const [projectStats, setProjectStats] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -28,6 +30,7 @@ const [project, setProject] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   useEffect(() => {
     if (id) {
       loadProjectData()
@@ -55,7 +58,36 @@ const loadProjectData = async () => {
       setLoading(false)
     }
   }
+const handleToggleFavorite = async () => {
+    try {
+      await projectService.toggleFavorite(id)
+      const updatedProject = await projectService.getById(id)
+      setProject(updatedProject)
+      showToast(updatedProject.isFavorite ? 'Added to favorites' : 'Removed from favorites', 'success')
+    } catch (error) {
+      showToast('Failed to update favorite status', 'error')
+    }
+  }
 
+  const handleArchiveProject = async () => {
+    try {
+      await projectService.archive(id)
+      showToast('Project archived successfully', 'success')
+      navigate('/projects')
+    } catch (error) {
+      showToast('Failed to archive project', 'error')
+    }
+  }
+
+  const handleDeleteProject = async () => {
+    try {
+      await projectService.delete(id)
+      showToast('Project deleted successfully', 'success')
+      navigate('/projects')
+    } catch (error) {
+      showToast('Failed to delete project', 'error')
+    }
+  }
   // Member management handlers
   const handleAddMember = () => {
     setEditingMember(null)
@@ -150,7 +182,7 @@ if (completed) {
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
+switch (status) {
       case 'Active': return 'bg-green-100 text-green-800'
       case 'Completed': return 'bg-blue-100 text-blue-800'
       case 'On Hold': return 'bg-yellow-100 text-yellow-800'
@@ -235,7 +267,7 @@ if (completed) {
               onClick={() => navigate(`/projects/${id}/settings`)}
             >
               <ApperIcon name="Settings" size={18} />
-              Settings
+Settings
             </Button>
             <Button
               variant="outline"
@@ -243,6 +275,34 @@ if (completed) {
             >
               <ApperIcon name="Calendar" size={18} />
               Timeline
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleToggleFavorite}
+              className={project?.isFavorite ? 'text-yellow-600 border-yellow-300' : ''}
+            >
+              <ApperIcon 
+                name="Star" 
+                size={18} 
+                className={project?.isFavorite ? 'fill-current' : ''} 
+              />
+              {project?.isFavorite ? 'Unfavorite' : 'Favorite'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleArchiveProject}
+              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+            >
+              <ApperIcon name="Archive" size={18} />
+              Archive
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDelete(true)}
+              className="text-red-600 border-red-300 hover:bg-red-50"
+            >
+              <ApperIcon name="Trash2" size={18} />
+              Delete
             </Button>
           </div>
         </div>
@@ -345,7 +405,40 @@ if (completed) {
         onSuccess={handleMemberModalSuccess}
         projectId={id}
         editingMember={editingMember}
-      />
+/>
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg p-6 max-w-md w-full"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <ApperIcon name="AlertTriangle" size={24} className="text-red-500" />
+              <h3 className="text-lg font-semibold text-gray-900">Delete Project</h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete "{project?.name}"? This action cannot be undone and will remove all associated tasks and data.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDelete(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteProject}
+              >
+                Delete Project
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
