@@ -10,7 +10,7 @@ import ProjectCreateModal from '@/components/molecules/ProjectCreateModal'
 import Button from '@/components/atoms/Button'
 import Input from '@/components/atoms/Input'
 import Select from '@/components/atoms/Select'
-import { showToast } from '@/utils/toast'
+import toast from '@/utils/toast'
 
 function ProjectList() {
   const navigate = useNavigate()
@@ -34,7 +34,7 @@ function ProjectList() {
       setProjects(data)
     } catch (err) {
       setError(err.message)
-      showToast('Failed to load projects', 'error')
+toast.error('Failed to load projects')
     } finally {
       setLoading(false)
     }
@@ -45,9 +45,9 @@ function ProjectList() {
       const newProject = await projectService.create(projectData)
       setProjects(prev => [newProject, ...prev])
       setIsCreateModalOpen(false)
-      showToast('Project created successfully! 🎉', 'success')
+toast.success('Project created successfully! 🎉')
     } catch (err) {
-      showToast('Failed to create project', 'error')
+toast.error('Failed to create project')
       throw err
     }
   }
