@@ -21,10 +21,10 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = fa
 const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "Personal",
-    priority: "Medium",
-    status: "Not Started",
-dueDate: "",
+    category: "",
+    priority: "",
+    status: "",
+    dueDate: "",
     dueDateTime: "",
     reminderEnabled: false,
     reminderDateTime: "",
@@ -42,7 +42,7 @@ dueDate: "",
     ],
     estimatedTime: null,
     actualTime: 0,
-timeSpent: 0,
+    timeSpent: 0,
     notes: "",
     attachments: [],
     linkedTasks: []
@@ -85,14 +85,12 @@ attachments: task.attachments || [],
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
-    } else {
+} else {
       // Check if we're creating a subtask (parentTaskId passed via task prop)
       if (task?.parentTaskId) {
         setFormData(prev => ({
           ...prev,
-          parentTaskId: task.parentTaskId,
-          category: task.category || prev.category,
-          priority: task.priority || prev.priority
+          parentTaskId: task.parentTaskId
         }))
         setIsSubtaskMode(true)
       }
