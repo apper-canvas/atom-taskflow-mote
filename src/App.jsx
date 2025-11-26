@@ -119,7 +119,7 @@ onClick={() => {
               )}
 </div>
             
-            {typeof process !== 'undefined' && process.env?.NODE_ENV === 'development' && this.state.error && (
+            {import.meta.env.MODE === 'development' && this.state.error && (
               <details className="text-left bg-gray-50 p-4 rounded-lg mt-4">
                 <summary className="cursor-pointer font-medium text-gray-700">Developer Info</summary>
                 <p className="mt-2 text-sm text-gray-600 font-mono break-all">
