@@ -10,6 +10,8 @@ import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import RecurringTaskModal from "@/components/molecules/RecurringTaskModal";
 import TagSelector from "@/components/molecules/TagSelector";
+import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
+import FilePreviewModal from "@/components/molecules/FilePreviewModal";
 // Mock users for assignment
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
@@ -171,26 +173,19 @@ const handleInputChange = (field, value) => {
 setShowRecurringModal(false)
   }
 
-  const handleFileAttachment = (e) => {
-    const files = Array.from(e.target.files);
-    const fileData = files.map(file => ({
-      name: file.name,
-      size: formatFileSize(file.size),
-      type: file.type,
-      lastModified: file.lastModified
-    }));
+const [previewFile, setPreviewFile] = useState(null);
+
+  const handleAttachmentsChange = (newAttachments) => {
     setFormData(prev => ({
       ...prev,
-      attachments: [...prev.attachments, ...fileData]
+      attachments: newAttachments
     }));
   };
 
-  const removeAttachment = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index)
-    }));
+  const handleFilePreview = (file) => {
+    setPreviewFile(file);
   };
+
 
   const handleTaskSearch = async (e) => {
     const searchTerm = e.target.value;
@@ -398,48 +393,17 @@ linkedTasks: formData.linkedTasks
           />
         </div>
 
-        {/* File Attachments */}
+{/* File Attachments */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
             File Attachments (Optional)
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
-            <input
-              type="file"
-              multiple
-              onChange={handleFileAttachment}
-              className="hidden"
-              id="file-upload"
-              disabled={isLoading}
-            />
-            <label htmlFor="file-upload" className="cursor-pointer">
-              <div className="space-y-2">
-                <ApperIcon name="Upload" size={24} className="mx-auto text-gray-400" />
-                <p className="text-sm text-gray-600">Click to upload files or drag and drop</p>
-                <p className="text-xs text-gray-400">PDF, DOC, IMG files supported</p>
-              </div>
-            </label>
-            {formData.attachments.length > 0 && (
-              <div className="mt-3 space-y-2">
-                {formData.attachments.map((file, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                    <div className="flex items-center gap-2">
-                      <ApperIcon name="File" size={16} />
-                      <span className="text-sm text-gray-700">{file.name}</span>
-                      <span className="text-xs text-gray-500">({file.size})</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <ApperIcon name="X" size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <FileAttachmentManager
+            attachments={formData.attachments}
+            onChange={handleAttachmentsChange}
+            maxFileSize={10 * 1024 * 1024} // 10MB
+            maxFiles={10}
+          />
         </div>
 
         {/* Task Linking */}
@@ -885,14 +849,20 @@ linkedTasks: formData.linkedTasks
           </div>
         </div>
       </form>
-
-      {/* Recurring Task Configuration Modal */}
+{/* Recurring Task Configuration Modal */}
       <RecurringTaskModal
         isOpen={showRecurringModal}
         onClose={() => setShowRecurringModal(false)}
         task={formData.isRecurring ? { ...formData } : null}
         onSave={handleRecurringSave}
-isLoading={isLoading}
+        isLoading={isLoading}
+      />
+
+      {/* File Preview Modal */}
+      <FilePreviewModal
+        file={previewFile}
+        isOpen={!!previewFile}
+        onClose={() => setPreviewFile(null)}
       />
     </Modal>
   )

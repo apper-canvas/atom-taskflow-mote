@@ -46,8 +46,8 @@ const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
       isTracking: false,
       trackingStartedAt: null,
       notes: taskData.notes || "",
-      attachments: taskData.attachments || [],
-      linkedTasks: taskData.linkedTasks || [],
+attachments: Array.isArray(taskData.attachments) ? taskData.attachments : [],
+      linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -77,8 +77,12 @@ async update(id, updates) {
       isTracking: updates.isTracking !== undefined ? updates.isTracking : (tasks[index].isTracking || false),
       trackingStartedAt: updates.trackingStartedAt !== undefined ? updates.trackingStartedAt : tasks[index].trackingStartedAt,
       notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
-      attachments: updates.attachments !== undefined ? updates.attachments : (tasks[index].attachments || []),
-      linkedTasks: updates.linkedTasks !== undefined ? updates.linkedTasks : (tasks[index].linkedTasks || []),
+attachments: updates.attachments !== undefined ? 
+        (Array.isArray(updates.attachments) ? updates.attachments : []) : 
+        (Array.isArray(tasks[index].attachments) ? tasks[index].attachments : []),
+      linkedTasks: updates.linkedTasks !== undefined ? 
+        (Array.isArray(updates.linkedTasks) ? updates.linkedTasks : []) : 
+        (Array.isArray(tasks[index].linkedTasks) ? tasks[index].linkedTasks : []),
       updatedAt: new Date().toISOString()
     }
     
@@ -223,8 +227,8 @@ const loadedTasks = JSON.parse(stored)
           isTracking: task.isTracking || false,
           trackingStartedAt: task.trackingStartedAt || null,
           notes: task.notes || "",
-          attachments: task.attachments || [],
-          linkedTasks: task.linkedTasks || []
+attachments: Array.isArray(task.attachments) ? task.attachments : [],
+          linkedTasks: Array.isArray(task.linkedTasks) ? task.linkedTasks : []
         }))
         tasks.length = 0
         tasks.push(...migratedTasks)
