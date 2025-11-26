@@ -1,4 +1,5 @@
 import tasksData from "@/services/mockData/tasks.json";
+import React from "react";
 
 let tasks = [...tasksData]
 
@@ -23,7 +24,7 @@ export const taskService = {
     await delay()
 const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
     const newTask = {
-      Id: maxId + 1,
+Id: maxId + 1,
       projectId: taskData.projectId || null,
       title: taskData.title || "",
       description: taskData.description || "",
@@ -46,8 +47,14 @@ const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
       isTracking: false,
       trackingStartedAt: null,
       notes: taskData.notes || "",
-attachments: Array.isArray(taskData.attachments) ? taskData.attachments : [],
-      linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
+      attachments: Array.isArray(taskData.attachments) ? taskData.attachments.map(att => ({
+        ...att,
+        folderId: att.folderId || null,
+        isArchived: att.isArchived || false,
+        storageLocation: att.storageLocation || 'local'
+      })) : [],
+linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
+      externalLinks: Array.isArray(taskData.externalLinks) ? taskData.externalLinks : [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -76,13 +83,21 @@ async update(id, updates) {
       timeSpent: updates.timeSpent !== undefined ? updates.timeSpent : (tasks[index].timeSpent || 0),
       isTracking: updates.isTracking !== undefined ? updates.isTracking : (tasks[index].isTracking || false),
       trackingStartedAt: updates.trackingStartedAt !== undefined ? updates.trackingStartedAt : tasks[index].trackingStartedAt,
-      notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
-attachments: updates.attachments !== undefined ? 
-        (Array.isArray(updates.attachments) ? updates.attachments : []) : 
+notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
+      attachments: updates.attachments !== undefined ? 
+        (Array.isArray(updates.attachments) ? updates.attachments.map(att => ({
+          ...att,
+          folderId: att.folderId || null,
+          isArchived: att.isArchived || false,
+          storageLocation: att.storageLocation || 'local'
+        })) : []) : 
         (Array.isArray(tasks[index].attachments) ? tasks[index].attachments : []),
       linkedTasks: updates.linkedTasks !== undefined ? 
         (Array.isArray(updates.linkedTasks) ? updates.linkedTasks : []) : 
         (Array.isArray(tasks[index].linkedTasks) ? tasks[index].linkedTasks : []),
+      externalLinks: updates.externalLinks !== undefined ?
+        (Array.isArray(updates.externalLinks) ? updates.externalLinks : []) :
+        (Array.isArray(tasks[index].externalLinks) ? tasks[index].externalLinks : [])
       updatedAt: new Date().toISOString()
     }
     
@@ -226,9 +241,15 @@ const loadedTasks = JSON.parse(stored)
           timeSpent: task.timeSpent || 0,
           isTracking: task.isTracking || false,
           trackingStartedAt: task.trackingStartedAt || null,
-          notes: task.notes || "",
-attachments: Array.isArray(task.attachments) ? task.attachments : [],
-          linkedTasks: Array.isArray(task.linkedTasks) ? task.linkedTasks : []
+notes: task.notes || "",
+          attachments: Array.isArray(task.attachments) ? task.attachments.map(att => ({
+            ...att,
+            folderId: att.folderId || null,
+            isArchived: att.isArchived || false,
+            storageLocation: att.storageLocation || 'local'
+          })) : [],
+          linkedTasks: Array.isArray(task.linkedTasks) ? task.linkedTasks : [],
+          externalLinks: Array.isArray(task.externalLinks) ? task.externalLinks : []
         }))
         tasks.length = 0
         tasks.push(...migratedTasks)

@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { format, differenceInDays } from 'date-fns'
-import { projectService } from '@/services/api/projectService'
-import { taskService } from '@/services/api/taskService'
-import ApperIcon from '@/components/ApperIcon'
-import Loading from '@/components/ui/Loading'
-import ErrorView from '@/components/ui/ErrorView'
-import Button from '@/components/atoms/Button'
-import Badge from '@/components/atoms/Badge'
-import ProjectDashboard from '@/components/molecules/ProjectDashboard'
-import TaskList from '@/components/organisms/TaskList'
-import TaskEditModal from '@/components/molecules/TaskEditModal'
-import toast from '@/utils/toast'
-import MemberCard from '@/components/molecules/MemberCard'
-import MemberManagementModal from '@/components/molecules/MemberManagementModal'
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { differenceInDays, format } from "date-fns";
+import { projectService } from "@/services/api/projectService";
+import { taskService } from "@/services/api/taskService";
+import { fileService } from "@/services/api/fileService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import TaskList from "@/components/organisms/TaskList";
+import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
+import MemberCard from "@/components/molecules/MemberCard";
+import ProjectDashboard from "@/components/molecules/ProjectDashboard";
+import MemberManagementModal from "@/components/molecules/MemberManagementModal";
+import TaskEditModal from "@/components/molecules/TaskEditModal";
+import toast from "@/utils/toast";
 
 function ProjectDetail() {
   const { id } = useParams()
-const navigate = useNavigate()
+  const navigate = useNavigate()
   const [project, setProject] = useState(null)
   const [tasks, setTasks] = useState([])
+  const [showArchivedFiles, setShowArchivedFiles] = useState(false)
   const [projectStats, setProjectStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -28,8 +31,11 @@ const navigate = useNavigate()
   const [editingTask, setEditingTask] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
-  const [editingMember, setEditingMember] = useState(null)
+const [editingMember, setEditingMember] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [projectFiles, setProjectFiles] = useState([])
+  const [projectExternalLinks, setProjectExternalLinks] = useState([])
+  
   useEffect(() => {
     if (id) {
       loadProjectData()
@@ -43,8 +49,10 @@ const loadProjectData = async () => {
       
       const [projectData, projectStatsData, allTasks] = await Promise.all([
         projectService.getById(id),
-        projectService.getProjectStats(id),
-        taskService.getAll()
+projectService.getProjectStats(id),
+        taskService.getAll(),
+        loadProjectFiles(),
+        loadProjectExternalLinks()
       ])
       
       setProject(projectData)
@@ -68,8 +76,26 @@ const updatedProject = await projectService.getById(id)
     }
   }
 
+const loadProjectFiles = async () => {
+    try {
+      const files = await fileService.getByProjectId(parseInt(id));
+      setProjectFiles(files);
+    } catch (error) {
+      console.error('Failed to load project files:', error);
+    }
+  };
+
+  const loadProjectExternalLinks = async () => {
+    try {
+      const links = await fileService.getExternalLinksByProject(parseInt(id));
+      setProjectExternalLinks(links);
+    } catch (error) {
+      console.error('Failed to load external links:', error);
+    }
+  };
+
   const handleArchiveProject = async () => {
-try {
+    try {
       await projectService.archive(id)
       toast.success('Project archived successfully')
       navigate('/projects')
@@ -126,7 +152,7 @@ const handleDeleteProject = async () => {
     try {
       if (taskId) {
 const updatedTask = await taskService.update(taskId, taskData)
-        setTasks(prev => prev.map(t => t.Id === taskId ? updatedTask : t))
+setTasks(prev => prev.map(t => t.Id === taskId ? updatedTask : t))
         toast.success('Task updated successfully!')
       } else {
         const newTask = await taskService.create({ ...taskData, projectId: parseInt(id) })
@@ -148,8 +174,8 @@ setProjectStats(updatedStats)
   const handleDeleteTask = async (taskId) => {
     try {
       await taskService.delete(taskId)
-      setTasks(prev => prev.filter(t => t.Id !== taskId))
-setIsTaskModalOpen(false)
+setTasks(prev => prev.filter(t => t.Id !== taskId))
+      setIsTaskModalOpen(false)
       setEditingTask(null)
       toast.success('Task deleted successfully')
       
@@ -174,10 +200,18 @@ if (completed) {
       
       // Refresh project stats
       const updatedStats = await projectService.getProjectStats(id)
-      setProjectStats(updatedStats)
+setProjectStats(updatedStats)
     } catch (err) {
       toast.error('Failed to update task')
     }
+  };
+
+  const handleProjectFilesChange = (updatedFiles) => {
+    setProjectFiles(updatedFiles);
+  };
+
+  const handleProjectExternalLinksChange = (updatedLinks) => {
+    setProjectExternalLinks(updatedLinks);
   }
 
   const getStatusColor = (status) => {
@@ -286,6 +320,7 @@ Settings
                 className={project?.isFavorite ? 'fill-current' : ''} 
               />
               {project?.isFavorite ? 'Unfavorite' : 'Favorite'}
+{project?.isFavorite ? 'Unfavorite' : 'Favorite'}
             </Button>
             <Button
               variant="outline"
@@ -303,7 +338,6 @@ Settings
               <ApperIcon name="Trash2" size={18} />
               Delete
             </Button>
-          </div>
         </div>
       </div>
 
@@ -326,7 +360,7 @@ Settings
             >
               <ApperIcon name={tab.icon} size={16} />
               {tab.label}
-            </button>
+</button>
           ))}
         </nav>
       </div>
@@ -348,7 +382,6 @@ Settings
           />
         </div>
       )}
-
 {activeTab === 'members' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-6">
@@ -359,7 +392,7 @@ Settings
             </Button>
           </div>
           
-{project.members && project.members.length > 0 ? (
+          {project.members && project.members.length > 0 ? (
             <div className="space-y-4">
               {project.members.map(member => (
                 <MemberCard
@@ -371,7 +404,7 @@ Settings
                 />
               ))}
             </div>
-) : (
+          ) : (
             <div className="text-center py-12">
               <ApperIcon name="Users" size={48} className="mx-auto text-gray-400 mb-4" />
               <h4 className="text-lg font-medium text-gray-900 mb-2">No members yet</h4>
@@ -385,6 +418,27 @@ Settings
         </div>
       )}
 
+      {/* Project Files Section */}
+      <div className="bg-white rounded-lg shadow p-6 mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-medium text-gray-900">Project Files</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              {projectFiles.length} files • {projectExternalLinks.length} links
+            </span>
+          </div>
+        </div>
+        
+        <FileAttachmentManager
+          attachments={projectFiles}
+          externalLinks={projectExternalLinks}
+          onChange={handleProjectFilesChange}
+          onExternalLinksChange={handleProjectExternalLinksChange}
+          projectId={parseInt(id)}
+          maxFileSize={project?.fileSettings?.maxFileSize || 10 * 1024 * 1024}
+          maxFiles={project?.fileSettings?.maxFilesPerTask || 10}
+        />
+      </div>
       {/* Task Modal */}
       <TaskEditModal
         isOpen={isTaskModalOpen}

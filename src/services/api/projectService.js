@@ -1,9 +1,17 @@
 import projectsData from "@/services/mockData/projects.json";
+import React from "react";
 
 let projects = [...projectsData].map(project => ({
-  ...project,
+...project,
   isFavorite: project.isFavorite || false,
-  isArchived: project.isArchived || false
+  isArchived: project.isArchived || false,
+  fileSettings: {
+    allowedFileTypes: ['image/*', 'application/pdf', 'text/*', '.doc', '.docx', '.xls', '.xlsx'],
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFilesPerTask: 10,
+    enableVersioning: true,
+    autoArchiveOldVersions: false
+  }
 }))
 
 const projectService = {
@@ -42,8 +50,15 @@ const projectService = {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           members: projectData.members || [],
-          isFavorite: false,
+isFavorite: false,
           isArchived: false,
+          fileSettings: {
+            allowedFileTypes: ['image/*', 'application/pdf', 'text/*', '.doc', '.docx', '.xls', '.xlsx'],
+            maxFileSize: 10 * 1024 * 1024,
+            maxFilesPerTask: 10,
+            enableVersioning: true,
+            autoArchiveOldVersions: false
+          },
           settings: {
             isPublic: projectData.settings?.isPublic || false,
             allowMemberInvites: projectData.settings?.allowMemberInvites || true,
@@ -99,16 +114,37 @@ const projectService = {
       setTimeout(() => {
         const project = projects.find(p => p.Id === parseInt(id))
         if (project) {
-          project.status = 'Archived'
+project.status = 'Archived'
           project.isArchived = true
+          project.archivedAt = new Date().toISOString()
+          project.archivedBy = 'current-user'
           project.updatedAt = new Date().toISOString()
           resolve(project)
         } else {
+          reject(new Error('Project not found'))
+} else {
           reject(new Error('Project not found'))
         }
       }, 200)
     })
   },
+
+  // Restore archived project
+  async restore(id) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const project = projects.find(p => p.Id === parseInt(id))
+        if (project) {
+          project.status = 'Active'
+          project.isArchived = false
+          project.archivedAt = null
+          project.archivedBy = null
+          project.updatedAt = new Date().toISOString()
+          resolve({ ...project })
+        } else {
+          reject(new Error('Project not found'))
+        }
+      }, 200)
 
   // Delete project permanently
   async delete(id) {

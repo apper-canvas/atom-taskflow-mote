@@ -12,7 +12,8 @@ const FilePreviewModal = ({ file, isOpen, onClose }) => {
 
   if (!file) return null;
 
-  const formatFileSize = (bytes) => {
+const formatFileSize = (bytes) => {
+    if (!bytes) return '0 B';
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -31,6 +32,16 @@ const downloadFile = (customName = null) => {
       toast.success('File download started');
     } else {
       toast.error('File not available for download');
+    }
+  };
+
+  const handleArchiveToggle = async () => {
+    if (file.isArchived) {
+      // Restore file
+      toast.info('Restore functionality would be implemented here');
+    } else {
+      // Archive file
+      toast.info('Archive functionality would be implemented here');
     }
   };
 
@@ -54,7 +65,19 @@ const downloadFile = (customName = null) => {
   };
 
   const renderPreview = () => {
-    if (!file.category || !file.url) {
+if (!file.category || !file.url) {
+      return (
+        <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+          <div className="text-center">
+            <ApperIcon name="File" size={48} className="mx-auto text-gray-400 mb-2" />
+            <p className="text-gray-500">Preview not available</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Check if file is archived
+    if (file.isArchived) {
       return (
         <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
           <div className="text-center space-y-2">
@@ -231,7 +254,7 @@ const downloadFile = (customName = null) => {
             <h4 className="text-sm font-medium text-gray-700">File Details</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-gray-500">Name:</span>
+<span className="text-gray-500">Name:</span>
                 <span className="text-gray-900 ml-2 break-all">{file.name}</span>
               </div>
               <div>
@@ -260,9 +283,38 @@ const downloadFile = (customName = null) => {
                   <span className="text-gray-900 ml-2">{file.uploadedBy}</span>
                 </div>
               )}
+              {file.folderId && (
+                <div>
+                  <span className="text-gray-500">Folder:</span>
+                  <span className="text-gray-900 ml-2">Organized</span>
+                </div>
+              )}
+              {file.storageLocation && (
+                <div>
+                  <span className="text-gray-500">Storage:</span>
+                  <span className="text-gray-900 ml-2 capitalize">{file.storageLocation}</span>
+                </div>
+              )}
+              {file.isArchived && (
+                <div>
+                  <span className="text-gray-500">Status:</span>
+                  <span className="text-orange-600 ml-2 flex items-center gap-1">
+                    <ApperIcon name="Archive" size={14} />
+                    Archived
+                  </span>
+                </div>
+              )}
+              {file.archivedAt && (
+                <div>
+                  <span className="text-gray-500">Archived:</span>
+                  <span className="text-gray-900 ml-2">
+                    {new Date(file.archivedAt).toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* File Actions */}
+{/* File Actions */}
             <div className="pt-3 border-t border-gray-200">
               <h5 className="text-sm font-medium text-gray-700 mb-2">Actions</h5>
               <div className="flex flex-wrap gap-2">
@@ -293,6 +345,38 @@ const downloadFile = (customName = null) => {
                   <ApperIcon name="Lock" size={14} />
                   Permissions
                 </Button>
+                {!file.isArchived ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleArchiveToggle}
+                    className="flex items-center gap-2 text-orange-600 hover:text-orange-700"
+                  >
+                    <ApperIcon name="Archive" size={14} />
+                    Archive File
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleArchiveToggle}
+                    className="flex items-center gap-2 text-green-600 hover:text-green-700"
+                  >
+                    <ApperIcon name="RotateCcw" size={14} />
+                    Restore File
+                  </Button>
+                )}
+                {file.accessLogs && file.accessLogs.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toast.info('Access logs feature coming soon')}
+                    className="flex items-center gap-2"
+                  >
+                    <ApperIcon name="Activity" size={14} />
+                    Access Logs ({file.accessLogs.length})
+                  </Button>
+                )}
               </div>
             </div>
           </div>
