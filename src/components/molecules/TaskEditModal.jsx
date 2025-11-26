@@ -912,10 +912,10 @@ linkedTasks: formData.linkedTasks
         file={previewFile}
         isOpen={!!previewFile}
 onClose={() => setPreviewFile(null)}
+onClose={() => setPreviewFile(null)}
       />
+        </div>
       </div>
     </Modal>
   );
-};
-
 export default TaskEditModal;
