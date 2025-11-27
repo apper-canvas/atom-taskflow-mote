@@ -887,22 +887,13 @@ value={filterType}
       </div>
 
 {/* Enhanced Add New Comment Section */}
-      <div className="border-t-2 border-slate-100 pt-8">
-        <div id="comment-input" className="bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 shadow-sm p-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
-              <ApperIcon name="Plus" size={18} className="text-blue-600" />
-              Add a comment
-            </h3>
-            <p className="text-sm text-slate-600">Share your thoughts with the team</p>
-          </div>
-<CommentInput
-            onSubmit={handleAddComment}
-            placeholder="What's on your mind? Share updates, ask questions, or provide feedback..."
-            taskId={taskId}
-            enableTopicSelection={true}
-          />
-        </div>
+<div className="border-t-2 border-slate-100 pt-8">
+        <CommentInput
+          onSubmit={handleAddComment}
+          placeholder="What's on your mind? Share updates, ask questions, or provide feedback..."
+          taskId={taskId}
+          enableTopicSelection={true}
+        />
       </div>
     </div>
   );
