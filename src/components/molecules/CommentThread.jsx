@@ -28,7 +28,8 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
     resolved: 0,
     threads: 0
   });
-  const currentUserId = 1; // This would come from authentication context
+const currentUserId = 1; // This would come from authentication context
+  const EDIT_WINDOW_MINUTES = 5; // Configurable edit window
   useEffect(() => {
     loadComments();
   }, [taskId]);
@@ -145,8 +146,27 @@ const toggleThreadCollapse = (commentId) => {
   };
 
   // Check if comment is from current user
-  const isOwnComment = (comment) => {
+const isOwnComment = (comment) => {
     return comment?.authorId === currentUserId;
+  };
+
+  const getEditStatus = (comment) => {
+    if (!comment || comment.authorId !== currentUserId) {
+      return { canEdit: false, reason: 'Not your comment' };
+    }
+    
+    const editWindowMinutes = comment.editWindowMinutes || EDIT_WINDOW_MINUTES;
+    const createdAt = new Date(comment.createdAt);
+    const now = new Date();
+    const minutesSinceCreation = (now - createdAt) / (1000 * 60);
+    const remainingMinutes = Math.max(0, editWindowMinutes - minutesSinceCreation);
+    
+    return {
+      canEdit: minutesSinceCreation <= editWindowMinutes,
+      remainingMinutes: Math.ceil(remainingMinutes),
+      remainingSeconds: Math.ceil((remainingMinutes * 60) % 60),
+      totalMinutes: editWindowMinutes
+    };
   };
 
   // Handle profile navigation (prepared for future implementation)
@@ -236,18 +256,38 @@ const renderComment = (comment, isReply = false) => {
     }
   };
 
+const [showEditHistory, setShowEditHistory] = useState(false);
+  const [editTimeRemaining, setEditTimeRemaining] = useState(null);
+  const editStatus = getEditStatus(comment);
+
+  // Update remaining edit time every second
+  useEffect(() => {
+    if (editStatus.canEdit && isOwnComment(comment)) {
+      const interval = setInterval(() => {
+        const newStatus = getEditStatus(comment);
+        setEditTimeRemaining(newStatus);
+        if (!newStatus.canEdit) {
+          clearInterval(interval);
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [comment, currentUserId]);
+
   return (
-<motion.div
-      key={comment.Id}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`${
-        isReply ? 'ml-12 mt-4 border-l-4 border-l-blue-200 pl-6' : 'mb-6'
-      } ${
-        comment.isPinned 
-          ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm' 
-          : 'bg-white border-slate-200'
-      } rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 p-6`}
+    <>
+      <motion.div
+        key={comment.Id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`${
+          isReply ? 'ml-12 mt-4 border-l-4 border-l-blue-200 pl-6' : 'mb-6'
+        } ${
+          comment.isPinned 
+            ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm' 
+            : 'bg-white border-slate-200'
+        } rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 p-6`}
     >
       {/* Comment Header */}
 <div className="flex items-start justify-between mb-4">
@@ -307,8 +347,8 @@ const renderComment = (comment, isReply = false) => {
               </div>
             </div>
             
-            <div className="flex items-center gap-3 text-sm text-slate-500">
-<span className="font-medium">{(() => {
+<div className="flex items-center gap-3 text-sm text-slate-500">
+              <span className="font-medium">{(() => {
                 try {
                   if (!comment.createdAt) return 'Recently'
                   const date = new Date(comment.createdAt)
@@ -319,7 +359,14 @@ const renderComment = (comment, isReply = false) => {
                 }
               })()}</span>
               {comment.isEdited && (
-                <span className="text-slate-400 text-xs">• edited</span>
+                <button
+                  onClick={() => setShowEditHistory(true)}
+                  className="text-slate-400 text-xs hover:text-blue-600 transition-colors duration-200 cursor-pointer flex items-center gap-1"
+                  title={`Last edited ${formatDistanceToNow(new Date(comment.updatedAt), { addSuffix: true })}. Click to view edit history.`}
+                >
+                  • <ApperIcon name="Edit3" size={12} />
+                  <span>edited</span>
+                </button>
               )}
             </div>
           </div>
@@ -374,14 +421,27 @@ const renderComment = (comment, isReply = false) => {
           </div>
 
           {/* Management Actions - Only show for own comments */}
-          {isOwnComment(comment) && (
+{isOwnComment(comment) && (
             <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
               <button
                 onClick={() => setEditingComment(comment.Id)}
-                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
-                title="Edit"
+                disabled={!editStatus.canEdit}
+                className={`p-2 rounded-md transition-all duration-200 relative group ${
+                  editStatus.canEdit
+                    ? 'text-slate-400 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'
+                    : 'text-slate-300 cursor-not-allowed opacity-50'
+                }`}
+                title={editStatus.canEdit 
+                  ? `Edit comment (${editStatus.remainingMinutes}m ${editStatus.remainingSeconds}s remaining)`
+                  : 'Edit window expired'
+                }
               >
                 <ApperIcon name="Edit3" size={16} />
+                {editStatus.canEdit && editStatus.remainingMinutes <= 1 && (
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                    {editStatus.remainingSeconds}s left
+                  </div>
+                )}
               </button>
               <button
                 onClick={() => handleDeleteComment(comment.Id)}
@@ -391,10 +451,11 @@ const renderComment = (comment, isReply = false) => {
                 <ApperIcon name="Trash2" size={16} />
               </button>
             </div>
-          )}
+)}
         </div>
       </div>
-
+      
+      {/* Enhanced Comment Content */}
       {/* Enhanced Comment Content */}
       {editingComment === comment.Id ? (
         <div className="ml-16">

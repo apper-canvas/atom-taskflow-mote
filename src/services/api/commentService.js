@@ -58,12 +58,13 @@ export const createComment = async (commentData) => {
     likedBy: [],
     isPinned: false,
     isResolved: false,
-    isEdited: false,
+isEdited: false,
     editHistory: [],
     isUnread: false,
     quotedCommentId: commentData.quotedCommentId || null,
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    editWindowMinutes: 5 // Configurable edit window
   };
   
   comments.push(newComment);
@@ -100,27 +101,58 @@ export const updateComment = async (id, updates) => {
     throw new Error('Comment not found');
   }
 
-  const originalComment = { ...comments[index] };
+  const comment = comments[index];
+  
+  // Check if edit window is still open
+  const editWindowMinutes = comment.editWindowMinutes || 5;
+  const createdAt = new Date(comment.createdAt);
+  const now = new Date();
+  const minutesSinceCreation = (now - createdAt) / (1000 * 60);
+  
+  if (minutesSinceCreation > editWindowMinutes) {
+    throw new Error(`Edit window has expired. Comments can only be edited within ${editWindowMinutes} minutes of posting.`);
+  }
   
   // Track edit history if content changed
-  const editHistory = [...(comments[index].editHistory || [])];
-  if (updates.content && updates.content !== comments[index].content) {
+  const editHistory = [...(comment.editHistory || [])];
+  if (updates.content && updates.content !== comment.content) {
     editHistory.push({
-      content: comments[index].content,
-      editedAt: comments[index].updatedAt,
-      editedBy: comments[index].authorId
+      Id: editHistory.length + 1,
+      content: comment.content,
+      editedAt: comment.updatedAt,
+      editedBy: comment.authorId,
+      version: editHistory.length + 1
     });
   }
 
   comments[index] = {
-    ...comments[index],
+    ...comment,
     ...updates,
-    isEdited: updates.content ? true : comments[index].isEdited,
+    isEdited: updates.content ? true : comment.isEdited,
     editHistory,
     updatedAt: new Date().toISOString()
   };
   
   return comments[index];
+};
+
+// Helper function to check if comment is still editable
+export const isCommentEditable = (comment, currentUserId) => {
+  if (!comment || comment.authorId !== currentUserId) {
+    return { canEdit: false, reason: 'Not your comment' };
+  }
+  
+  const editWindowMinutes = comment.editWindowMinutes || 5;
+  const createdAt = new Date(comment.createdAt);
+  const now = new Date();
+  const minutesSinceCreation = (now - createdAt) / (1000 * 60);
+  const remainingMinutes = Math.max(0, editWindowMinutes - minutesSinceCreation);
+  
+  return {
+    canEdit: minutesSinceCreation <= editWindowMinutes,
+    remainingMinutes: Math.ceil(remainingMinutes),
+    remainingSeconds: Math.ceil((remainingMinutes * 60) % 60)
+  };
 };
 
 // Delete a comment
