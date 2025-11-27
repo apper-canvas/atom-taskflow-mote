@@ -38,14 +38,29 @@ export const getCommentById = async (id) => {
 export const createComment = async (commentData) => {
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const maxId = comments.length > 0 ? Math.max(...comments.map(c => c.Id)) : 0;
+  // Validate required fields
+  if (!commentData) {
+    throw new Error('Comment data is required');
+  }
   
-  const newComment = {
+  // Validate content - ensure it's not empty or whitespace only
+  const content = commentData.content || '';
+  if (!content.trim()) {
+    throw new Error('Comment content cannot be empty');
+  }
+  
+  // Validate taskId
+  if (!commentData.taskId) {
+    throw new Error('Task ID is required for comments');
+  }
+  
+  const maxId = comments.length > 0 ? Math.max(...comments.map(c => c.Id)) : 0;
+const newComment = {
     Id: maxId + 1,
     taskId: parseInt(commentData.taskId),
     parentId: commentData.parentId || null,
     topic: commentData.topic || null,
-    content: commentData.content || "",
+    content: content.trim(), // Use validated and trimmed content
     contentType: commentData.contentType || "html", // text, html, markdown
     authorId: commentData.authorId || 1,
     authorName: commentData.authorName || "Current User",

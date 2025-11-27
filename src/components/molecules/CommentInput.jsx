@@ -229,8 +229,14 @@ const handleSelectSuggestion = (suggestion) => {
 
 const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() || isSubmitting) return;
-
+    
+    // Enhanced validation with user feedback
+    if (!content.trim()) {
+      showToast.warning('Please enter a comment before submitting');
+      return;
+    }
+    
+    if (isSubmitting) return;
     // Load topics when topic selection is enabled
     if (enableTopicSelection && taskId && availableTopics.length === 0) {
       try {
@@ -244,7 +250,8 @@ const handleSubmit = async (e) => {
 setIsSubmitting(true);
     
 try {
-await onSubmit(content, mentions, null, null, null, selectedTopic);
+      // Pass trimmed content to ensure no whitespace-only comments
+      await onSubmit(content.trim(), mentions, null, null, null, selectedTopic);
       setContent('');
       setMentions([]);
       setSelectedTopic('');
