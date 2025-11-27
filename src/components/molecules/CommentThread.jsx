@@ -375,7 +375,7 @@ const renderComment = (comment, isReply = false) => {
       {/* Replies */}
 {/* Replies */}
       {comment.replies?.map(reply => renderComment(reply, true))}
-    </motion.div>
+</motion.div>
   );
 };
 
@@ -385,7 +385,7 @@ const renderComment = (comment, isReply = false) => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
-
+  }
   return (
     <div className="space-y-4">
       {/* Search and Filters */}
