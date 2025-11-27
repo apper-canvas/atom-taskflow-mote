@@ -38,14 +38,26 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
   const [previewDates, setPreviewDates] = useState([])
 
   useEffect(() => {
-    if (task) {
+if (task) {
       setFormData({
         title: task.title || "",
         description: task.description || "",
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         tags: task.tags || [],
-recurrence: task.recurrence || formData.recurrence
+        recurrence: task.recurrence ? {
+          ...task.recurrence,
+          startDate: task.recurrence.startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm")
+        } : {
+          type: "daily",
+          interval: 1,
+          startDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+          endType: "never",
+          endDate: "",
+          occurrences: 10,
+          weekdays: [1, 2, 3, 4, 5],
+          monthlyType: "date"
+        }
       })
     } else {
       // Reset form for new recurring task

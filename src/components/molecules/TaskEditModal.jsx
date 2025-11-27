@@ -797,10 +797,13 @@ rows={4}
         </div>
       </form>
 {/* Recurring Task Configuration Modal */}
-      <RecurringTaskModal
+<RecurringTaskModal
         isOpen={showRecurringModal}
         onClose={() => setShowRecurringModal(false)}
-        task={formData.isRecurring ? { ...formData } : null}
+        task={formData.isRecurring ? { 
+          ...formData, 
+          recurrence: formData.recurrence || task?.recurrence 
+        } : null}
         onSave={handleRecurringSave}
         isLoading={isLoading}
       />
