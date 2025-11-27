@@ -267,8 +267,7 @@ export const getTeamMembers = async () => {
 // Get comment statistics for a task
 export const getCommentStats = async (taskId) => {
   await new Promise(resolve => setTimeout(resolve, 100));
-  
-  const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
+const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
   
   return {
     total: taskComments.length,
@@ -277,6 +276,136 @@ export const getCommentStats = async (taskId) => {
     resolved: taskComments.filter(c => c.isResolved).length,
     threads: taskComments.filter(c => !c.parentId).length
   };
+};
+
+// Sentiment Analysis Functions
+const analyzeSentiment = (text) => {
+  if (!text || typeof text !== 'string') {
+    return { sentiment: 'neutral', confidence: 0, score: 0 };
+  }
+
+  const positiveWords = ['great', 'excellent', 'amazing', 'awesome', 'good', 'nice', 'perfect', 'love', 'wonderful', 'fantastic', 'brilliant', 'outstanding', 'superb', 'impressive', 'helpful', 'thanks', 'thank you', 'appreciate', 'well done', 'congratulations'];
+  const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'stupid', 'wrong', 'broken', 'issue', 'problem', 'error', 'bug', 'fail', 'failed', 'disappointing', 'frustrated', 'annoying', 'difficult', 'confusing', 'unclear'];
+
+  const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+  let positiveScore = 0;
+  let negativeScore = 0;
+
+  words.forEach(word => {
+    if (positiveWords.includes(word)) positiveScore++;
+    if (negativeWords.includes(word)) negativeScore++;
+  });
+
+  const totalSentimentWords = positiveScore + negativeScore;
+  
+  if (totalSentimentWords === 0) {
+    return { sentiment: 'neutral', confidence: 0.6, score: 0 };
+  }
+
+  const score = (positiveScore - negativeScore) / Math.max(words.length, 1);
+  const confidence = Math.min(totalSentimentWords / Math.max(words.length, 1) * 2, 1);
+
+  let sentiment = 'neutral';
+  if (score > 0.1) sentiment = 'positive';
+  else if (score < -0.1) sentiment = 'negative';
+
+  return {
+    sentiment,
+    confidence: Math.max(confidence, 0.3),
+    score: parseFloat(score.toFixed(3))
+  };
+};
+
+const generateConversationSummary = (comments) => {
+  if (!comments || comments.length === 0) {
+    return {
+      keyPoints: [],
+      overallSentiment: 'neutral',
+      participantCount: 0,
+      timespan: null,
+      topics: []
+    };
+  }
+
+  const participants = [...new Set(comments.map(c => c.authorName))];
+  const sortedComments = comments.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const timespan = {
+    start: sortedComments[0]?.createdAt,
+    end: sortedComments[sortedComments.length - 1]?.createdAt
+  };
+
+  // Extract key points (longer comments or those with reactions)
+  const keyPoints = comments
+    .filter(c => c.content.length > 50 || c.reactions?.length > 0 || c.isPinned)
+    .slice(0, 3)
+    .map(c => ({
+      author: c.authorName,
+      content: c.content.length > 100 ? c.content.substring(0, 100) + '...' : c.content,
+      sentiment: analyzeSentiment(c.content).sentiment
+    }));
+
+  // Calculate overall sentiment
+  const sentiments = comments.map(c => analyzeSentiment(c.content));
+  const avgScore = sentiments.reduce((sum, s) => sum + s.score, 0) / sentiments.length;
+  let overallSentiment = 'neutral';
+  if (avgScore > 0.1) overallSentiment = 'positive';
+  else if (avgScore < -0.1) overallSentiment = 'negative';
+
+  // Extract topics (simple keyword extraction)
+  const allText = comments.map(c => c.content).join(' ').toLowerCase();
+  const commonWords = allText.match(/\b\w{4,}\b/g) || [];
+  const wordFreq = {};
+  commonWords.forEach(word => {
+    if (!['this', 'that', 'with', 'have', 'will', 'been', 'from', 'they', 'them', 'were', 'said', 'each', 'which', 'their', 'time', 'would', 'about', 'there', 'could', 'other', 'more', 'very', 'what', 'when', 'where', 'much', 'some', 'these', 'those'].includes(word)) {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    }
+  });
+
+  const topics = Object.entries(wordFreq)
+    .filter(([_, freq]) => freq > 1)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([word, _]) => word);
+
+  return {
+    keyPoints,
+    overallSentiment,
+    participantCount: participants.length,
+    timespan,
+    topics
+  };
+};
+
+const getConversationsByTopic = (taskId) => {
+  const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
+  const threads = buildCommentThreads(taskComments);
+  
+  const conversations = threads.map(thread => {
+    const allComments = [thread, ...(thread.replies || [])];
+    const summary = generateConversationSummary(allComments);
+    
+    return {
+      id: thread.Id,
+      title: thread.content.length > 50 ? thread.content.substring(0, 50) + '...' : thread.content,
+      author: thread.authorName,
+      createdAt: thread.createdAt,
+      commentCount: 1 + (thread.replies?.length || 0),
+      summary,
+      mainTopic: summary.topics[0] || 'general'
+    };
+  });
+
+  // Group by topic
+  const topicGroups = {};
+  conversations.forEach(conv => {
+    const topic = conv.mainTopic;
+    if (!topicGroups[topic]) {
+      topicGroups[topic] = [];
+    }
+    topicGroups[topic].push(conv);
+  });
+
+  return topicGroups;
 };
 
 // Build threaded comment structure
@@ -344,10 +473,13 @@ const commentService = {
   toggleResolve,
   searchComments,
   markAsRead,
-  getTeamMembers,
+getTeamMembers,
   getCommentStats,
-buildCommentThreads,
-  getCommentTopics
+  buildCommentThreads,
+  getCommentTopics,
+  analyzeSentiment,
+  generateConversationSummary,
+  getConversationsByTopic
 };
 
 export default commentService;

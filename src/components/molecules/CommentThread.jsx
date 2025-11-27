@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
-import CommentInput from "@/components/molecules/CommentInput";
-import CommentReactions from "@/components/molecules/CommentReactions";
-import commentService, { addReaction, buildCommentThreads, createComment, deleteComment, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
+import commentService, { addReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
 import { updateTaskCommentStats } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
+import Select from "@/components/atoms/Select";
+import CommentReactions from "@/components/molecules/CommentReactions";
+import CommentInput from "@/components/molecules/CommentInput";
 import toast from "@/utils/toast";
 
 const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [comments, setComments] = useState([]);
-  const [threads, setThreads] = useState([]);
+const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
-const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic, sentiment
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [selectedSentiment, setSelectedSentiment] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
-
+  const [conversationSummary, setConversationSummary] = useState(null);
   useEffect(() => {
     loadComments();
   }, [taskId]);
@@ -169,7 +171,26 @@ content,
     }
   };
 
-const renderComment = (comment, isReply = false) => (
+const renderComment = (comment, isReply = false) => {
+  const sentiment = analyzeSentiment(comment.content);
+  
+  const getSentimentColor = (sentimentType) => {
+    switch (sentimentType) {
+      case 'positive': return 'text-green-600 bg-green-50 border-green-200';
+      case 'negative': return 'text-red-600 bg-red-50 border-red-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  const getSentimentIcon = (sentimentType) => {
+    switch (sentimentType) {
+      case 'positive': return 'ThumbsUp';
+      case 'negative': return 'ThumbsDown';
+      default: return 'Minus';
+    }
+  };
+
+  return (
     <motion.div
       key={comment.Id}
       initial={{ opacity: 0, y: 10 }}
@@ -190,6 +211,13 @@ const renderComment = (comment, isReply = false) => (
               )}
               {comment.isResolved && (
                 <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Resolved</span>
+              )}
+              {/* Sentiment Indicator */}
+              {sentiment.confidence > 0.4 && (
+                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${getSentimentColor(sentiment.sentiment)}`}>
+                  <ApperIcon name={getSentimentIcon(sentiment.sentiment)} size={10} />
+                  {sentiment.sentiment}
+                </span>
               )}
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -257,11 +285,48 @@ const renderComment = (comment, isReply = false) => (
           submitText="Update"
         />
       ) : (
-        <div className="mb-3">
+<div className="mb-3">
           <div 
             className="text-sm text-gray-700 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: comment.content }}
           />
+          
+          {/* Conversation Summary for Thread Starters */}
+          {!isReply && comment.replies && comment.replies.length > 2 && (
+            <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <ApperIcon name="MessageSquare" size={14} className="text-blue-600" />
+                <span className="text-xs font-medium text-blue-800">Conversation Summary</span>
+              </div>
+              {(() => {
+                const allComments = [comment, ...(comment.replies || [])];
+                const summary = generateConversationSummary(allComments);
+                return (
+                  <div className="space-y-2">
+                    <div className="text-xs text-blue-700">
+                      <strong>{summary.participantCount}</strong> participants • 
+                      <strong> {summary.keyPoints.length}</strong> key points • 
+                      <span className={`ml-1 px-1 py-0.5 rounded text-xs ${
+                        summary.overallSentiment === 'positive' ? 'bg-green-100 text-green-700' :
+                        summary.overallSentiment === 'negative' ? 'bg-red-100 text-red-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {summary.overallSentiment} tone
+                      </span>
+                    </div>
+                    {summary.topics.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <ApperIcon name="Hash" size={12} className="text-blue-500" />
+                        <span className="text-xs text-blue-600">
+                          {summary.topics.slice(0, 2).join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
           {comment.attachments?.length > 0 && (
             <div className="mt-2 space-y-1">
               {comment.attachments.map((file, idx) => (
@@ -308,9 +373,11 @@ const renderComment = (comment, isReply = false) => (
       )}
 
       {/* Replies */}
+{/* Replies */}
       {comment.replies?.map(reply => renderComment(reply, true))}
     </motion.div>
   );
+};
 
   if (loading) {
     return (
@@ -318,7 +385,6 @@ const renderComment = (comment, isReply = false) => (
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
-  }
 
   return (
     <div className="space-y-4">
@@ -334,7 +400,7 @@ const renderComment = (comment, isReply = false) => (
             className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-<select
+        <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -342,11 +408,12 @@ const renderComment = (comment, isReply = false) => (
           <option value="all">All Comments</option>
           <option value="pinned">Pinned</option>
           <option value="resolved">Resolved</option>
-<option value="unread">Unread</option>
+          <option value="unread">Unread</option>
+          <option value="sentiment">By Sentiment</option>
           <option value="topic">By Topic</option>
         </select>
         
-        {/* Topic Selection Dropdown - Only show when topic filter is selected */}
+        {/* Topic Selection Dropdown */}
         {filterType === 'topic' && (
           <select
             value={selectedTopic}
@@ -354,10 +421,23 @@ const renderComment = (comment, isReply = false) => (
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select Topic</option>
-            {/* Extract unique topics from comments */}
             {[...new Set(comments.map(c => c.topic).filter(Boolean))].map(topic => (
               <option key={topic} value={topic}>{topic}</option>
             ))}
+          </select>
+        )}
+        
+        {/* Sentiment Filter Dropdown */}
+        {filterType === 'sentiment' && (
+          <select
+            value={selectedSentiment}
+            onChange={(e) => setSelectedSentiment(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">All Sentiments</option>
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+            <option value="neutral">Neutral</option>
           </select>
         )}
       </div>

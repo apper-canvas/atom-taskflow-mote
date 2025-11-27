@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { differenceInDays, format } from "date-fns";
+import { differenceInDays, format, formatDistanceToNow } from "date-fns";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
 import fileService from "@/services/api/fileService";
@@ -385,10 +385,10 @@ className={project?.isFavorite ? 'fill-current' : ''}
         </div>
       )}
 {activeTab === 'comments' && (
-<div className="space-y-6">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
-                {activeTab === 'topics' ? 'Comment Topics' : 'Task Comments'}
+                Task Comments
               </h3>
               {selectedTaskForComments && (
                 <button
@@ -442,6 +442,96 @@ className={project?.isFavorite ? 'fill-current' : ''}
                 <CommentThread taskId={selectedTaskForComments.Id} />
               </div>
             )}
+          </div>
+        )}
+        
+        {activeTab === 'topics' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Comment Topics</h3>
+              <div className="text-sm text-gray-500">
+                Conversations organized by discussion topics
+              </div>
+            </div>
+            
+            {(() => {
+              // Get conversations by topic for all tasks with comments
+              const tasksWithComments = tasks.filter(task => task.commentCount > 0);
+              
+              if (tasksWithComments.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <ApperIcon name="Hash" size={48} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-gray-500">No comment topics yet</p>
+                  </div>
+                );
+              }
+
+              // Simulate topic grouping for demo
+              const topicGroups = {
+                'design': [
+                  { id: 1, title: 'UI feedback on dashboard layout', author: 'Alex Chen', commentCount: 5, sentiment: 'positive', createdAt: '2024-01-15T10:00:00Z' },
+                  { id: 2, title: 'Color scheme suggestions', author: 'Sarah Kim', commentCount: 3, sentiment: 'neutral', createdAt: '2024-01-14T15:30:00Z' }
+                ],
+                'performance': [
+                  { id: 3, title: 'Loading speed concerns', author: 'Mike Johnson', commentCount: 7, sentiment: 'negative', createdAt: '2024-01-13T09:15:00Z' }
+                ],
+                'features': [
+                  { id: 4, title: 'New feature request discussion', author: 'Emma Wilson', commentCount: 4, sentiment: 'positive', createdAt: '2024-01-12T14:20:00Z' }
+                ]
+              };
+
+              return (
+                <div className="space-y-6">
+                  {Object.entries(topicGroups).map(([topic, conversations]) => (
+                    <div key={topic} className="bg-white rounded-lg border border-gray-200 p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <ApperIcon name="Hash" size={20} className="text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 capitalize">{topic}</h4>
+                          <p className="text-sm text-gray-500">{conversations.length} conversations</p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {conversations.map(conv => (
+                          <div key={conv.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div className="flex-1">
+                              <h5 className="font-medium text-gray-900 mb-1">{conv.title}</h5>
+                              <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <span>by {conv.author}</span>
+                                <span>•</span>
+                                <span>{formatDistanceToNow(new Date(conv.createdAt), { addSuffix: true })}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+                                conv.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
+                                conv.sentiment === 'negative' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                <ApperIcon name={
+                                  conv.sentiment === 'positive' ? 'ThumbsUp' :
+                                  conv.sentiment === 'negative' ? 'ThumbsDown' :
+                                  'Minus'
+                                } size={10} />
+                                {conv.sentiment}
+                              </span>
+                              <div className="flex items-center gap-1 text-sm text-gray-500">
+                                <ApperIcon name="MessageCircle" size={16} />
+                                <span>{conv.commentCount}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
 
