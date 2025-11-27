@@ -107,9 +107,6 @@ switch (priority) {
     return { formatted, isOverdue }
   }
 
-  const dueDateInfo = formatDueDate(task.dueDate)
-  const isOverdue = dueDateInfo?.isOverdue
-  const isDueSoon = dueDateInfo && !isOverdue && (dueDateInfo === "Today" || dueDateInfo === "Tomorrow")
 
 // State for expandable sections
   const [showNotes, setShowNotes] = useState(false);
@@ -362,6 +359,7 @@ switch (priority) {
                 )}
 
                 {/* Due Date Warning */}
+{/* Due Date Warning */}
                 {task.dueDateTime && !task.completed && (
                   <div className="flex items-center gap-1 text-xs mb-2">
                     <ApperIcon 
@@ -431,15 +429,20 @@ switch (priority) {
                         </div>
                     )}
                     
-                    {/* Due Date */}
-                    {dueDateInfo && <div
-                        className={cn(
-                            "flex items-center gap-1 text-xs px-2 py-1 rounded-full",
-                            isOverdue ? "text-red-700 bg-red-100" : isDueSoon ? "text-amber-700 bg-amber-100" : "text-gray-600 bg-gray-100"
-                        )}>
-                        <ApperIcon name={isOverdue ? "AlertCircle" : "Clock"} size={12} />
-                        {typeof dueDateInfo === "string" ? dueDateInfo : dueDateInfo.formatted}
-                    </div>}
+{/* Due Date */}
+                    {task.dueDateTime && (
+                      <div className={cn(
+                        "flex items-center gap-1 text-xs px-2 py-1 rounded-full",
+                        isPast(new Date(task.dueDateTime)) && !isToday(new Date(task.dueDateTime)) ? "text-red-700 bg-red-100" : 
+                        (isToday(new Date(task.dueDateTime)) || isTomorrow(new Date(task.dueDateTime))) ? "text-amber-700 bg-amber-100" : 
+                        "text-gray-600 bg-gray-100"
+                      )}>
+                        <ApperIcon name={isPast(new Date(task.dueDateTime)) && !isToday(new Date(task.dueDateTime)) ? "AlertCircle" : "Clock"} size={12} />
+                        {isToday(new Date(task.dueDateTime)) ? "Today" :
+                         isTomorrow(new Date(task.dueDateTime)) ? "Tomorrow" :
+                         format(new Date(task.dueDateTime), "MMM d")}
+                      </div>
+                    )}
                     {/* Priority Indicator */}
                     <div
                         className={cn(

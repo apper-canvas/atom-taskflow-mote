@@ -30,11 +30,7 @@ const [formData, setFormData] = useState({
     category: "",
     priority: "",
     status: "",
-    dueDate: "",
-    dueDateTime: "",
-    reminderEnabled: false,
-    reminderDateTime: "",
-    reminderMethod: "notification",
+dueDateTime: "",
     parentTaskId: null,
     tags: [],
     isRecurring: false,
@@ -70,10 +66,7 @@ if (task) {
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         status: task.status || "Not Started",
-dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd'T'HH:mm") : "",
-        reminderEnabled: task.reminderEnabled || false,
-        reminderDateTime: task.reminderDateTime ? format(new Date(task.reminderDateTime), "yyyy-MM-dd'T'HH:mm") : "",
-        reminderMethod: task.reminderMethod || "notification",
+dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
@@ -256,8 +249,8 @@ const handleTagsChange = (newTags) => {
       newErrors.title = "Task title is required"
     }
     
-    if (formData.dueDate && new Date(formData.dueDate) < new Date()) {
-      newErrors.dueDate = "Due date cannot be in the past"
+if (formData.dueDateTime && new Date(formData.dueDateTime) < new Date()) {
+      newErrors.dueDateTime = "Due date cannot be in the past"
     }
     
     setErrors(newErrors)
@@ -273,11 +266,7 @@ const taskData = {
       projectId: formData.projectId ? parseInt(formData.projectId) : null,
       title: formData.title.trim(),
       description: formData.description.trim(),
-dueDate: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
-      reminderEnabled: formData.reminderEnabled,
-      reminderDateTime: formData.reminderEnabled && formData.reminderDateTime ? new Date(formData.reminderDateTime).toISOString() : null,
-      reminderMethod: formData.reminderMethod,
-      dueDateTime: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
+dueDateTime: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
 tags: formData.tags,
       isRecurring: formData.isRecurring,
@@ -720,60 +709,16 @@ rows={4}
           <option value="Cancelled">❌ Cancelled</option>
         </Select>
 
-        {/* Due Date */}
+{/* Due Date */}
         <Input
           label="Due Date (Optional)"
           type="datetime-local"
-          value={formData.dueDate}
-          onChange={(e) => handleInputChange("dueDate", e.target.value)}
-          error={errors.dueDate}
+          value={formData.dueDateTime}
+          onChange={(e) => handleInputChange("dueDateTime", e.target.value)}
+          error={errors.dueDateTime}
           disabled={isLoading}
         />
 
-        {/* Reminder Section */}
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-medium text-gray-700">
-              Reminder Options
-            </label>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="reminderEnabled"
-                checked={formData.reminderEnabled}
-                onChange={(e) => handleInputChange("reminderEnabled", e.target.checked)}
-                disabled={isLoading}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-              />
-              <label htmlFor="reminderEnabled" className="ml-2 text-sm text-gray-700">
-                Enable Reminder
-              </label>
-            </div>
-          </div>
-
-          {formData.reminderEnabled && (
-            <div className="space-y-3">
-              <Input
-                label="Reminder Date & Time"
-                type="datetime-local"
-                value={formData.reminderDateTime}
-                onChange={(e) => handleInputChange("reminderDateTime", e.target.value)}
-                disabled={isLoading}
-              />
-
-              <Select
-                label="Notification Method"
-                value={formData.reminderMethod}
-                onChange={(e) => handleInputChange("reminderMethod", e.target.value)}
-                disabled={isLoading}
-              >
-                <option value="notification">Browser Notification</option>
-                <option value="email">Email Reminder</option>
-                <option value="both">Both Notification & Email</option>
-              </Select>
-            </div>
-          )}
-        </div>
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4">
