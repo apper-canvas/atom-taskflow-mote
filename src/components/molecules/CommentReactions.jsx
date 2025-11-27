@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import ApperIcon from '@/components/ApperIcon';
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
 
+// Available emoji reactions
 const REACTION_EMOJIS = [
   { emoji: '👍', name: 'thumbs_up' },
   { emoji: '❤️', name: 'heart' },
-  { emoji: '😂', name: 'laugh' },
-  { emoji: '😮', name: 'wow' },
-  { emoji: '😢', name: 'sad' },
-  { emoji: '😡', name: 'angry' },
+  { emoji: '😂', name: 'laughing' },
   { emoji: '🎉', name: 'celebration' },
-  { emoji: '🚀', name: 'rocket' }
+  { emoji: '😍', name: 'heart_eyes' },
+  { emoji: '🔥', name: 'fire' },
+  { emoji: '💯', name: 'hundred' },
+  { emoji: '✨', name: 'sparkles' },
+  { emoji: '👏', name: 'clapping' },
+  { emoji: '🚀', name: 'rocket' },
+  { emoji: '💪', name: 'muscle' },
+  { emoji: '🎯', name: 'target' }
 ];
-
 const CommentReactions = ({ reactions = [], onAddReaction }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 

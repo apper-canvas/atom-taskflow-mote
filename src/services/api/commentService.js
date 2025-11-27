@@ -78,16 +78,33 @@ export const addReaction = async (commentId, emoji, userId = 1, userName = 'Curr
   const comment = comments.find(c => c.Id === commentId);
   if (!comment) throw new Error('Comment not found');
   
-  // Remove existing reaction from this user for this emoji
-  comment.reactions = comment.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
+  // Check if user already reacted with this emoji
+  const existingReaction = comment.reactions.find(r => r.userId === userId && r.emoji === emoji);
   
-  // Add new reaction
-  comment.reactions.push({
-    emoji,
-    userId,
-    userName,
-    createdAt: new Date().toISOString()
-  });
+  if (existingReaction) {
+    // Remove existing reaction (toggle off)
+    comment.reactions = comment.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
+  } else {
+    // Add new reaction
+    comment.reactions.push({
+      emoji,
+      userId,
+      userName,
+      createdAt: new Date().toISOString()
+    });
+  }
+  
+  return comment;
+};
+
+export const removeReaction = async (commentId, emoji, userId = 1) => {
+  await new Promise(resolve => setTimeout(resolve, 150));
+  
+  const comment = comments.find(c => c.Id === commentId);
+  if (!comment) throw new Error('Comment not found');
+  
+  // Remove reaction from this user for this emoji
+  comment.reactions = comment.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
   
   return comment;
 };
@@ -373,7 +390,8 @@ export default {
   getCommentById,
   getCommentTopics,
   getTeamMembers,
-  addReaction,
+addReaction,
+  removeReaction,
   toggleLike,
   togglePin,
   toggleResolve,

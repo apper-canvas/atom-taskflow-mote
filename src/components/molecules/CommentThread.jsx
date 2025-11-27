@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
-import commentService, { addReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentStats, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
+import commentService, { addReaction, removeReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentStats, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
 import { updateTaskCommentStats } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Select from "@/components/atoms/Select";
@@ -219,12 +219,20 @@ const isOwnComment = (comment) => {
     }
   };
 
-  const handleAddReaction = async (commentId, emoji) => {
+const handleAddReaction = async (commentId, emoji) => {
     try {
       const updatedComment = await commentService.addReaction(commentId, emoji, 1);
       setComments(prev => prev.map(c => c.Id === commentId ? updatedComment : c));
+      
+      // Check if reaction was added or removed for appropriate toast
+      const userReaction = updatedComment.reactions.find(r => r.userId === 1 && r.emoji === emoji);
+      if (userReaction) {
+        toast.success(`Added ${emoji} reaction`);
+      } else {
+        toast.success(`Removed ${emoji} reaction`);
+      }
     } catch (error) {
-      toast.error('Failed to add reaction');
+      toast.error('Failed to update reaction');
     }
   };
 
