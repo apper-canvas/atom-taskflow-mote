@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
-import { showToast } from "@/utils/toast";
+import toast from "@/utils/toast";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
@@ -199,7 +199,7 @@ const handleRecurringSave = (taskId, recurringData) => {
       recurrence: recurringData.recurrence
     }))
     setShowRecurringModal(false)
-    showToast('Recurring schedule updated successfully', 'success')
+    toast.success('Recurring schedule updated successfully')
   }
 
   const handleEditRecurring = () => {
