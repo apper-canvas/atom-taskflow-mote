@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { format, isPast, isToday, isTomorrow } from "date-fns";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
+import CommentThread from "@/components/molecules/CommentThread";
 import toast from "@/utils/toast";
 import { cn } from "@/utils/cn";
 
@@ -14,7 +15,6 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
   const [showSubtasks, setShowSubtasks] = useState(false);
   const [subtasks, setSubtasks] = useState([]);
   const [loadingSubtasks, setLoadingSubtasks] = useState(false);
-
   // Check if this task has subtasks or subtask progress
 const hasSubtasks = task.subtaskCount > 0 || task.parentTaskId
   const isParentTask = task.subtaskCount > 0
@@ -57,7 +57,7 @@ const hasSubtasks = task.subtaskCount > 0 || task.parentTaskId
       loadSubtasks()
     }
   }
-  const [isCompleting, setIsCompleting] = useState(false)
+const [isCompleting, setIsCompleting] = useState(false)
 
   const handleToggleComplete = async () => {
     setIsCompleting(true)
@@ -110,9 +110,10 @@ switch (priority) {
 
 
 // State for expandable sections
-  const [showNotes, setShowNotes] = useState(false);
+const [showNotes, setShowNotes] = useState(false);
   const [showAttachments, setShowAttachments] = useState(false);
   const [showLinkedTasks, setShowLinkedTasks] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   return (
     <motion.div
@@ -233,7 +234,27 @@ switch (priority) {
                                 {task.linkedTasks.length}
                             </button>
                         )}
-                    </div>
+</div>
+                    
+                    {/* Comments button */}
+                    <button
+                      onClick={() => setShowComments(!showComments)}
+                      className={`p-2 rounded-lg transition-all duration-200 ${
+                        showComments 
+                          ? 'bg-blue-100 text-blue-600 shadow-sm' 
+                          : 'text-gray-500 hover:text-blue-600 hover:bg-blue-50'
+                      }`}
+                      title="Comments"
+                    >
+                      <div className="flex items-center gap-1">
+                        <ApperIcon name="MessageCircle" size={16} />
+                        {task.commentCount > 0 && (
+                          <span className="text-xs font-medium bg-blue-600 text-white px-1.5 py-0.5 rounded-full">
+                            {task.commentCount}
+                          </span>
+                        )}
+                      </div>
+                    </button>
                 </div>
                 {/* Subtask progress bar for parent tasks */}
                 {isParentTask && task.subtaskProgress !== undefined && <div className="mb-3">
@@ -324,8 +345,28 @@ switch (priority) {
                             ))}
                         </div>
                     </motion.div>
-                )}
+)}
 
+                {/* Comments Section */}
+                <AnimatePresence>
+                  {showComments && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-t border-gray-100 pt-4 mt-4"
+                    >
+                      <div className="flex items-center gap-2 mb-4">
+                        <ApperIcon name="MessageCircle" size={16} className="text-gray-500" />
+                        <h4 className="text-sm font-medium text-gray-700">Comments</h4>
+                      </div>
+                      <div className="max-h-96">
+                        <CommentThread taskId={task.Id} maxHeight="24rem" />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                 {/* Assignment Info */}
                 {task.assignedTo && (
                   <div className="flex items-center gap-2 mb-2">
