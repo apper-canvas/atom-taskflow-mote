@@ -1,11 +1,10 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import commentService, { getCommentTopics, getCommentsByTaskId } from "@/services/api/commentService";
+import commentService from "@/services/api/commentService";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
-import toast from "@/utils/toast";
 
 const CommentInput = ({ 
   onSubmit, 
@@ -16,19 +15,16 @@ onCancel,
   enableTopicSelection = false,
   taskId = null
 }) => {
-const [content, setContent] = useState(initialContent);
+  const [content, setContent] = useState(initialContent);
   const [mentions, setMentions] = useState([]);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState('');
   const [availableTopics, setAvailableTopics] = useState([]);
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
-  const [aiSuggestions, setAiSuggestions] = useState([]);
-  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
-  const [isLoadingAiSuggestions, setIsLoadingAiSuggestions] = useState(false);
   const textareaRef = useRef(null);
 
   const handleContentChange = (e) => {
@@ -105,9 +101,9 @@ const [content, setContent] = useState(initialContent);
     }
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() || isSubmitting) return;
+if (!content.trim() || isSubmitting) return;
 
     // Load topics when topic selection is enabled
     if (enableTopicSelection && taskId && availableTopics.length === 0) {
@@ -126,75 +122,11 @@ const handleSubmit = async (e) => {
       await onSubmit(content, mentions, []);
       setContent('');
       setMentions([]);
-      setShowAiSuggestions(false);
-      setAiSuggestions([]);
     } catch (error) {
       console.error('Failed to submit comment:', error);
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleGetAiSuggestions = async () => {
-    if (isLoadingAiSuggestions) return;
-
-    setIsLoadingAiSuggestions(true);
-    
-    try {
-      // Initialize ApperClient
-      const { ApperClient } = window.ApperSDK;
-      const apperClient = new ApperClient({
-        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
-        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
-      });
-// Get context for AI suggestions
-      let commentContext = content || "General discussion";
-      let previousComments = [];
-      
-// If we have taskId, get recent comments for context
-      if (taskId) {
-        try {
-          const taskComments = await commentService.getCommentsByTaskId(taskId);
-          previousComments = taskComments.slice(-3).map(comment => ({
-            authorName: comment.authorName,
-            content: comment.content
-          }));
-        } catch (error) {
-          console.info(`apper_info: Got this error in this function: ${import.meta.env.VITE_GENERATE_COMMENT_SUGGESTIONS}. The error is: ${error.message}`);
-        }
-      }
-
-      const result = await apperClient.functions.invoke(import.meta.env.VITE_GENERATE_COMMENT_SUGGESTIONS, {
-        body: JSON.stringify({
-          commentContext,
-          previousComments
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (result.success && result.suggestions) {
-        setAiSuggestions(result.suggestions);
-        setShowAiSuggestions(true);
-        toast.success('AI suggestions generated successfully');
-      } else {
-        console.info(`apper_info: Got an error in this function: ${import.meta.env.VITE_GENERATE_COMMENT_SUGGESTIONS}. The response body is: ${JSON.stringify(result)}.`);
-        toast.error('Failed to generate AI suggestions');
-      }
-    } catch (error) {
-      console.info(`apper_info: Got this error in this function: ${import.meta.env.VITE_GENERATE_COMMENT_SUGGESTIONS}. The error is: ${error.message}`);
-      toast.error('Error connecting to AI service');
-    } finally {
-      setIsLoadingAiSuggestions(false);
-    }
-  };
-
-  const handleUseSuggestion = (suggestion) => {
-    setContent(suggestion);
-    setShowAiSuggestions(false);
-    textareaRef.current?.focus();
-    toast.success('Suggestion inserted');
   };
 
   const handleCancel = () => {
@@ -238,42 +170,6 @@ const handleSubmit = async (e) => {
         )}
       </div>
 
-      {/* AI Suggestions Panel */}
-      {showAiSuggestions && aiSuggestions.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <ApperIcon name="Sparkles" size={16} className="text-purple-600" />
-              <span className="text-sm font-medium text-purple-800">AI Suggestions</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowAiSuggestions(false)}
-              className="text-purple-400 hover:text-purple-600 transition-colors"
-            >
-              <ApperIcon name="X" size={16} />
-            </button>
-          </div>
-          <div className="space-y-2">
-            {aiSuggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() => handleUseSuggestion(suggestion)}
-                className="w-full text-left p-3 bg-white rounded-md border border-purple-100 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 text-sm text-gray-700 hover:text-purple-800"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
       {/* Enhanced Mentioned Users */}
       {mentions.length > 0 && (
         <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -305,33 +201,9 @@ const handleSubmit = async (e) => {
       )}
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <ApperIcon name="Info" size={14} />
-            <span>Use @ to mention team members • Support rich text formatting</span>
-          </div>
-          
-          {/* AI Suggestions Button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleGetAiSuggestions}
-            disabled={isLoadingAiSuggestions}
-            className="text-purple-600 border-purple-200 hover:bg-purple-50 hover:border-purple-300"
-          >
-            {isLoadingAiSuggestions ? (
-              <>
-                <div className="w-3 h-3 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mr-1" />
-                AI
-              </>
-            ) : (
-              <>
-                <ApperIcon name="Sparkles" size={14} className="mr-1" />
-                AI Suggestions
-              </>
-            )}
-          </Button>
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <ApperIcon name="Info" size={14} />
+          <span>Use @ to mention team members • Support rich text formatting</span>
         </div>
         
         <div className="flex items-center gap-3">
