@@ -274,7 +274,8 @@ export default {
   toggleResolve,
   searchComments,
   markAsRead,
-  getCommentStats
+  getCommentStats,
+  buildCommentThreads
 };
 
 // Sentiment Analysis Functions
