@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { projectService } from '@/services/api/projectService'
-import ApperIcon from '@/components/ApperIcon'
-import Modal from '@/components/atoms/Modal'
-import Input from '@/components/atoms/Input'
-import Textarea from '@/components/atoms/Textarea'
-import Select from '@/components/atoms/Select'
-import Button from '@/components/atoms/Button'
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { projectService } from "@/services/api/projectService";
+import ApperIcon from "@/components/ApperIcon";
+import Textarea from "@/components/atoms/Textarea";
+import Modal from "@/components/atoms/Modal";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
 
 function ProjectCreateModal({ isOpen, onClose, onSubmit, template }) {
   const [formData, setFormData] = useState({
@@ -164,35 +164,38 @@ if (field === 'templateId' && value) {
       title="Create New Project"
       size="lg"
     >
-      <div className="p-6 space-y-6">
+<div className="p-6 space-y-6">
         {/* Template Selection */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-          <div>
-            <h4 className="font-medium text-gray-900">Use Project Template</h4>
-            <p className="text-sm text-gray-600">Start with a pre-configured project structure</p>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <h4 className="font-medium text-gray-900">Use Project Template</h4>
+              <p className="text-sm text-gray-600">Start with a pre-configured project structure</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={formData.useTemplate}
+              onChange={(e) => handleInputChange('useTemplate', e.target.checked)}
+              className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+            />
           </div>
-          <input
-            type="checkbox"
-            checked={formData.useTemplate}
-            onChange={(e) => handleInputChange('useTemplate', e.target.checked)}
-            className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-          />
-        </div>
 
-        {formData.useTemplate && (
-          <Select
-            label="Select Template"
-            value={formData.templateId}
-            onChange={(e) => handleInputChange('templateId', e.target.value)}
-          >
-            <option value="">Choose a template...</option>
-            {templates.map(template => (
-              <option key={template.Id} value={template.Id}>
-                {template.icon} {template.name}
-              </option>
-            ))}
-          </Select>
-        )}
+{formData.useTemplate && (
+            <Select
+              label="Choose Template"
+              value={formData.templateId}
+              onChange={(e) => handleInputChange('templateId', e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Select a template...</option>
+              {templates.map(template => (
+                <option key={template.Id} value={template.Id}>
+                  {template.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </div>
 
         {/* Basic Information */}
         <div className="space-y-4">
