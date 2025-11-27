@@ -89,41 +89,59 @@ attachments: task.attachments || [],
       setIsSubtaskMode(!!task.parentTaskId)
 } else if (isOpen) {
       // Creating new task or modal just opened - reset to defaults
-      setFormData({
-        title: "",
-        description: "",
-        category: "Personal",
-        priority: "Medium",
-        status: "Not Started",
-        parentTaskId: null,
-        tags: [],
-        isRecurring: false,
-        recurrence: null,
-        assignedTo: null,
-        projectId: null,
-        reminders: [
-          { type: "on_due", enabled: false },
-          { type: "1_day_before", enabled: false },
-          { type: "1_hour_before", enabled: false },
-          { type: "custom", enabled: false, minutes: 60 }
-        ],
-        estimatedTime: null,
-        actualTime: 0,
-        timeSpent: 0,
-        notes: "",
-        attachments: [],
-        linkedTasks: []
-      });
-      setIsSubtaskMode(false);
-      
-      // Check if we're creating a subtask (parentTaskId passed via task prop)
-      if (task?.parentTaskId) {
-        setFormData(prev => ({
-          ...prev,
-          parentTaskId: task.parentTaskId
-        }))
-        setIsSubtaskMode(true)
-      }
+      const initializeForm = async () => {
+        const baseFormData = {
+          title: "",
+          description: "",
+          category: "Personal",
+          priority: "Medium",
+          status: "Not Started",
+          parentTaskId: null,
+          tags: [],
+          isRecurring: false,
+          recurrence: null,
+          assignedTo: null,
+          projectId: null,
+          reminders: [
+            { type: "on_due", enabled: false },
+            { type: "1_day_before", enabled: false },
+            { type: "1_hour_before", enabled: false },
+            { type: "custom", enabled: false, minutes: 60 }
+          ],
+          estimatedTime: null,
+          actualTime: 0,
+          timeSpent: 0,
+          notes: "",
+          attachments: [],
+          linkedTasks: []
+        };
+
+        setFormData(baseFormData);
+        setIsSubtaskMode(false);
+        
+        // Check if we're creating a subtask (parentTaskId passed via task prop)
+        if (task?.parentTaskId) {
+          try {
+            // Fetch parent task to get project information
+            const parentTask = await taskService.getById(task.parentTaskId);
+            setFormData(prev => ({
+              ...prev,
+              parentTaskId: task.parentTaskId,
+              projectId: parentTask?.projectId || null
+            }));
+            setIsSubtaskMode(true);
+          } catch (error) {
+            console.error('Failed to fetch parent task:', error);
+            setFormData(prev => ({
+              ...prev,
+              parentTaskId: task.parentTaskId
+            }));
+            setIsSubtaskMode(true);
+          }
+        }
+      };
+
+      initializeForm();
     }
     
     if (isOpen) {
@@ -168,6 +186,16 @@ const handleInputChange = (field, value) => {
     // Toggle subtask mode when parentTaskId changes
     if (field === 'parentTaskId') {
       setIsSubtaskMode(!!value)
+      // If changing to subtask mode, try to inherit parent's project
+      if (value) {
+        taskService.getById(value).then(parentTask => {
+          if (parentTask?.projectId) {
+            setFormData(prev => ({ ...prev, projectId: parentTask.projectId }))
+          }
+        }).catch(error => {
+          console.error('Failed to fetch parent task for project inheritance:', error)
+        })
+      }
     }
     // When project changes, inherit project's default category if available
     if (field === 'projectId' && value) {
