@@ -11,6 +11,9 @@ import ProjectDetail from "@/components/pages/ProjectDetail";
 import NotificationCenter from "@/components/pages/NotificationCenter";
 import ProjectList from "@/components/pages/ProjectList";
 
+// Lazy load Templates page
+const Templates = lazy(() => import("@/components/pages/Templates"));
+
 // Enhanced lazy loading with error recovery
 const createLazyComponent = (importFunc, componentName) => {
   return lazy(() => 
@@ -155,12 +158,16 @@ const mainRoutes = [
     element: <SuspenseWrapper><ProjectTimeline /></SuspenseWrapper>
   },
   {
-    path: "notifications",
+path: "notifications",
     element: <SuspenseWrapper><NotificationCenter /></SuspenseWrapper>
   },
   {
     path: "notifications/preferences",
     element: <SuspenseWrapper><NotificationPreferences /></SuspenseWrapper>
+  },
+  {
+    path: "templates",
+    element: <SuspenseWrapper><Templates /></SuspenseWrapper>
   },
   {
     path: "*",
