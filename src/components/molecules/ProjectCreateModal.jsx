@@ -167,17 +167,30 @@ if (field === 'templateId' && value) {
 <div className="p-6 space-y-6">
         {/* Template Selection */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h4 className="font-medium text-gray-900">Use Project Template</h4>
-              <p className="text-sm text-gray-600">Start with a pre-configured project structure</p>
+<div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-purple-50 to-indigo-50 rounded-lg"></div>
+            <div className="relative flex items-center justify-between p-5 border-2 border-blue-200 rounded-lg bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+                  <ApperIcon name="Sparkles" size={18} className="text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 text-base">Use Project Template</h4>
+                  <p className="text-sm text-gray-700 font-medium">Start with a pre-configured project structure</p>
+                </div>
+              </div>
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={formData.useTemplate}
+                  onChange={(e) => handleInputChange('useTemplate', e.target.checked)}
+                  className="custom-checkbox w-6 h-6 cursor-pointer"
+                />
+                {formData.useTemplate && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce-in"></div>
+                )}
+              </div>
             </div>
-            <input
-              type="checkbox"
-              checked={formData.useTemplate}
-              onChange={(e) => handleInputChange('useTemplate', e.target.checked)}
-              className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-            />
           </div>
 
 {formData.useTemplate && (
