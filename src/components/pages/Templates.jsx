@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
@@ -22,9 +23,10 @@ const Templates = () => {
   const [activeTab, setActiveTab] = useState("tasks")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [showLibrary, setShowLibrary] = useState(false)
-const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState([])
   const [projectCategories, setProjectCategories] = useState([])
 
   useEffect(() => {
@@ -290,12 +292,18 @@ toast.error("Failed to import templates. Please check file format.")
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
                 {filteredTemplates.map((template) => (
-                  <TemplateCard
+<TemplateCard
                     key={template.Id}
                     template={template}
                     type={activeTab}
-onDelete={handleDeleteTemplate}
-                    onUse={activeTab === "tasks" ? taskService.createFromTemplate.bind(taskService) : (templateId, projectData) => projectService.createFromTemplate(templateId, projectData)}
+                    onDelete={handleDeleteTemplate}
+                    onUse={(templateId) => {
+                      if (activeTab === "tasks") {
+                        navigate('/tasks/create', { state: { templateId } });
+                      } else {
+                        navigate('/projects/create', { state: { templateId } });
+                      }
+                    }}
                   />
                 ))}
               </AnimatePresence>
@@ -329,11 +337,11 @@ const TemplateCard = ({ template, type, onDelete, onUse }) => {
   const handleUse = async () => {
     try {
       setIsLoading(true)
-      await onUse(template.Id)
-toast.success(`${type === 'tasks' ? 'Task' : 'Project'} created from template! 🎉`)
+      onUse(template.Id)
+      toast.success(`Opening ${type === 'tasks' ? 'task' : 'project'} form with template data! 🎉`)
     } catch (err) {
       console.error("Failed to use template:", err)
-toast.error("Failed to use template. Please try again.")
+      toast.error("Failed to use template. Please try again.")
     } finally {
       setIsLoading(false)
     }

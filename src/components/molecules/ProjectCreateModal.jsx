@@ -8,7 +8,7 @@ import Textarea from '@/components/atoms/Textarea'
 import Select from '@/components/atoms/Select'
 import Button from '@/components/atoms/Button'
 
-function ProjectCreateModal({ isOpen, onClose, onSubmit }) {
+function ProjectCreateModal({ isOpen, onClose, onSubmit, template }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -25,10 +25,24 @@ function ProjectCreateModal({ isOpen, onClose, onSubmit }) {
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    if (isOpen) {
+if (isOpen) {
       loadTemplates()
+      
+      // If template provided, auto-fill form data
+      if (template) {
+        setFormData(prev => ({
+          ...prev,
+          name: template.name || '',
+          description: template.description || '',
+          color: template.color || '#3b82f6',
+          icon: template.icon || '📁',
+          status: template.status || 'Active',
+          useTemplate: true,
+          templateId: template.Id
+        }))
+      }
     }
-  }, [isOpen])
+  }, [isOpen, template])
 
   const loadTemplates = async () => {
     try {
@@ -46,14 +60,16 @@ function ProjectCreateModal({ isOpen, onClose, onSubmit }) {
     }
 
     // Auto-fill template data
-    if (field === 'templateId' && value) {
-      const template = templates.find(t => t.Id === value)
-      if (template) {
+if (field === 'templateId' && value) {
+      const selectedTemplate = templates.find(t => t.Id === value)
+      if (selectedTemplate) {
         setFormData(prev => ({
           ...prev,
-          color: template.color,
-          icon: template.icon,
-          description: prev.description || template.description
+          name: prev.name || selectedTemplate.name,
+          color: selectedTemplate.color,
+          icon: selectedTemplate.icon,
+          description: prev.description || selectedTemplate.description,
+          status: selectedTemplate.status || 'Active'
         }))
       }
     }

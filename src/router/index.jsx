@@ -1,5 +1,7 @@
-import { createBrowserRouter } from "react-router-dom";
-import React, { Suspense } from "react";
+import { createBrowserRouter, useLocation } from "react-router-dom";
+import React, { Suspense, useState } from "react";
+import { projectService } from "@/services/api/projectService";
+import { taskService } from "@/services/api/taskService";
 import Layout from "@/components/organisms/Layout";
 import ProjectSettings from "@/components/pages/ProjectSettings";
 import ProjectTimeline from "@/components/pages/ProjectTimeline";
@@ -10,6 +12,13 @@ import ProjectDetail from "@/components/pages/ProjectDetail";
 import Templates from "@/components/pages/Templates";
 import NotificationCenter from "@/components/pages/NotificationCenter";
 import ProjectList from "@/components/pages/ProjectList";
+import ProjectCreateModal from "@/components/molecules/ProjectCreateModal";
+import TaskEditModal from "@/components/molecules/TaskEditModal";
+import toast from "@/utils/toast";
+
+// Lazy load create pages
+const TaskCreate = React.lazy(() => import('@/components/pages/TaskCreate'))
+const ProjectCreate = React.lazy(() => import('@/components/pages/ProjectCreate'))
 
 // Suspense wrapper component
 const SuspenseWrapper = ({ children }) => (
@@ -20,17 +29,15 @@ const SuspenseWrapper = ({ children }) => (
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
-        <div className="space-y-2">
-          <p className="text-lg font-medium text-gray-900">Loading...</p>
-          <p className="text-sm text-gray-600">Preparing your workspace</p>
-        </div>
+        <div className="text-lg font-medium text-gray-700">Loading...</div>
       </div>
     </div>
   }>
     {children}
   </Suspense>
 );
-// Router Error Boundary Component
+
+// Error Boundary Class Component
 class RouterErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
@@ -104,6 +111,10 @@ const mainRoutes = [
     element: <SuspenseWrapper><ProjectList /></SuspenseWrapper>
   },
   {
+    path: "projects/create",
+    element: <SuspenseWrapper><ProjectCreate /></SuspenseWrapper>
+  },
+  {
     path: "projects/:id",
     element: <SuspenseWrapper><ProjectDetail /></SuspenseWrapper>
   },
@@ -116,7 +127,11 @@ const mainRoutes = [
     element: <SuspenseWrapper><ProjectTimeline /></SuspenseWrapper>
   },
   {
-path: "notifications",
+    path: "tasks/create",
+    element: <SuspenseWrapper><TaskCreate /></SuspenseWrapper>
+  },
+  {
+    path: "notifications",
     element: <SuspenseWrapper><NotificationCenter /></SuspenseWrapper>
   },
   {
@@ -131,7 +146,7 @@ path: "notifications",
     path: "*",
     element: <SuspenseWrapper><NotFound /></SuspenseWrapper>
   }
-]
+];
 
 const routes = [
   {

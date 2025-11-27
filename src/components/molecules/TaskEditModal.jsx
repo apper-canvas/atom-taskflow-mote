@@ -24,7 +24,7 @@ const mockUsers = [
   { id: 5, name: "David Brown", email: "david@company.com" }
 ];
 
-const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
+const TaskEditModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false, template }) => {
 const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -69,7 +69,7 @@ if (task && task.Id) {
         status: task.status || "Not Started",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
-isRecurring: task.isRecurring || false,
+        isRecurring: task.isRecurring || false,
         recurrence: task.recurrence || null,
         assignedTo: task.assignedTo || null,
         reminders: task.reminders || [
@@ -82,12 +82,40 @@ isRecurring: task.isRecurring || false,
         actualTime: task.actualTime || 0,
         timeSpent: task.timeSpent || 0,
         notes: task.notes || "",
-attachments: task.attachments || [],
+        attachments: task.attachments || [],
         projectId: task.projectId || null,
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
-} else if (isOpen) {
+    } else if (template) {
+      // Creating new task from template - populate with template data
+      setFormData({
+        title: template.title || "",
+        description: template.description || "",
+        category: template.category || "Personal",
+        priority: template.priority || "Medium",
+        status: "Not Started",
+        parentTaskId: null,
+        tags: template.tags || [],
+        isRecurring: template.isRecurring || false,
+        recurrence: template.recurrence || null,
+        assignedTo: null,
+        projectId: null,
+        reminders: template.reminders || [
+          { type: "on_due", enabled: false },
+          { type: "1_day_before", enabled: false },
+          { type: "1_hour_before", enabled: false },
+          { type: "custom", enabled: false, minutes: 60 }
+        ],
+        estimatedTime: template.estimatedTime || null,
+        actualTime: 0,
+        timeSpent: 0,
+        notes: template.notes || "",
+        attachments: [],
+        linkedTasks: []
+      });
+      setIsSubtaskMode(false);
+    } else if (isOpen) {
       // Creating new task or modal just opened - reset to defaults
       const initializeForm = async () => {
         const baseFormData = {
