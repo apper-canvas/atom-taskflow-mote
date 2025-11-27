@@ -245,6 +245,19 @@ export const getTeamMembers = async () => {
   await new Promise(resolve => setTimeout(resolve, 100));
   return mockTeamMembers;
 };
+// Get comment statistics for a task
+export const getCommentStats = async (taskId) => {
+  await new Promise(resolve => setTimeout(resolve, 100));
+  const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
+  
+  return {
+    total: taskComments.length,
+    unread: taskComments.filter(c => c.isUnread).length,
+    pinned: taskComments.filter(c => c.isPinned).length,
+    resolved: taskComments.filter(c => c.isResolved).length,
+    threads: taskComments.filter(c => !c.parentId).length
+  };
+};
 
 // Export all functions
 export default {
@@ -262,20 +275,6 @@ export default {
   searchComments,
   markAsRead,
   getCommentStats
-};
-
-// Get comment statistics for a task
-export const getCommentStats = async (taskId) => {
-  await new Promise(resolve => setTimeout(resolve, 100));
-const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
-  
-  return {
-    total: taskComments.length,
-    unread: taskComments.filter(c => c.isUnread).length,
-    pinned: taskComments.filter(c => c.isPinned).length,
-    resolved: taskComments.filter(c => c.isResolved).length,
-    threads: taskComments.filter(c => !c.parentId).length
-  };
 };
 
 // Sentiment Analysis Functions
