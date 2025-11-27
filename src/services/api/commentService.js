@@ -269,6 +269,20 @@ export const searchComments = async (taskId, query) => {
   return taskComments.filter(comment => 
     comment.content.toLowerCase().includes(query.toLowerCase()) ||
     comment.authorName.toLowerCase().includes(query.toLowerCase())
+);
+};
+
+// Filter comments by author
+export const filterCommentsByAuthor = async (taskId, authorName) => {
+  await delay();
+  
+  if (!authorName.trim()) {
+    return getCommentsByTaskId(taskId);
+  }
+  
+  const taskComments = comments.filter(comment => comment.taskId === parseInt(taskId));
+  return taskComments.filter(comment => 
+    comment.authorName.toLowerCase() === authorName.toLowerCase()
   );
 };
 
@@ -390,14 +404,15 @@ export default {
   getCommentById,
   getCommentTopics,
   getTeamMembers,
-addReaction,
+  addReaction,
   removeReaction,
   toggleLike,
   togglePin,
   toggleResolve,
   searchComments,
+  filterCommentsByAuthor,
   markAsRead,
-getCommentStats,
+  getCommentStats,
   buildCommentThreads
 };
 

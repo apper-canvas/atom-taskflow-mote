@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
-import commentService, { addReaction, removeReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentStats, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
+import commentService, { addReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentStats, getCommentsByTaskId, markAsRead, removeReaction, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
 import { updateTaskCommentStats } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Select from "@/components/atoms/Select";
@@ -13,10 +13,11 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [comments, setComments] = useState([]);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic, sentiment
+const [searchQuery, setSearchQuery] = useState('');
+const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic, sentiment, author
   const [selectedTopic, setSelectedTopic] = useState('');
   const [selectedSentiment, setSelectedSentiment] = useState('');
+  const [selectedAuthor, setSelectedAuthor] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [conversationSummary, setConversationSummary] = useState(null);
@@ -36,7 +37,7 @@ const currentUserId = 1; // This would come from authentication context
 
   useEffect(() => {
     buildThreads();
-  }, [comments, searchQuery, filterType]);
+}, [comments, searchQuery, filterType, selectedTopic, selectedSentiment, selectedAuthor]);
 
   useEffect(() => {
     loadCommentStats();
@@ -77,8 +78,12 @@ let filteredComments = comments;
     if (searchQuery.trim()) {
       filteredComments = await commentService.searchComments(taskId, searchQuery);
     }
-
-    // Apply type filter
+    
+    // Apply author filter if different from search
+    if (filterType === 'author' && selectedAuthor && !searchQuery.trim()) {
+      filteredComments = await commentService.filterCommentsByAuthor(taskId, selectedAuthor);
+    }
+// Apply type filter
     switch (filterType) {
       case 'pinned':
         filteredComments = filteredComments.filter(c => c.isPinned);
@@ -89,15 +94,31 @@ let filteredComments = comments;
       case 'unread':
         filteredComments = filteredComments.filter(c => c.isUnread);
         break;
-case 'topic':
+      case 'topic':
         if (selectedTopic) {
           filteredComments = filteredComments.filter(c => c.topic === selectedTopic);
         }
         break;
+      case 'sentiment':
+        if (selectedSentiment) {
+          filteredComments = filteredComments.filter(c => c.sentiment === selectedSentiment);
+        }
+        break;
+      case 'author':
+        if (selectedAuthor) {
+          filteredComments = filteredComments.filter(c => c.authorName === selectedAuthor);
+        }
+        break;
       default:
-        // Reset selectedTopic when switching away from topic filter
+        // Reset selections when switching away from specific filters
         if (filterType !== 'topic' && selectedTopic) {
           setSelectedTopic('');
+        }
+        if (filterType !== 'sentiment' && selectedSentiment) {
+          setSelectedSentiment('');
+        }
+        if (filterType !== 'author' && selectedAuthor) {
+          setSelectedAuthor('');
         }
         break;
     }
@@ -727,7 +748,7 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
           
           <div className="flex flex-wrap gap-3">
             <select
-              value={filterType}
+value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-32"
             >
@@ -735,6 +756,7 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
               <option value="pinned">📌 Pinned</option>
               <option value="resolved">✅ Resolved</option>
               <option value="unread">🔵 Unread</option>
+              <option value="author">👤 By Author</option>
               <option value="sentiment">😊 By Sentiment</option>
               <option value="topic">🏷️ By Topic</option>
             </select>
@@ -749,6 +771,20 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
                 <option value="">Select Topic</option>
                 {[...new Set(comments.map(c => c.topic).filter(Boolean))].map(topic => (
                   <option key={topic} value={topic}>{topic}</option>
+                ))}
+              </select>
+)}
+            
+            {/* Author Filter */}
+            {filterType === 'author' && (
+              <select
+                value={selectedAuthor}
+                onChange={(e) => setSelectedAuthor(e.target.value)}
+                className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-40"
+              >
+                <option value="">Select Author</option>
+                {[...new Set(comments.map(c => c.authorName).filter(Boolean))].map(author => (
+                  <option key={author} value={author}>{author}</option>
                 ))}
               </select>
             )}
@@ -770,7 +806,7 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
         </div>
         
         {/* Filter Summary */}
-        {(searchQuery || filterType !== 'all' || selectedTopic || selectedSentiment) && (
+{(searchQuery || filterType !== 'all' || selectedTopic || selectedSentiment || selectedAuthor) && (
           <div className="mt-4 pt-4 border-t border-slate-200">
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <ApperIcon name="Filter" size={14} />
@@ -794,6 +830,11 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
                 {selectedSentiment && (
                   <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
                     Sentiment: {selectedSentiment}
+                  </span>
+                )}
+                {selectedAuthor && (
+                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                    Author: {selectedAuthor}
                   </span>
                 )}
               </div>
