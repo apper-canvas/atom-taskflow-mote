@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { taskService } from "@/services/api/taskService";
 import { projectService } from "@/services/api/projectService";
+import { taskService } from "@/services/api/taskService";
+import { showToast } from "@/utils/toast";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
@@ -197,6 +198,12 @@ const handleRecurringSave = (taskId, recurringData) => {
       isRecurring: true,
       recurrence: recurringData.recurrence
     }))
+    setShowRecurringModal(false)
+    showToast('Recurring schedule updated successfully', 'success')
+  }
+
+  const handleEditRecurring = () => {
+    setShowRecurringModal(true)
     setShowRecurringModal(false)
   }
 
@@ -800,8 +807,9 @@ rows={4}
 <RecurringTaskModal
         isOpen={showRecurringModal}
         onClose={() => setShowRecurringModal(false)}
-        task={formData.isRecurring ? { 
+task={formData.isRecurring ? { 
           ...formData, 
+          Id: task?.Id,
           recurrence: formData.recurrence || task?.recurrence 
         } : null}
         onSave={handleRecurringSave}
