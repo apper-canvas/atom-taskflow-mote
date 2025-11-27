@@ -42,9 +42,11 @@ export const createComment = async (commentData) => {
   if (!commentData) {
     throw new Error('Comment data is required');
   }
-  
-  // Validate content - ensure it's not empty or whitespace only
-  const content = commentData.content || '';
+// Enhanced content validation - ensure it's not empty or whitespace only
+  const content = commentData.content?.trim() || '';
+  if (!content || content.length < 3) {
+    throw new Error('Comment content must be at least 3 characters long');
+  }
   if (!content.trim()) {
     throw new Error('Comment content cannot be empty');
   }
@@ -62,9 +64,9 @@ const newComment = {
     topic: commentData.topic || null,
     content: content.trim(), // Use validated and trimmed content
     contentType: commentData.contentType || "html", // text, html, markdown
-    authorId: commentData.authorId || 1,
-    authorName: commentData.authorName || "Current User",
-    authorEmail: commentData.authorEmail || "user@example.com",
+authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorId : 1,
+    authorName: commentData.authorName?.trim() || "Current User",
+    authorEmail: commentData.authorEmail?.trim() || "user@example.com",
     authorAvatar: commentData.authorAvatar || null,
     mentions: Array.isArray(commentData.mentions) ? commentData.mentions : [],
     attachments: Array.isArray(commentData.attachments) ? commentData.attachments : [],

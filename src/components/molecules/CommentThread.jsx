@@ -30,6 +30,8 @@ const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, u
     threads: 0
   });
 const currentUserId = 1; // This would come from authentication context
+const currentUserName = 'Current User'; // This would come from authentication context
+const currentUserEmail = 'user@example.com'; // This would come from authentication context
   const EDIT_WINDOW_MINUTES = 5; // Configurable edit window
   useEffect(() => {
     loadComments();
@@ -150,9 +152,9 @@ const toggleThreadCollapse = (commentId) => {
         mentions,
         attachments,
         quotedCommentId,
-        authorId: currentUserId,
-        authorName: 'Current User',
-        authorEmail: 'user@example.com',
+authorId: currentUserId,
+        authorName: currentUserName,
+        authorEmail: currentUserEmail,
         authorAvatar: null
       });
 
@@ -350,7 +352,7 @@ const RenderComment = ({ comment, isReply = false }) => {
                 className="font-semibold text-slate-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
                 title={`View ${comment?.authorName || 'User'}'s profile`}
               >
-                {comment?.authorName || 'Anonymous'}
+{comment?.authorName?.trim() || 'Unknown User'}
               </button>
               {/* Enhanced Status Indicators */}
               <div className="flex items-center gap-2">
