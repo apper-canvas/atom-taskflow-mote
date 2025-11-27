@@ -12,13 +12,14 @@ import Input from "@/components/atoms/Input";
 import Badge from "@/components/atoms/Badge";
 import toast from "@/utils/toast";
 const TemplateLibrary = ({ isOpen, onClose, type = "tasks" }) => {
-  const [templates, setTemplates] = useState([])
+const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("popular")
   const [categories, setCategories] = useState([])
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [libraryTemplates, setLibraryTemplates] = useState([])
 
   useEffect(() => {
     if (isOpen) {
@@ -30,10 +31,13 @@ const TemplateLibrary = ({ isOpen, onClose, type = "tasks" }) => {
     try {
       setLoading(true)
       const [templateData, categoryData] = await Promise.all([
-        type === 'tasks' ? taskService.getTemplates() : projectService.getTemplates(),
+type === 'tasks' ? taskService.getTemplates() : projectService.getTemplates(),
         type === 'tasks' ? taskService.getTemplateCategories() : projectService.getTemplateCategories()
       ])
       
+      // Filter built-in templates for library
+      const builtInTemplates = templateData.filter(template => template.isBuiltIn)
+      setLibraryTemplates(builtInTemplates)
       setTemplates(templateData)
       setCategories(categoryData)
     } catch (error) {
@@ -46,11 +50,11 @@ toast.error("Failed to load template library")
 
   const handleUseTemplate = async (templateId) => {
     try {
-      if (type === 'tasks') {
+if (type === 'tasks') {
         await taskService.createFromTemplate(templateId)
-toast.success("Task created from template! 🎉")
+        toast.success("Task created from template! 🎉")
       } else {
-await projectService.createFromTemplate(templateId)
+        await projectService.createFromTemplate(templateId)
         toast.success("Project created from template! 🎉")
       }
       onClose()
@@ -82,74 +86,7 @@ await projectService.createFromTemplate(templateId)
       const matchesCategory = selectedCategory === "all" || template.category === selectedCategory
       return matchesSearch && matchesCategory
     })
-  )
-
-  const libraryTemplates = [
-    // Predefined popular templates
-    {
-      Id: 'lib-1',
-      name: 'Daily Standup Meeting',
-      description: 'Template for organizing daily standup meetings with standard agenda items',
-      category: 'Meetings',
-      icon: '🎯',
-      usageCount: 156,
-      isLibrary: true,
-      defaults: {
-        category: 'Work',
-        priority: 'Medium',
-        estimatedTime: 30
-      },
-      subtasks: [
-        { title: 'Review yesterday\'s progress', priority: 'High' },
-        { title: 'Discuss today\'s goals', priority: 'High' },
-        { title: 'Identify blockers', priority: 'Medium' },
-        { title: 'Plan next steps', priority: 'Medium' }
-      ]
-    },
-    {
-      Id: 'lib-2',
-      name: 'Website Launch Checklist',
-      description: 'Comprehensive checklist for launching a new website or web application',
-      category: 'Projects',
-      icon: '🚀',
-      usageCount: 89,
-      isLibrary: true,
-      defaults: {
-        category: 'Work',
-        priority: 'High',
-        estimatedTime: 480
-      },
-      subtasks: [
-        { title: 'Domain setup and DNS configuration', priority: 'High' },
-        { title: 'SSL certificate installation', priority: 'High' },
-        { title: 'Performance testing', priority: 'High' },
-        { title: 'SEO optimization', priority: 'Medium' },
-        { title: 'Analytics setup', priority: 'Medium' },
-        { title: 'Backup system configuration', priority: 'Medium' }
-      ]
-    },
-    {
-      Id: 'lib-3',
-      name: 'Code Review Process',
-      description: 'Standard process for conducting thorough code reviews',
-      category: 'Development',
-      icon: '🔍',
-      usageCount: 134,
-      isLibrary: true,
-      defaults: {
-        category: 'Work',
-        priority: 'High',
-        estimatedTime: 60
-      },
-      subtasks: [
-        { title: 'Check code functionality', priority: 'High' },
-        { title: 'Review code style and conventions', priority: 'Medium' },
-        { title: 'Test edge cases', priority: 'High' },
-        { title: 'Verify security considerations', priority: 'High' },
-        { title: 'Document feedback', priority: 'Medium' }
-      ]
-    }
-  ]
+)
 
   const allTemplates = [...libraryTemplates, ...filteredTemplates]
 
@@ -183,10 +120,9 @@ await projectService.createFromTemplate(templateId)
             className="w-48"
           >
             <option value="all">All Categories</option>
-            <option value="Meetings">Meetings</option>
-            <option value="Projects">Projects</option>
-            <option value="Development">Development</option>
-            <option value="Personal">Personal</option>
+{categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </Select>
           
           <Select
@@ -288,9 +224,12 @@ const TemplateLibraryCard = ({ template, onUse, onPreview }) => {
       </p>
       
       <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>Used {template.usageCount || 0} times</span>
-        {template.subtasks?.length > 0 && (
-          <span>{template.subtasks.length} subtasks</span>
+<span>Used {template.usageCount || 0} times</span>
+        {(template.subtasks?.length > 0 || template.tasks?.length > 0) && (
+          <span>
+            {template.subtasks?.length > 0 && `${template.subtasks.length} subtasks`}
+            {template.tasks?.length > 0 && `${template.tasks.length} tasks`}
+          </span>
         )}
       </div>
     </motion.div>

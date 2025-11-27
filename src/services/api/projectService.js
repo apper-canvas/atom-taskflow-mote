@@ -160,60 +160,460 @@ return new Promise((resolve, reject) => {
   },
 
   // Get project templates
+// Get built-in project templates
   async getTemplates() {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const templates = [
+        const userTemplates = this.getUserTemplates()
+        
+        // Built-in project templates
+        const builtInTemplates = [
           {
-            Id: 'template_1',
-            name: 'Software Development',
-            description: 'Complete software development workflow',
+            Id: -1,
+            name: 'Software Development Project',
+            description: 'Complete software development lifecycle with agile methodology',
             icon: '💻',
             color: '#3b82f6',
-            categories: ['Work'],
-            defaultTasks: [
-              { title: 'Requirements gathering', priority: 'High', category: 'Work' },
-              { title: 'System design', priority: 'High', category: 'Work' },
-              { title: 'Development', priority: 'Medium', category: 'Work' },
-              { title: 'Testing', priority: 'Medium', category: 'Work' },
-              { title: 'Deployment', priority: 'High', category: 'Work' }
-            ]
+            category: 'Technology',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 1, name: 'development', color: '#3b82f6' },
+              { Id: 2, name: 'agile', color: '#10b981' }
+            ],
+            defaults: {
+              color: '#3b82f6',
+              status: 'Active',
+              settings: {
+                isPublic: false,
+                allowMemberInvites: true,
+                requireApproval: false
+              }
+            },
+            tasks: [
+              { 
+                title: 'Project Setup & Requirements Gathering', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Set up development environment and gather detailed requirements',
+                estimatedTime: 480
+              },
+              { 
+                title: 'System Architecture & Design', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Create system architecture diagrams and database design',
+                estimatedTime: 360
+              },
+              { 
+                title: 'Development Environment Setup', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Configure development tools, CI/CD pipeline, and version control',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Core Feature Development', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Implement core application features and functionality',
+                estimatedTime: 1200
+              },
+              { 
+                title: 'Testing & Quality Assurance', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Comprehensive testing including unit, integration, and end-to-end tests',
+                estimatedTime: 480
+              },
+              { 
+                title: 'Documentation & Deployment', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Create user documentation and deploy to production environment',
+                estimatedTime: 320
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 142
           },
           {
-            Id: 'template_2',
-            name: 'Marketing Campaign',
-            description: 'Marketing campaign planning and execution',
+            Id: -2,
+            name: 'Marketing Campaign Launch',
+            description: 'End-to-end marketing campaign from strategy to analysis',
             icon: '📢',
             color: '#f59e0b',
-            categories: ['Work'],
-            defaultTasks: [
-              { title: 'Market research', priority: 'High', category: 'Work' },
-              { title: 'Content creation', priority: 'Medium', category: 'Work' },
-              { title: 'Campaign launch', priority: 'High', category: 'Work' },
-              { title: 'Performance analysis', priority: 'Medium', category: 'Work' }
-            ]
+            category: 'Marketing',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 3, name: 'marketing', color: '#f59e0b' },
+              { Id: 4, name: 'campaign', color: '#ef4444' }
+            ],
+            defaults: {
+              color: '#f59e0b',
+              status: 'Active',
+              settings: {
+                isPublic: false,
+                allowMemberInvites: true,
+                requireApproval: true
+              }
+            },
+            tasks: [
+              { 
+                title: 'Market Research & Target Audience Analysis', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Research market trends and define target customer segments',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Campaign Strategy & Messaging Development', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Develop campaign strategy, key messages, and value propositions',
+                estimatedTime: 320
+              },
+              { 
+                title: 'Creative Content Creation', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Create visuals, copy, videos, and other marketing materials',
+                estimatedTime: 480
+              },
+              { 
+                title: 'Channel Selection & Media Planning', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Choose marketing channels and plan media buy and scheduling',
+                estimatedTime: 180
+              },
+              { 
+                title: 'Campaign Launch & Monitoring', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Execute campaign launch and monitor initial performance',
+                estimatedTime: 120
+              },
+              { 
+                title: 'Performance Analysis & Optimization', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Analyze campaign results and optimize for better performance',
+                estimatedTime: 200
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 87
           },
           {
-            Id: 'template_3',
-            name: 'Personal Goals',
-            description: 'Personal development and goal tracking',
+            Id: -3,
+            name: 'Event Planning & Management',
+            description: 'Comprehensive event planning from conception to execution',
+            icon: '🎉',
+            color: '#8b5cf6',
+            category: 'Events',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 5, name: 'event', color: '#8b5cf6' },
+              { Id: 6, name: 'planning', color: '#10b981' }
+            ],
+            defaults: {
+              color: '#8b5cf6',
+              status: 'Active',
+              settings: {
+                isPublic: true,
+                allowMemberInvites: true,
+                requireApproval: false
+              }
+            },
+            tasks: [
+              { 
+                title: 'Event Concept & Budget Planning', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Define event concept, objectives, and establish budget parameters',
+                estimatedTime: 180
+              },
+              { 
+                title: 'Venue Selection & Booking', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Research, visit, and secure appropriate venue for the event',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Vendor Coordination & Catering', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Coordinate with caterers, AV teams, decorators, and other vendors',
+                estimatedTime: 320
+              },
+              { 
+                title: 'Marketing & Guest Registration', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Promote event and manage attendee registration process',
+                estimatedTime: 200
+              },
+              { 
+                title: 'Event Day Coordination', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Manage all aspects of event execution and troubleshoot issues',
+                estimatedTime: 600
+              },
+              { 
+                title: 'Post-Event Follow-up & Analysis', 
+                priority: 'Low', 
+                category: 'Work',
+                description: 'Gather feedback, send thank you messages, and analyze event success',
+                estimatedTime: 120
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 64
+          },
+          {
+            Id: -4,
+            name: 'Personal Goal Achievement',
+            description: 'Structured approach to setting and achieving personal goals',
             icon: '🎯',
             color: '#10b981',
-            categories: ['Personal'],
-            defaultTasks: [
-              { title: 'Set objectives', priority: 'High', category: 'Personal' },
-              { title: 'Create action plan', priority: 'Medium', category: 'Personal' },
-              { title: 'Track progress', priority: 'Medium', category: 'Personal' },
-              { title: 'Review and adjust', priority: 'Low', category: 'Personal' }
-            ]
+            category: 'Personal',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 7, name: 'personal', color: '#10b981' },
+              { Id: 8, name: 'goals', color: '#8b5cf6' }
+            ],
+            defaults: {
+              color: '#10b981',
+              status: 'Active',
+              settings: {
+                isPublic: false,
+                allowMemberInvites: false,
+                requireApproval: false
+              }
+            },
+            tasks: [
+              { 
+                title: 'Goal Definition & Vision Setting', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Clearly define specific, measurable, achievable goals',
+                estimatedTime: 120
+              },
+              { 
+                title: 'Action Plan & Milestone Creation', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Break down goals into actionable steps and key milestones',
+                estimatedTime: 180
+              },
+              { 
+                title: 'Resource Assessment & Skill Development', 
+                priority: 'Medium', 
+                category: 'Personal',
+                description: 'Identify needed resources and skills to achieve goals',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Progress Tracking & Regular Review', 
+                priority: 'Medium', 
+                category: 'Personal',
+                description: 'Establish tracking system and schedule regular progress reviews',
+                estimatedTime: 60
+              },
+              { 
+                title: 'Obstacle Management & Adaptation', 
+                priority: 'Medium', 
+                category: 'Personal',
+                description: 'Identify potential obstacles and create contingency plans',
+                estimatedTime: 120
+              },
+              { 
+                title: 'Celebration & Next Goal Planning', 
+                priority: 'Low', 
+                category: 'Personal',
+                description: 'Celebrate achievements and plan next set of goals',
+                estimatedTime: 90
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 93
+          },
+          {
+            Id: -5,
+            name: 'Product Launch Strategy',
+            description: 'Complete product launch from development to market introduction',
+            icon: '🚀',
+            color: '#ef4444',
+            category: 'Business',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 9, name: 'product', color: '#ef4444' },
+              { Id: 10, name: 'launch', color: '#f59e0b' }
+            ],
+            defaults: {
+              color: '#ef4444',
+              status: 'Active',
+              settings: {
+                isPublic: false,
+                allowMemberInvites: true,
+                requireApproval: true
+              }
+            },
+            tasks: [
+              { 
+                title: 'Product Development & Testing', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Complete product development and conduct thorough testing',
+                estimatedTime: 800
+              },
+              { 
+                title: 'Market Research & Competitive Analysis', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Analyze target market and competitive landscape',
+                estimatedTime: 200
+              },
+              { 
+                title: 'Pricing Strategy & Business Model', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Develop pricing strategy and finalize business model',
+                estimatedTime: 160
+              },
+              { 
+                title: 'Launch Marketing & PR Campaign', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Create and execute comprehensive launch marketing campaign',
+                estimatedTime: 400
+              },
+              { 
+                title: 'Sales Team Training & Channel Setup', 
+                priority: 'Medium', 
+                category: 'Work',
+                description: 'Train sales team and establish distribution channels',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Launch Execution & Customer Support', 
+                priority: 'High', 
+                category: 'Work',
+                description: 'Execute product launch and provide initial customer support',
+                estimatedTime: 320
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 71
+          },
+          {
+            Id: -6,
+            name: 'Home Renovation Project',
+            description: 'Complete home renovation from planning to completion',
+            icon: '🏠',
+            color: '#6b7280',
+            category: 'Personal',
+            isBuiltIn: true,
+            isPublic: true,
+            tags: [
+              { Id: 11, name: 'home', color: '#6b7280' },
+              { Id: 12, name: 'renovation', color: '#f59e0b' }
+            ],
+            defaults: {
+              color: '#6b7280',
+              status: 'Active',
+              settings: {
+                isPublic: false,
+                allowMemberInvites: true,
+                requireApproval: false
+              }
+            },
+            tasks: [
+              { 
+                title: 'Planning & Design Phase', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Create renovation plans, get permits, and finalize design',
+                estimatedTime: 320
+              },
+              { 
+                title: 'Budget Planning & Contractor Selection', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Establish budget and select qualified contractors',
+                estimatedTime: 240
+              },
+              { 
+                title: 'Material Selection & Procurement', 
+                priority: 'Medium', 
+                category: 'Personal',
+                description: 'Choose materials, fixtures, and coordinate deliveries',
+                estimatedTime: 180
+              },
+              { 
+                title: 'Demolition & Structural Work', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Complete demolition and any structural modifications',
+                estimatedTime: 480
+              },
+              { 
+                title: 'Installation & Finishing Work', 
+                priority: 'High', 
+                category: 'Personal',
+                description: 'Install new elements and complete finishing touches',
+                estimatedTime: 720
+              },
+              { 
+                title: 'Final Inspection & Touch-ups', 
+                priority: 'Medium', 
+                category: 'Personal',
+                description: 'Conduct final inspection and complete any necessary touch-ups',
+                estimatedTime: 120
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system',
+            usageCount: 38
           }
         ]
-        resolve(templates)
+        
+        // Combine built-in templates with user templates
+        resolve([...builtInTemplates, ...userTemplates])
       }, 100)
     })
   },
 
-  // Create project from template
+  // Get user-created templates only
+  getUserTemplates() {
+    try {
+      const stored = localStorage.getItem("taskflow-project-templates")
+      return stored ? JSON.parse(stored) : []
+    } catch (error) {
+      console.error("Failed to load user project templates:", error)
+      return []
+    }
+  },
+
+  // Create project from template (legacy method for compatibility)
   async createFromTemplate(templateId, projectData) {
     const templates = await this.getTemplates()
     const template = templates.find(t => t.Id === templateId)
@@ -226,10 +626,31 @@ return new Promise((resolve, reject) => {
       ...projectData,
       icon: projectData.icon || template.icon,
       color: projectData.color || template.color,
-      defaultCategory: template.categories[0]
+      defaultCategory: template.category || 'Work'
     }
 
-    return this.create(projectFromTemplate)
+    const project = await this.create(projectFromTemplate)
+
+    // Create tasks if template has them
+    if (template.tasks && template.tasks.length > 0) {
+      const { taskService } = await import('./taskService')
+      
+      for (const taskTemplate of template.tasks) {
+        await taskService.create({
+          ...taskTemplate,
+          projectId: project.Id
+        })
+      }
+    }
+
+    // Increment usage count for user templates only
+    if (!template.isBuiltIn) {
+      await this.updateTemplate(templateId, {
+        usageCount: template.usageCount + 1
+      })
+    }
+
+    return project
   },
 
   // Add member to project
@@ -341,7 +762,7 @@ return new Promise((resolve, reject) => {
             if (!task.dueDate && !task.dueDateTime) return false
             const dueDate = new Date(task.dueDate || task.dueDateTime)
             return !task.completed && dueDate < new Date()
-}).length,
+          }).length,
           completionPercentage: projectTasks.length > 0 
             ? Math.round((projectTasks.filter(task => task.completed).length / projectTasks.length) * 100)
             : 0,
@@ -360,19 +781,7 @@ return new Promise((resolve, reject) => {
   },
 
   // Project Template Management
-  async getTemplates() {
-    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
-    await delay()
-    try {
-      const stored = localStorage.getItem("taskflow-project-templates")
-      return stored ? JSON.parse(stored) : []
-    } catch (error) {
-      console.error("Failed to load project templates:", error)
-      return []
-    }
-  },
-
-async getTemplateById(id) {
+  async getTemplateById(id) {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
     const templates = await this.getTemplates()
@@ -386,8 +795,8 @@ async getTemplateById(id) {
   async createTemplate(templateData) {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
-    const templates = await this.getTemplates()
-    const maxId = templates.length > 0 ? Math.max(...templates.map(t => t.Id)) : 0
+    const userTemplates = this.getUserTemplates()
+    const maxId = userTemplates.length > 0 ? Math.max(...userTemplates.map(t => t.Id)) : 0
     
     const newTemplate = {
       Id: maxId + 1,
@@ -396,6 +805,7 @@ async getTemplateById(id) {
       category: templateData.category || "Business",
       icon: templateData.icon || "📁",
       isPublic: templateData.isPublic || false,
+      isBuiltIn: false,
       defaults: {
         color: templateData.defaults?.color || "#3b82f6",
         status: templateData.defaults?.status || "Active",
@@ -408,97 +818,63 @@ async getTemplateById(id) {
       usageCount: 0
     }
     
-    templates.push(newTemplate)
-    this.saveProjectTemplatesToStorage(templates)
+    userTemplates.push(newTemplate)
+    this.saveProjectTemplatesToStorage(userTemplates)
     return { ...newTemplate }
   },
 
-async updateTemplate(id, updates) {
+  async updateTemplate(id, updates) {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
-    const templates = await this.getTemplates()
-    const index = templates.findIndex(t => t.Id === parseInt(id))
+    const userTemplates = this.getUserTemplates()
+    const index = userTemplates.findIndex(t => t.Id === parseInt(id))
     
     if (index === -1) {
-      throw new Error(`Project template with Id ${id} not found`)
+      throw new Error(`Project template with Id ${id} not found or cannot be modified`)
     }
     
-    templates[index] = {
-      ...templates[index],
+    userTemplates[index] = {
+      ...userTemplates[index],
       ...updates,
       updatedAt: new Date().toISOString()
     }
     
-    this.saveProjectTemplatesToStorage(templates)
-    return { ...templates[index] }
+    this.saveProjectTemplatesToStorage(userTemplates)
+    return { ...userTemplates[index] }
   },
 
-async deleteTemplate(id) {
+  async deleteTemplate(id) {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
-    const templates = await this.getTemplates()
-    const index = templates.findIndex(t => t.Id === parseInt(id))
+    const userTemplates = this.getUserTemplates()
+    const index = userTemplates.findIndex(t => t.Id === parseInt(id))
     
     if (index === -1) {
-      throw new Error(`Project template with Id ${id} not found`)
+      throw new Error(`Project template with Id ${id} not found or cannot be deleted`)
     }
     
-    const deleted = templates.splice(index, 1)[0]
-    this.saveProjectTemplatesToStorage(templates)
+    const deleted = userTemplates.splice(index, 1)[0]
+    this.saveProjectTemplatesToStorage(userTemplates)
     return { ...deleted }
   },
 
-async createFromTemplate(templateId, overrides = {}) {
-    const delay = () => new Promise(resolve => setTimeout(resolve, 100));
-    await delay()
-    const template = await this.getTemplateById(templateId)
-    
-    // Create project from template
-    const projectData = {
-      ...template.defaults,
-      ...overrides,
-      name: overrides.name || template.name
-    }
-    
-    const project = await this.create(projectData)
-    
-    // Create tasks if template has them
-    if (template.tasks && template.tasks.length > 0) {
-      const { taskService } = await import('./taskService')
-      
-      for (const taskTemplate of template.tasks) {
-        await taskService.create({
-          ...taskTemplate,
-          projectId: project.Id
-        })
-      }
-    }
-    
-    // Increment usage count
-    await this.updateTemplate(templateId, {
-      usageCount: template.usageCount + 1
-    })
-    
-    return project
-  },
-
-async getTemplateCategories() {
+  async getTemplateCategories() {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
     const templates = await this.getTemplates()
     const categories = [...new Set(templates.map(t => t.category))]
-    return categories.length > 0 ? categories : ["Business", "Personal", "Education", "Non-Profit"]
+    return categories.length > 0 ? categories : ["Business", "Personal", "Technology", "Marketing", "Events", "Education"]
   },
 
-async exportTemplates() {
+  async exportTemplates() {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
-    const templates = await this.getTemplates()
+    const userTemplates = this.getUserTemplates()
     const exportData = {
       version: "1.0",
       exportedAt: new Date().toISOString(),
       type: "project-templates",
-      templates: templates.map(template => ({
+      templates: userTemplates.map(template => ({
         ...template,
         createdBy: undefined,
         Id: undefined
@@ -507,15 +883,15 @@ async exportTemplates() {
     return exportData
   },
 
-async importTemplates(importData) {
+  async importTemplates(importData) {
     const delay = () => new Promise(resolve => setTimeout(resolve, 100));
     await delay()
     if (!importData.templates || !Array.isArray(importData.templates)) {
       throw new Error("Invalid project template data format")
     }
     
-    const existingTemplates = await this.getTemplates()
-    const maxId = existingTemplates.length > 0 ? Math.max(...existingTemplates.map(t => t.Id)) : 0
+    const existingUserTemplates = this.getUserTemplates()
+    const maxId = existingUserTemplates.length > 0 ? Math.max(...existingUserTemplates.map(t => t.Id)) : 0
     
     const importedTemplates = []
     let currentId = maxId
@@ -528,13 +904,14 @@ async importTemplates(importData) {
         createdBy: "imported",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        usageCount: 0
+        usageCount: 0,
+        isBuiltIn: false
       }
-      existingTemplates.push(newTemplate)
+      existingUserTemplates.push(newTemplate)
       importedTemplates.push(newTemplate)
     }
     
-    this.saveProjectTemplatesToStorage(existingTemplates)
+    this.saveProjectTemplatesToStorage(existingUserTemplates)
     return importedTemplates
   },
 
@@ -544,6 +921,6 @@ async importTemplates(importData) {
     } catch (error) {
       console.error("Failed to save project templates to localStorage:", error)
     }
-}
+  }
 }
 export { projectService }

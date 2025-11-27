@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { taskService } from '@/services/api/taskService'
-import { projectService } from '@/services/api/projectService'
-import ApperIcon from '@/components/ApperIcon'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import Select from '@/components/atoms/Select'
-import Badge from '@/components/atoms/Badge'
-import Loading from '@/components/ui/Loading'
-import ErrorView from '@/components/ui/ErrorView'
-import Empty from '@/components/ui/Empty'
-import TemplateCreateModal from '@/components/molecules/TemplateCreateModal'
-import TemplateLibrary from '@/components/molecules/TemplateLibrary'
-import toast from '@/utils/toast'
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { projectService } from "@/services/api/projectService";
+import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import Empty from "@/components/ui/Empty";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Badge from "@/components/atoms/Badge";
+import TemplateCreateModal from "@/components/molecules/TemplateCreateModal";
+import TemplateLibrary from "@/components/molecules/TemplateLibrary";
+import toast from "@/utils/toast";
 
 const Templates = () => {
   const [taskTemplates, setTaskTemplates] = useState([])
@@ -24,24 +24,27 @@ const Templates = () => {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [showLibrary, setShowLibrary] = useState(false)
-  const [categories, setCategories] = useState([])
+const [categories, setCategories] = useState([])
+  const [projectCategories, setProjectCategories] = useState([])
 
   useEffect(() => {
     loadTemplates()
   }, [])
 
-  const loadTemplates = async () => {
+const loadTemplates = async () => {
     try {
       setError("")
-      const [taskTemplateData, projectTemplateData, categoryData] = await Promise.all([
+      const [taskTemplateData, projectTemplateData, taskCategoryData, projectCategoryData] = await Promise.all([
         taskService.getTemplates(),
         projectService.getTemplates(),
-        taskService.getTemplateCategories()
+        taskService.getTemplateCategories(),
+        projectService.getTemplateCategories()
       ])
       
       setTaskTemplates(taskTemplateData)
       setProjectTemplates(projectTemplateData)
-      setCategories(categoryData)
+      setCategories(taskCategoryData)
+      setProjectCategories(projectCategoryData)
     } catch (err) {
       console.error("Failed to load templates:", err)
       setError(err.message || "Failed to load templates")
@@ -256,16 +259,14 @@ toast.error("Failed to import templates. Please check file format.")
               />
             </div>
             
-            <Select
+<Select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-48"
             >
               <option value="all">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
+              {(activeTab === 'tasks' ? categories : projectCategories).map(category => (
+                <option key={category} value={category}>{category}</option>
               ))}
             </Select>
           </div>

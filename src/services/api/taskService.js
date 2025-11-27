@@ -503,9 +503,237 @@ export const updateTaskCommentStats = async (taskId, commentCount, hasUnread = f
 // Template Management
 taskService.getTemplates = async function() {
   await delay()
-try {
+  try {
     const stored = localStorage.getItem("taskflow-task-templates")
-    return stored ? JSON.parse(stored) : []
+    const userTemplates = stored ? JSON.parse(stored) : []
+    
+    // Default built-in templates
+    const builtInTemplates = [
+      {
+        Id: -1,
+        name: 'Daily Standup Meeting',
+        description: 'Structure your daily team standup meetings with consistent agenda items',
+        category: 'Meetings',
+        icon: '🎯',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 1, name: 'meeting', color: '#3b82f6' },
+          { Id: 2, name: 'daily', color: '#10b981' }
+        ],
+        defaults: {
+          title: 'Daily Standup - {{date}}',
+          description: 'Daily team standup meeting',
+          category: 'Work',
+          priority: 'Medium',
+          status: 'Not Started',
+          estimatedTime: 30,
+          tags: [
+            { Id: 1, name: 'meeting', color: '#3b82f6' },
+            { Id: 2, name: 'daily', color: '#10b981' }
+          ]
+        },
+        subtasks: [
+          { title: 'Review yesterday\'s progress and blockers', priority: 'High', description: 'Each team member shares what they completed yesterday and any obstacles encountered' },
+          { title: 'Discuss today\'s priorities and goals', priority: 'High', description: 'Outline the main objectives and tasks planned for today' },
+          { title: 'Identify potential blockers or dependencies', priority: 'Medium', description: 'Proactively identify any issues that might impact progress' },
+          { title: 'Plan next steps and assignments', priority: 'Medium', description: 'Clarify action items and responsibilities for the day ahead' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 156
+      },
+      {
+        Id: -2,
+        name: 'Code Review Checklist',
+        description: 'Comprehensive checklist for conducting thorough code reviews',
+        category: 'Development',
+        icon: '🔍',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 3, name: 'code-review', color: '#8b5cf6' },
+          { Id: 4, name: 'quality', color: '#ef4444' }
+        ],
+        defaults: {
+          title: 'Code Review - {{branch/feature}}',
+          description: 'Review code changes for quality and standards compliance',
+          category: 'Work',
+          priority: 'High',
+          status: 'Not Started',
+          estimatedTime: 60,
+          tags: [
+            { Id: 3, name: 'code-review', color: '#8b5cf6' },
+            { Id: 4, name: 'quality', color: '#ef4444' }
+          ]
+        },
+        subtasks: [
+          { title: 'Verify functionality works as expected', priority: 'High', description: 'Test the new code changes to ensure they work correctly' },
+          { title: 'Check code style and formatting conventions', priority: 'Medium', description: 'Ensure code follows team standards and style guides' },
+          { title: 'Test edge cases and error handling', priority: 'High', description: 'Verify robust handling of unexpected inputs and error scenarios' },
+          { title: 'Review security considerations', priority: 'High', description: 'Check for potential security vulnerabilities or data exposure' },
+          { title: 'Assess performance implications', priority: 'Medium', description: 'Consider impact on application performance and resource usage' },
+          { title: 'Document feedback and suggestions', priority: 'Medium', description: 'Provide constructive feedback and improvement recommendations' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 134
+      },
+      {
+        Id: -3,
+        name: 'Website Launch Checklist',
+        description: 'Complete checklist for launching a new website or web application',
+        category: 'Projects',
+        icon: '🚀',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 5, name: 'launch', color: '#f59e0b' },
+          { Id: 6, name: 'website', color: '#10b981' }
+        ],
+        defaults: {
+          title: 'Website Launch - {{project name}}',
+          description: 'Launch preparation and go-live activities',
+          category: 'Work',
+          priority: 'High',
+          status: 'Not Started',
+          estimatedTime: 480,
+          tags: [
+            { Id: 5, name: 'launch', color: '#f59e0b' },
+            { Id: 6, name: 'website', color: '#10b981' }
+          ]
+        },
+        subtasks: [
+          { title: 'Domain setup and DNS configuration', priority: 'High', description: 'Configure domain name and DNS settings for production' },
+          { title: 'SSL certificate installation and testing', priority: 'High', description: 'Install and verify SSL certificate for secure connections' },
+          { title: 'Performance testing and optimization', priority: 'High', description: 'Run performance tests and optimize loading speeds' },
+          { title: 'SEO optimization and meta tags', priority: 'Medium', description: 'Implement SEO best practices and meta information' },
+          { title: 'Analytics and tracking setup', priority: 'Medium', description: 'Configure Google Analytics and other tracking tools' },
+          { title: 'Backup system configuration', priority: 'Medium', description: 'Set up automated backup and recovery procedures' },
+          { title: 'Security audit and penetration testing', priority: 'High', description: 'Conduct security review and vulnerability assessment' },
+          { title: 'Browser compatibility testing', priority: 'Medium', description: 'Test website across different browsers and devices' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 89
+      },
+      {
+        Id: -4,
+        name: 'Client Onboarding Process',
+        description: 'Streamlined process for onboarding new clients and projects',
+        category: 'Business',
+        icon: '👥',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 7, name: 'client', color: '#3b82f6' },
+          { Id: 8, name: 'onboarding', color: '#10b981' }
+        ],
+        defaults: {
+          title: 'Client Onboarding - {{client name}}',
+          description: 'Complete onboarding process for new client',
+          category: 'Work',
+          priority: 'High',
+          status: 'Not Started',
+          estimatedTime: 240,
+          tags: [
+            { Id: 7, name: 'client', color: '#3b82f6' },
+            { Id: 8, name: 'onboarding', color: '#10b981' }
+          ]
+        },
+        subtasks: [
+          { title: 'Send welcome email and onboarding materials', priority: 'High', description: 'Provide client with welcome package and initial documentation' },
+          { title: 'Schedule kick-off meeting', priority: 'High', description: 'Organize initial meeting to discuss project goals and timeline' },
+          { title: 'Collect client requirements and assets', priority: 'High', description: 'Gather all necessary information and materials from client' },
+          { title: 'Set up project management tools access', priority: 'Medium', description: 'Provide client access to project tracking and communication tools' },
+          { title: 'Define communication protocols', priority: 'Medium', description: 'Establish regular check-in schedule and communication preferences' },
+          { title: 'Create project timeline and milestones', priority: 'Medium', description: 'Develop detailed project plan with key deliverables and dates' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 67
+      },
+      {
+        Id: -5,
+        name: 'Personal Goal Planning',
+        description: 'Framework for setting and tracking personal development goals',
+        category: 'Personal',
+        icon: '🎯',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 9, name: 'goals', color: '#8b5cf6' },
+          { Id: 10, name: 'personal', color: '#f59e0b' }
+        ],
+        defaults: {
+          title: '{{goal period}} Goal Planning',
+          description: 'Personal development and achievement planning',
+          category: 'Personal',
+          priority: 'Medium',
+          status: 'Not Started',
+          estimatedTime: 120,
+          tags: [
+            { Id: 9, name: 'goals', color: '#8b5cf6' },
+            { Id: 10, name: 'personal', color: '#f59e0b' }
+          ]
+        },
+        subtasks: [
+          { title: 'Define specific and measurable objectives', priority: 'High', description: 'Set clear, specific goals that can be measured and tracked' },
+          { title: 'Break down goals into actionable steps', priority: 'High', description: 'Create detailed action plan with specific tasks and milestones' },
+          { title: 'Set realistic timelines and deadlines', priority: 'Medium', description: 'Establish achievable deadlines for each goal and milestone' },
+          { title: 'Identify resources and support needed', priority: 'Medium', description: 'Determine what tools, people, or resources will help achieve goals' },
+          { title: 'Create accountability and tracking system', priority: 'Medium', description: 'Set up regular review process and progress tracking methods' },
+          { title: 'Plan celebration and reward milestones', priority: 'Low', description: 'Define how to celebrate progress and maintain motivation' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 45
+      },
+      {
+        Id: -6,
+        name: 'Weekly Planning Session',
+        description: 'Structured weekly planning and review process',
+        category: 'Planning',
+        icon: '📅',
+        isPublic: true,
+        isBuiltIn: true,
+        tags: [
+          { Id: 11, name: 'planning', color: '#10b981' },
+          { Id: 12, name: 'weekly', color: '#3b82f6' }
+        ],
+        defaults: {
+          title: 'Weekly Planning - Week of {{date}}',
+          description: 'Weekly planning and priority setting session',
+          category: 'Personal',
+          priority: 'Medium',
+          status: 'Not Started',
+          estimatedTime: 60,
+          tags: [
+            { Id: 11, name: 'planning', color: '#10b981' },
+            { Id: 12, name: 'weekly', color: '#3b82f6' }
+          ]
+        },
+        subtasks: [
+          { title: 'Review previous week\'s accomplishments', priority: 'Medium', description: 'Assess what was completed and what needs to carry over' },
+          { title: 'Set top 3 priorities for the upcoming week', priority: 'High', description: 'Identify the most important objectives to focus on' },
+          { title: 'Schedule important tasks and meetings', priority: 'High', description: 'Block time for priority tasks and necessary meetings' },
+          { title: 'Plan time for unexpected issues and buffer', priority: 'Medium', description: 'Reserve time for handling urgent matters and interruptions' },
+          { title: 'Review and adjust long-term goals', priority: 'Low', description: 'Check progress against larger objectives and adjust as needed' }
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system',
+        usageCount: 78
+      }
+    ]
+    
+    // Combine built-in templates with user templates
+    return [...builtInTemplates, ...userTemplates]
   } catch (error) {
     console.error("Failed to load task templates:", error)
     return []
@@ -524,8 +752,8 @@ taskService.getTemplateById = async function(id) {
 
 taskService.createTemplate = async function(templateData) {
   await delay()
-  const templates = await this.getTemplates()
-  const maxId = templates.length > 0 ? Math.max(...templates.map(t => t.Id)) : 0
+  const userTemplates = await this.getUserTemplates()
+  const maxId = userTemplates.length > 0 ? Math.max(...userTemplates.map(t => t.Id)) : 0
   
   const newTemplate = {
     Id: maxId + 1,
@@ -534,6 +762,7 @@ taskService.createTemplate = async function(templateData) {
     category: templateData.category || "General",
     icon: templateData.icon || "📝",
     isPublic: templateData.isPublic || false,
+    isBuiltIn: false,
     tags: templateData.tags || [],
     defaults: {
       title: templateData.defaults?.title || "",
@@ -549,45 +778,45 @@ taskService.createTemplate = async function(templateData) {
     subtasks: Array.isArray(templateData.subtasks) ? templateData.subtasks : [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    createdBy: "current-user", // In real app, would be from auth
+    createdBy: "current-user",
     usageCount: 0
   }
   
-  templates.push(newTemplate)
-  this.saveTemplatesToStorage(templates)
+  userTemplates.push(newTemplate)
+  this.saveTemplatesToStorage(userTemplates)
   return { ...newTemplate }
 }
 
 taskService.updateTemplate = async function(id, updates) {
   await delay()
-  const templates = await this.getTemplates()
-  const index = templates.findIndex(t => t.Id === parseInt(id))
+  const userTemplates = await this.getUserTemplates()
+  const index = userTemplates.findIndex(t => t.Id === parseInt(id))
   
   if (index === -1) {
-    throw new Error(`Template with Id ${id} not found`)
+    throw new Error(`Template with Id ${id} not found or cannot be modified`)
   }
   
-  templates[index] = {
-    ...templates[index],
+  userTemplates[index] = {
+    ...userTemplates[index],
     ...updates,
     updatedAt: new Date().toISOString()
   }
   
-  this.saveTemplatesToStorage(templates)
-  return { ...templates[index] }
+  this.saveTemplatesToStorage(userTemplates)
+  return { ...userTemplates[index] }
 }
 
 taskService.deleteTemplate = async function(id) {
   await delay()
-  const templates = await this.getTemplates()
-  const index = templates.findIndex(t => t.Id === parseInt(id))
+  const userTemplates = await this.getUserTemplates()
+  const index = userTemplates.findIndex(t => t.Id === parseInt(id))
   
   if (index === -1) {
-    throw new Error(`Template with Id ${id} not found`)
+    throw new Error(`Template with Id ${id} not found or cannot be deleted`)
   }
   
-  const deleted = templates.splice(index, 1)[0]
-  this.saveTemplatesToStorage(templates)
+  const deleted = userTemplates.splice(index, 1)[0]
+  this.saveTemplatesToStorage(userTemplates)
   return { ...deleted }
 }
 
@@ -616,10 +845,12 @@ taskService.createFromTemplate = async function(templateId, overrides = {}) {
     }
   }
   
-  // Increment usage count
-  await this.updateTemplate(templateId, {
-    usageCount: template.usageCount + 1
-  })
+  // Increment usage count for user templates only
+  if (!template.isBuiltIn) {
+    await this.updateTemplate(templateId, {
+      usageCount: template.usageCount + 1
+    })
+  }
   
   return mainTask
 }
@@ -628,7 +859,7 @@ taskService.getTemplateCategories = async function() {
   await delay()
   const templates = await this.getTemplates()
   const categories = [...new Set(templates.map(t => t.category))]
-  return categories.length > 0 ? categories : ["General", "Work", "Personal", "Project"]
+  return categories.length > 0 ? categories : ["General", "Work", "Personal", "Project", "Meetings", "Development", "Business", "Planning"]
 }
 
 taskService.getPopularTemplates = async function(limit = 10) {
@@ -639,16 +870,27 @@ taskService.getPopularTemplates = async function(limit = 10) {
     .slice(0, limit)
 }
 
+taskService.getUserTemplates = async function() {
+  try {
+    const stored = localStorage.getItem("taskflow-task-templates")
+    return stored ? JSON.parse(stored) : []
+  } catch (error) {
+    console.error("Failed to load user templates:", error)
+    return []
+  }
+}
+
 taskService.exportTemplates = async function() {
   await delay()
-  const templates = await this.getTemplates()
+  const userTemplates = await this.getUserTemplates()
   const exportData = {
     version: "1.0",
     exportedAt: new Date().toISOString(),
-    templates: templates.map(template => ({
+    type: "task-templates",
+    templates: userTemplates.map(template => ({
       ...template,
-      createdBy: undefined, // Remove user-specific data
-      Id: undefined // Will be regenerated on import
+      createdBy: undefined,
+      Id: undefined
     }))
   }
   return exportData
@@ -660,8 +902,8 @@ taskService.importTemplates = async function(importData) {
     throw new Error("Invalid template data format")
   }
   
-  const existingTemplates = await this.getTemplates()
-  const maxId = existingTemplates.length > 0 ? Math.max(...existingTemplates.map(t => t.Id)) : 0
+  const existingUserTemplates = await this.getUserTemplates()
+  const maxId = existingUserTemplates.length > 0 ? Math.max(...existingUserTemplates.map(t => t.Id)) : 0
   
   const importedTemplates = []
   let currentId = maxId
@@ -674,13 +916,14 @@ taskService.importTemplates = async function(importData) {
       createdBy: "imported",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      usageCount: 0
+      usageCount: 0,
+      isBuiltIn: false
     }
-    existingTemplates.push(newTemplate)
+    existingUserTemplates.push(newTemplate)
     importedTemplates.push(newTemplate)
   }
   
-  this.saveTemplatesToStorage(existingTemplates)
+  this.saveTemplatesToStorage(existingUserTemplates)
   return importedTemplates
 }
 
