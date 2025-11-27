@@ -27,14 +27,16 @@ function ProjectDetail() {
   const [showArchivedFiles, setShowArchivedFiles] = useState(false)
   const [projectStats, setProjectStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [loadingTasks, setLoadingTasks] = useState(false)
+  const [loadingProject, setLoadingProject] = useState(false)
   const [error, setError] = useState(null)
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
-const [editingMember, setEditingMember] = useState(null)
+  const [editingMember, setEditingMember] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-const [projectFiles, setProjectFiles] = useState([])
+  const [projectFiles, setProjectFiles] = useState([])
   const [projectExternalLinks, setProjectExternalLinks] = useState([])
   const [selectedTaskForComments, setSelectedTaskForComments] = useState(null)
   useEffect(() => {
@@ -368,174 +370,276 @@ className={project?.isFavorite ? 'fill-current' : ''}
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'overview' && projectStats && (
-        <ProjectDashboard project={project} stats={projectStats} tasks={tasks} />
+{activeTab === 'overview' && (
+        <div className="space-y-6">
+          {projectStats ? (
+            <ProjectDashboard project={project} stats={projectStats} tasks={tasks} />
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="text-center">
+                <ApperIcon name="BarChart3" size={48} className="mx-auto text-gray-300 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Project Overview</h3>
+                <p className="text-gray-600 mb-4">Loading project statistics and insights...</p>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
-      {activeTab === 'tasks' && (
+{activeTab === 'tasks' && (
         <div className="space-y-6">
-          <TaskList
-            tasks={tasks}
-            onToggleComplete={handleToggleComplete}
-            onEdit={handleEditTask}
-            onCreateSubtask={() => {}} // Handled by TaskCard internally
-            onToggleSubtask={() => {}} // Handled by TaskCard internally
-            viewMode="list"
-          />
+          {loadingTasks ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="text-center">
+                <ApperIcon name="Loader2" size={48} className="mx-auto text-gray-300 mb-4 animate-spin" />
+                <p className="text-gray-600">Loading tasks...</p>
+              </div>
+            </div>
+          ) : tasks.length > 0 ? (
+            <TaskList
+              tasks={tasks}
+              onToggleComplete={handleToggleComplete}
+              onEdit={handleEditTask}
+              onCreateSubtask={() => {}} // Handled by TaskCard internally
+              onToggleSubtask={() => {}} // Handled by TaskCard internally
+              viewMode="list"
+            />
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="text-center">
+                <ApperIcon name="CheckSquare" size={48} className="mx-auto text-gray-300 mb-4" />
+<h3 className="text-lg font-medium text-gray-900 mb-2">No Tasks Yet</h3>
+                <p className="text-gray-600 mb-4">Create your first task to get started with this project.</p>
+                <Button onClick={handleCreateTask}>
+                  <ApperIcon name="Plus" size={16} />
+                  Create Task
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 {activeTab === 'comments' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Task Comments
-              </h3>
-              {selectedTaskForComments && (
-                <button
-                  onClick={() => setSelectedTaskForComments(null)}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  View All Tasks
-                </button>
-              )}
-            </div>
-            
-            {!selectedTaskForComments ? (
-              <div className="space-y-4">
-                {tasks.filter(task => task.commentCount > 0).length === 0 ? (
-                  <div className="text-center py-12">
-                    <ApperIcon name="MessageCircle" size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">No comments yet on any tasks</p>
-                  </div>
-                ) : (
-                  tasks.filter(task => task.commentCount > 0).map(task => (
-                    <div
-                      key={task.Id}
-                      className="bg-white rounded-lg border border-gray-200 p-4 hover:border-gray-300 transition-colors cursor-pointer"
-                      onClick={() => setSelectedTaskForComments(task)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900 mb-1">{task.title}</h4>
-                          <p className="text-sm text-gray-500">{task.description}</p>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-gray-500 ml-4">
-                          <div className="flex items-center gap-1">
-                            <ApperIcon name="MessageCircle" size={16} />
-                            <span>{task.commentCount}</span>
-                          </div>
-                          {task.hasUnreadComments && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="mb-6">
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">{selectedTaskForComments.title}</h4>
-                  <p className="text-gray-600">{selectedTaskForComments.description}</p>
-                </div>
-                <CommentThread taskId={selectedTaskForComments.Id} />
-              </div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Task Comments
+            </h3>
+            {selectedTaskForComments && (
+              <button
+                onClick={() => setSelectedTaskForComments(null)}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                View All Tasks
+              </button>
             )}
           </div>
-        )}
-        
-        {activeTab === 'topics' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Comment Topics</h3>
-              <div className="text-sm text-gray-500">
-                Conversations organized by discussion topics
+          
+          {loadingTasks ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="text-center">
+                <ApperIcon name="Loader2" size={48} className="mx-auto text-gray-300 mb-4 animate-spin" />
+                <p className="text-gray-600">Loading comments...</p>
               </div>
             </div>
-            
-            {(() => {
-              // Get conversations by topic for all tasks with comments
-              const tasksWithComments = tasks.filter(task => task.commentCount > 0);
-              
-              if (tasksWithComments.length === 0) {
-                return (
-                  <div className="text-center py-12">
-                    <ApperIcon name="Hash" size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">No comment topics yet</p>
+          ) : !selectedTaskForComments ? (
+            <div className="space-y-4">
+              {tasks.filter(task => task.commentCount && task.commentCount > 0).length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                  <div className="text-center">
+                    <ApperIcon name="MessageCircle" size={48} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Comments Yet</h3>
+                    <p className="text-gray-600 mb-4">Start a conversation by commenting on tasks.</p>
+                    <Button onClick={() => setActiveTab('tasks')}>
+                      <ApperIcon name="ArrowLeft" size={16} />
+                      View Tasks
+                    </Button>
                   </div>
-                );
-              }
-
-              // Simulate topic grouping for demo
-              const topicGroups = {
-                'design': [
-                  { id: 1, title: 'UI feedback on dashboard layout', author: 'Alex Chen', commentCount: 5, sentiment: 'positive', createdAt: '2024-01-15T10:00:00Z' },
-                  { id: 2, title: 'Color scheme suggestions', author: 'Sarah Kim', commentCount: 3, sentiment: 'neutral', createdAt: '2024-01-14T15:30:00Z' }
-                ],
-                'performance': [
-                  { id: 3, title: 'Loading speed concerns', author: 'Mike Johnson', commentCount: 7, sentiment: 'negative', createdAt: '2024-01-13T09:15:00Z' }
-                ],
-                'features': [
-                  { id: 4, title: 'New feature request discussion', author: 'Emma Wilson', commentCount: 4, sentiment: 'positive', createdAt: '2024-01-12T14:20:00Z' }
-                ]
-              };
-
-              return (
-                <div className="space-y-6">
-                  {Object.entries(topicGroups).map(([topic, conversations]) => (
-                    <div key={topic} className="bg-white rounded-lg border border-gray-200 p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <ApperIcon name="Hash" size={20} className="text-blue-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 capitalize">{topic}</h4>
-                          <p className="text-sm text-gray-500">{conversations.length} conversations</p>
-                        </div>
+                </div>
+              ) : (
+                tasks.filter(task => task.commentCount && task.commentCount > 0).map(task => (
+                  <div
+                    key={task.Id}
+                    className="bg-white rounded-lg border border-gray-200 p-4 hover:border-gray-300 transition-colors cursor-pointer"
+                    onClick={() => setSelectedTaskForComments(task)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 mb-1">{task.title}</h4>
+                        <p className="text-sm text-gray-500 line-clamp-2">{task.description}</p>
                       </div>
-                      
-                      <div className="space-y-3">
-                        {conversations.map(conv => (
-                          <div key={conv.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                            <div className="flex-1">
-                              <h5 className="font-medium text-gray-900 mb-1">{conv.title}</h5>
-                              <div className="flex items-center gap-3 text-sm text-gray-500">
-                                <span>by {conv.author}</span>
-                                <span>•</span>
-                                <span>{formatDistanceToNow(new Date(conv.createdAt), { addSuffix: true })}</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
-                                conv.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
-                                conv.sentiment === 'negative' ? 'bg-red-100 text-red-700' :
-                                'bg-gray-100 text-gray-700'
-                              }`}>
-                                <ApperIcon name={
-                                  conv.sentiment === 'positive' ? 'ThumbsUp' :
-                                  conv.sentiment === 'negative' ? 'ThumbsDown' :
-                                  'Minus'
-                                } size={10} />
-                                {conv.sentiment}
-                              </span>
-                              <div className="flex items-center gap-1 text-sm text-gray-500">
-                                <ApperIcon name="MessageCircle" size={16} />
-                                <span>{conv.commentCount}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-3 text-sm text-gray-500 ml-4">
+                        <div className="flex items-center gap-1">
+                          <ApperIcon name="MessageCircle" size={16} />
+                          <span>{task.commentCount || 0}</span>
+                        </div>
+                        {task.hasUnreadComments && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        )}
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <div className="mb-6">
+                <h4 className="text-lg font-medium text-gray-900 mb-2">{selectedTaskForComments.title}</h4>
+                <p className="text-gray-600">{selectedTaskForComments.description}</p>
+              </div>
+              <CommentThread taskId={selectedTaskForComments.Id} />
+            </div>
+          )}
+        </div>
+      )}
+        
+{activeTab === 'topics' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Comment Topics</h3>
+            <div className="text-sm text-gray-500">
+              Conversations organized by discussion topics
+            </div>
+          </div>
+          
+          {loadingTasks ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+              <div className="text-center">
+                <ApperIcon name="Loader2" size={48} className="mx-auto text-gray-300 mb-4 animate-spin" />
+                <p className="text-gray-600">Loading discussion topics...</p>
+              </div>
+            </div>
+          ) : (() => {
+            // Get conversations by topic for all tasks with comments
+            const tasksWithComments = tasks.filter(task => task.commentCount && task.commentCount > 0);
+            
+            if (tasksWithComments.length === 0) {
+              return (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                  <div className="text-center">
+                    <ApperIcon name="Hash" size={48} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Topics Yet</h3>
+                    <p className="text-gray-600 mb-4">Discussion topics will appear here as team members comment on tasks.</p>
+                    <Button onClick={() => setActiveTab('comments')}>
+                      <ApperIcon name="MessageCircle" size={16} />
+                      Start Discussions
+                    </Button>
+                  </div>
                 </div>
               );
-            })()}
-          </div>
-        )}
+            }
 
-        {activeTab === 'members' && (
+            // Generate topic groups based on task data and project context
+            const topicGroups = {
+              'general': tasksWithComments.slice(0, 2).map(task => ({
+                id: task.Id,
+                title: `Discussion about: ${task.title}`,
+                author: 'Project Team',
+                commentCount: task.commentCount || 1,
+                sentiment: task.priority === 'high' ? 'negative' : task.priority === 'medium' ? 'neutral' : 'positive',
+                createdAt: task.createdAt || new Date().toISOString(),
+                taskId: task.Id
+              })),
+              'progress': tasksWithComments.filter(t => t.status === 'in-progress').map(task => ({
+                id: task.Id + 1000,
+                title: `Progress updates on ${task.title}`,
+                author: 'Team Lead',
+                commentCount: Math.max(task.commentCount - 1, 1) || 2,
+                sentiment: 'positive',
+                createdAt: task.updatedAt || new Date().toISOString(),
+                taskId: task.Id
+              })),
+              'feedback': tasksWithComments.filter(t => t.status === 'completed').map(task => ({
+                id: task.Id + 2000,
+                title: `Feedback on ${task.title}`,
+                author: 'Quality Assurance',
+                commentCount: Math.floor(task.commentCount / 2) || 1,
+                sentiment: 'neutral',
+                createdAt: task.completedAt || new Date().toISOString(),
+                taskId: task.Id
+              }))
+            };
+
+            // Filter out empty topic groups
+            const activeTopicGroups = Object.entries(topicGroups).filter(([_, conversations]) => conversations.length > 0);
+
+            if (activeTopicGroups.length === 0) {
+              return (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                  <div className="text-center">
+                    <ApperIcon name="Hash" size={48} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Organizing Topics</h3>
+                    <p className="text-gray-600">Discussion topics are being organized from your task comments...</p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-6">
+                {activeTopicGroups.map(([topic, conversations]) => (
+                  <div key={topic} className="bg-white rounded-lg border border-gray-200 p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <ApperIcon name="Hash" size={20} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 capitalize">{topic}</h4>
+                        <p className="text-sm text-gray-500">{conversations.length} conversations</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {conversations.map(conv => (
+                        <div 
+                          key={conv.id} 
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                          onClick={() => {
+                            const task = tasks.find(t => t.Id === conv.taskId);
+                            if (task) {
+                              setSelectedTaskForComments(task);
+                              setActiveTab('comments');
+                            }
+                          }}
+                        >
+                          <div className="flex-1">
+                            <h5 className="font-medium text-gray-900 mb-1">{conv.title}</h5>
+                            <div className="flex items-center gap-3 text-sm text-gray-500">
+                              <span>by {conv.author}</span>
+                              <span>•</span>
+                              <span>{formatDistanceToNow(new Date(conv.createdAt), { addSuffix: true })}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+                              conv.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
+                              conv.sentiment === 'negative' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              <ApperIcon name={
+                                conv.sentiment === 'positive' ? 'ThumbsUp' :
+                                conv.sentiment === 'negative' ? 'ThumbsDown' :
+                                'Minus'
+                              } size={10} />
+                              {conv.sentiment}
+                            </span>
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <ApperIcon name="MessageCircle" size={16} />
+                              <span>{conv.commentCount}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+)}
+{activeTab === 'members' && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Project Members</h3>
@@ -545,7 +649,12 @@ className={project?.isFavorite ? 'fill-current' : ''}
             </Button>
           </div>
           
-          {project.members && project.members.length > 0 ? (
+          {loadingProject ? (
+            <div className="text-center py-8">
+              <ApperIcon name="Loader2" size={48} className="mx-auto text-gray-300 mb-4 animate-spin" />
+              <p className="text-gray-600">Loading team members...</p>
+            </div>
+          ) : project.members && project.members.length > 0 ? (
             <div className="space-y-4">
               {project.members.map(member => (
                 <MemberCard
@@ -560,12 +669,17 @@ className={project?.isFavorite ? 'fill-current' : ''}
           ) : (
             <div className="text-center py-12">
               <ApperIcon name="Users" size={48} className="mx-auto text-gray-400 mb-4" />
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No members yet</h4>
-              <p className="text-gray-600 mb-4">Add team members to collaborate on this project</p>
-              <Button onClick={handleAddMember}>
-                <ApperIcon name="UserPlus" size={16} />
-                Add First Member
-              </Button>
+              <h4 className="text-lg font-medium text-gray-900 mb-2">No Members Yet</h4>
+              <p className="text-gray-600 mb-4">Add team members to collaborate on this project and track progress together.</p>
+              <div className="space-y-3">
+                <Button onClick={handleAddMember}>
+                  <ApperIcon name="UserPlus" size={16} />
+                  Add First Member
+                </Button>
+                <p className="text-sm text-gray-500">
+                  You can invite team members by email or username
+                </p>
+              </div>
             </div>
           )}
         </div>
