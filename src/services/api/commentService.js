@@ -1,4 +1,5 @@
 import commentsData from "@/services/mockData/comments.json";
+import React from "react";
 // Mock delay function for simulating API calls
 const delay = (ms = 200) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -256,7 +257,61 @@ export const getCommentStats = async (taskId) => {
     pinned: taskComments.filter(c => c.isPinned).length,
     resolved: taskComments.filter(c => c.isResolved).length,
     threads: taskComments.filter(c => !c.parentId).length
+threads: taskComments.filter(c => !c.parentId).length
   };
+};
+
+// Build threaded comment structure - moved before export to fix hoisting
+export const buildCommentThreads = (comments) => {
+  const commentMap = {};
+  const topicGroups = {};
+
+  // First pass: create comment map and group by topic
+  comments.forEach(comment => {
+    commentMap[comment.Id] = { ...comment, replies: [] };
+    
+    const topic = comment.topic || 'General';
+    if (!topicGroups[topic]) {
+      topicGroups[topic] = [];
+    }
+  });
+
+  // Second pass: build threads within topics
+  comments.forEach(comment => {
+    const topic = comment.topic || 'General';
+    
+    if (comment.parentId && commentMap[comment.parentId]) {
+      commentMap[comment.parentId].replies.push(commentMap[comment.Id]);
+    } else {
+      topicGroups[topic].push(commentMap[comment.Id]);
+    }
+  });
+
+  // Sort threads within each topic: pinned first, then by creation date
+  Object.keys(topicGroups).forEach(topic => {
+    topicGroups[topic].sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  });
+
+  // Return flattened structure with topic headers
+  const result = [];
+  Object.keys(topicGroups).sort().forEach(topic => {
+    if (topicGroups[topic].length > 0) {
+      result.push({
+        Id: `topic-${topic}`,
+        type: 'topic-header',
+        topic: topic,
+        commentCount: topicGroups[topic].length,
+        comments: topicGroups[topic]
+      });
+      result.push(...topicGroups[topic]);
+    }
+  });
+
+  return result;
 };
 
 // Export all functions
@@ -409,57 +464,6 @@ const getConversationsByTopic = (taskId) => {
 };
 
 // Build threaded comment structure
-export const buildCommentThreads = (comments) => {
-  const commentMap = {};
-  const topicGroups = {};
-
-  // First pass: create comment map and group by topic
-  comments.forEach(comment => {
-    commentMap[comment.Id] = { ...comment, replies: [] };
-    
-    const topic = comment.topic || 'General';
-    if (!topicGroups[topic]) {
-      topicGroups[topic] = [];
-    }
-  });
-
-  // Second pass: build threads within topics
-  comments.forEach(comment => {
-    const topic = comment.topic || 'General';
-    
-    if (comment.parentId && commentMap[comment.parentId]) {
-      commentMap[comment.parentId].replies.push(commentMap[comment.Id]);
-    } else {
-      topicGroups[topic].push(commentMap[comment.Id]);
-    }
-  });
-
-  // Sort threads within each topic: pinned first, then by creation date
-  Object.keys(topicGroups).forEach(topic => {
-    topicGroups[topic].sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-  });
-
-  // Return flattened structure with topic headers
-  const result = [];
-  Object.keys(topicGroups).sort().forEach(topic => {
-    if (topicGroups[topic].length > 0) {
-      result.push({
-        Id: `topic-${topic}`,
-        type: 'topic-header',
-        topic: topic,
-        commentCount: topicGroups[topic].length,
-        comments: topicGroups[topic]
-      });
-      result.push(...topicGroups[topic]);
-    }
-  });
-
-  return result;
-};
 
 // Helper function to build context for AI suggestions
 export const buildSuggestionContext = (comments, targetCommentId = null) => {
@@ -499,29 +503,6 @@ export const validateSuggestion = (suggestion) => {
   if (!suggestion || typeof suggestion !== 'string') return false;
   const trimmed = suggestion.trim();
   return trimmed.length > 0 && trimmed.length <= 500; // Reasonable length limit
-};
-
-const commentService = {
-  getCommentsByTaskId,
-  getCommentById,
-  createComment,
-  updateComment,
-  deleteComment,
-  addReaction,
-  toggleLike,
-  togglePin,
-  toggleResolve,
-  searchComments,
-  markAsRead,
-  getTeamMembers,
-  getCommentStats,
-  buildCommentThreads,
-  getCommentTopics,
-  analyzeSentiment,
-  generateConversationSummary,
-  getConversationsByTopic,
-  buildSuggestionContext,
-  validateSuggestion
 };
 
 // Named exports for direct import
