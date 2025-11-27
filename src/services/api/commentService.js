@@ -91,6 +91,40 @@ isEdited: false,
   };
   
   comments.push(newComment);
+
+  // Trigger email notification for comment (async, don't block comment creation)
+  setTimeout(async () => {
+    try {
+      const { notificationService } = await import('./notificationService.js');
+      
+      // Create comment snippet for email (limit to 200 characters)
+      let commentSnippet = content;
+      if (commentSnippet.length > 200) {
+        commentSnippet = commentSnippet.substring(0, 197) + '...';
+      }
+
+      // Get task information (mock data for now)
+      const taskTitle = `Task #${commentData.taskId}`;
+      
+      await notificationService.sendEmailNotification({
+        type: 'task_comment',
+        taskId: commentData.taskId,
+        taskTitle: taskTitle,
+        assignedTo: newComment.authorEmail, // Send to comment author for now
+        recipientEmail: newComment.authorEmail,
+        commentSnippet: commentSnippet,
+        commentAuthor: newComment.authorName,
+        commentId: newComment.Id,
+        priority: 'Normal'
+      });
+
+      console.log('Email notification sent for comment:', newComment.Id);
+    } catch (error) {
+      // Don't throw error to avoid blocking comment creation
+      console.warn('Failed to send email notification for comment:', error.message);
+    }
+  }, 100); // Small delay to ensure comment is fully processed
+
   return newComment;
 };
 

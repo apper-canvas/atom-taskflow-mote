@@ -133,7 +133,7 @@ export const notificationService = {
   },
 
   // Create task-related notification
-  async createTaskNotification(type, taskId, taskTitle, message, userId = null) {
+async createTaskNotification(type, taskId, taskTitle, message, userId = null) {
     const typeMessages = {
       task_assigned: 'You have been assigned to a task',
       task_completed: 'Task has been completed',
@@ -320,7 +320,7 @@ throw new Error('Audio playback failed');
     }
   },
 
-  // Create email content from template
+// Create email content from template
   async createEmailFromTemplate(emailData) {
     await delay();
     
@@ -392,6 +392,33 @@ throw new Error('Audio playback failed');
           </div>
         `,
         textTemplate: `TASK OVERDUE\n\nTask: ${emailData.taskTitle}\nWas Due: ${emailData.dueDate ? new Date(emailData.dueDate).toLocaleDateString() : 'Not set'}\nDays Overdue: ${emailData.daysOverdue || 'Unknown'}\nPriority: ${emailData.priority || 'Not set'}\n\nImmediate attention required!`
+      },
+
+      task_comment: {
+        subject: `New comment on ${emailData.taskTitle}`,
+        htmlTemplate: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #6366f1;">New Comment</h2>
+            <p>A new comment has been added to your task:</p>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #6366f1;">
+              <h3 style="margin: 0 0 10px 0; color: #1f2937;">${emailData.taskTitle}</h3>
+              <div style="background: white; padding: 16px; border-radius: 6px; margin: 12px 0; border: 1px solid #e5e7eb;">
+                <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;"><strong>Comment by:</strong> ${emailData.commentAuthor || 'Unknown User'}</p>
+                <div style="color: #374151; line-height: 1.5;">
+                  ${emailData.commentSnippet || 'No comment content available'}
+                </div>
+              </div>
+              <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;">
+                <strong>Posted:</strong> ${new Date().toLocaleString()}
+              </p>
+            </div>
+            <p>Click here to view the full conversation and respond.</p>
+            <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
+              <p>You're receiving this email because you're involved with this task. Update your notification preferences in your account settings.</p>
+            </div>
+          </div>
+        `,
+        textTemplate: `New Comment on ${emailData.taskTitle}\n\nA new comment has been added to your task:\n\nTask: ${emailData.taskTitle}\nComment by: ${emailData.commentAuthor || 'Unknown User'}\nComment: ${emailData.commentSnippet || 'No comment content available'}\nPosted: ${new Date().toLocaleString()}\n\nView the full conversation in your dashboard.`
       }
     };
 
