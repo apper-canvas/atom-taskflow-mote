@@ -482,4 +482,7 @@ getTeamMembers,
   getConversationsByTopic
 };
 
+// Named exports for direct import
+export { analyzeSentiment, generateConversationSummary, getConversationsByTopic };
+
 export default commentService;
