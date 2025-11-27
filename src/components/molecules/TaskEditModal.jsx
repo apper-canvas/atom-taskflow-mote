@@ -107,7 +107,8 @@ attachments: task.attachments || [],
     }
     
     // Load available parent tasks for subtask creation
-    loadAvailableTasks()
+loadAvailableTasks()
+    loadAvailableProjects()
     setErrors({})
     setShowDeleteConfirm(false)
     setShowRecurringModal(false)
