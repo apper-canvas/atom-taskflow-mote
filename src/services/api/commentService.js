@@ -255,9 +255,8 @@ export const getCommentStats = async (taskId) => {
     total: taskComments.length,
     unread: taskComments.filter(c => c.isUnread).length,
     pinned: taskComments.filter(c => c.isPinned).length,
-    resolved: taskComments.filter(c => c.isResolved).length,
+resolved: taskComments.filter(c => c.isResolved).length,
     threads: taskComments.filter(c => !c.parentId).length
-threads: taskComments.filter(c => !c.parentId).length
   };
 };
 
