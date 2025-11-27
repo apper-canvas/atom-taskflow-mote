@@ -17,7 +17,7 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
     category: "Personal",
     priority: "Medium",
     tags: [],
-    recurrence: {
+recurrence: {
       enabled: true,
       pattern: "daily", // daily, weekly, monthly, yearly, custom
       interval: 1,
@@ -37,8 +37,8 @@ const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [previewDates, setPreviewDates] = useState([])
 
-  useEffect(() => {
-if (task) {
+useEffect(() => {
+    if (task) {
       setFormData({
         title: task.title || "",
         description: task.description || "",
@@ -46,22 +46,31 @@ if (task) {
         priority: task.priority || "Medium",
         tags: task.tags || [],
         recurrence: task.recurrence ? {
-          ...task.recurrence,
-          startDate: task.recurrence.startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+          enabled: true,
+          pattern: task.recurrence.pattern || task.recurrence.type || "daily",
+          interval: task.recurrence.interval || 1,
+          daysOfWeek: task.recurrence.daysOfWeek || task.recurrence.weekdays || [],
+          monthlyType: task.recurrence.monthlyType || "date",
+          monthlyDate: task.recurrence.monthlyDate || 1,
+          monthlyWeek: task.recurrence.monthlyWeek || 1,
+          monthlyDay: task.recurrence.monthlyDay || 1,
           endType: task.recurrence.endType || "never",
+          endAfterOccurrences: task.recurrence.endAfterOccurrences || task.recurrence.occurrences || 10,
           endDate: task.recurrence.endDate || "",
-          occurrences: task.recurrence.occurrences || 10,
-          weekdays: task.recurrence.weekdays || [1, 2, 3, 4, 5],
-          monthlyType: task.recurrence.monthlyType || "date"
+          startDate: task.recurrence.startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm")
         } : {
-          type: "daily",
+          enabled: true,
+          pattern: "daily",
           interval: 1,
-          startDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+          daysOfWeek: [],
+          monthlyType: "date",
+          monthlyDate: 1,
+          monthlyWeek: 1,
+          monthlyDay: 1,
           endType: "never",
+          endAfterOccurrences: 10,
           endDate: "",
-          occurrences: 10,
-          weekdays: [1, 2, 3, 4, 5],
-          monthlyType: "date"
+          startDate: format(new Date(), "yyyy-MM-dd'T'HH:mm")
         }
       })
     } else {
