@@ -199,13 +199,13 @@ const renderComment = (comment, isReply = false) => {
     >
       {/* Comment Header */}
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+<div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-            {comment.authorName.charAt(0)}
+            {comment?.authorName?.charAt(0) || '?'}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-900 text-sm">{comment.authorName}</span>
+              <span className="font-medium text-gray-900 text-sm">{comment?.authorName || 'Anonymous'}</span>
               {comment.isPinned && (
                 <ApperIcon name="Pin" size={14} className="text-yellow-600" />
               )}
@@ -365,17 +365,18 @@ const renderComment = (comment, isReply = false) => {
           <CommentInput
             onSubmit={(content, mentions, attachments) => 
               handleAddComment(content, mentions, attachments, comment.Id)
-            }
+}
             onCancel={() => setReplyingTo(null)}
-            placeholder={`Reply to ${comment.authorName}...`}
+            placeholder={`Reply to ${comment?.authorName || 'Anonymous'}...`}
           />
         </div>
       )}
 
-      {/* Replies */}
 {/* Replies */}
-      {comment.replies?.map(reply => renderComment(reply, true))}
-</motion.div>
+      {comment?.replies?.length > 0 && comment.replies.map(reply => 
+        reply ? renderComment(reply, true) : null
+      )}
+    </motion.div>
   );
 };
 
