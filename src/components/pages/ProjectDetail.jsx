@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { differenceInDays, format, formatDistanceToNow } from "date-fns";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
-import fileService from "@/services/api/fileService";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
@@ -12,7 +11,6 @@ import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
 import Modal from "@/components/atoms/Modal";
 import TaskList from "@/components/organisms/TaskList";
-import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
 import MemberCard from "@/components/molecules/MemberCard";
 import ProjectDashboard from "@/components/molecules/ProjectDashboard";
 import MemberManagementModal from "@/components/molecules/MemberManagementModal";
@@ -25,7 +23,6 @@ function ProjectDetail() {
   const navigate = useNavigate()
   const [project, setProject] = useState(null)
   const [tasks, setTasks] = useState([])
-  const [showArchivedFiles, setShowArchivedFiles] = useState(false)
   const [projectStats, setProjectStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadingTasks, setLoadingTasks] = useState(false)
@@ -37,8 +34,6 @@ const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
   const [editingMember, setEditingMember] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const [projectFiles, setProjectFiles] = useState([])
-  const [projectExternalLinks, setProjectExternalLinks] = useState([])
   const [selectedTaskForComments, setSelectedTaskForComments] = useState(null)
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
   const [commentModalTask, setCommentModalTask] = useState(null)
@@ -57,8 +52,6 @@ const loadProjectData = async () => {
         projectService.getById(id),
 projectService.getProjectStats(id),
         taskService.getAll(),
-        loadProjectFiles(),
-        loadProjectExternalLinks()
       ])
       
       setProject(projectData)
@@ -82,23 +75,6 @@ const updatedProject = await projectService.getById(id)
     }
   }
 
-const loadProjectFiles = async () => {
-    try {
-      const files = await fileService.getByProjectId(parseInt(id));
-      setProjectFiles(files);
-    } catch (error) {
-      console.error('Failed to load project files:', error);
-    }
-  };
-
-  const loadProjectExternalLinks = async () => {
-    try {
-      const links = await fileService.getExternalLinksByProject(parseInt(id));
-      setProjectExternalLinks(links);
-    } catch (error) {
-      console.error('Failed to load external links:', error);
-    }
-  };
 
   const handleArchiveProject = async () => {
     try {
@@ -217,13 +193,6 @@ setProjectStats(updatedStats)
     }
   };
 
-  const handleProjectFilesChange = (updatedFiles) => {
-    setProjectFiles(updatedFiles);
-  };
-
-  const handleProjectExternalLinksChange = (updatedLinks) => {
-    setProjectExternalLinks(updatedLinks);
-  }
 
   const getStatusColor = (status) => {
 switch (status) {
@@ -708,27 +677,6 @@ className={project?.isFavorite ? 'fill-current' : ''}
       )}
 
 
-      {/* Project Files Section */}
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Project Files</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
-              {projectFiles.length} files • {projectExternalLinks.length} links
-            </span>
-          </div>
-        </div>
-        
-        <FileAttachmentManager
-          attachments={projectFiles}
-          externalLinks={projectExternalLinks}
-          onChange={handleProjectFilesChange}
-          onExternalLinksChange={handleProjectExternalLinksChange}
-          projectId={parseInt(id)}
-          maxFileSize={project?.fileSettings?.maxFileSize || 10 * 1024 * 1024}
-          maxFiles={project?.fileSettings?.maxFilesPerTask || 10}
-        />
-      </div>
       {/* Task Modal */}
       <TaskEditModal
         isOpen={isTaskModalOpen}
