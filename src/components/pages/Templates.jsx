@@ -12,7 +12,7 @@ import ErrorView from '@/components/ui/ErrorView'
 import Empty from '@/components/ui/Empty'
 import TemplateCreateModal from '@/components/molecules/TemplateCreateModal'
 import TemplateLibrary from '@/components/molecules/TemplateLibrary'
-import { showToast } from '@/utils/toast'
+import toast from '@/utils/toast'
 
 const Templates = () => {
   const [taskTemplates, setTaskTemplates] = useState([])
@@ -55,16 +55,16 @@ const Templates = () => {
       if (activeTab === "tasks") {
         const newTemplate = await taskService.createTemplate(templateData)
         setTaskTemplates(prev => [newTemplate, ...prev])
-        showToast("Task template created successfully! 🎉", "success")
+toast.success("Task template created successfully! 🎉")
       } else {
         const newTemplate = await projectService.createTemplate(templateData)
         setProjectTemplates(prev => [newTemplate, ...prev])
-        showToast("Project template created successfully! 🎉", "success")
+toast.success("Project template created successfully! 🎉")
       }
       setIsCreateModalOpen(false)
     } catch (err) {
       console.error("Failed to create template:", err)
-      showToast("Failed to create template. Please try again.", "error")
+toast.error("Failed to create template. Please try again.")
     }
   }
 
@@ -75,15 +75,15 @@ const Templates = () => {
       if (activeTab === "tasks") {
         await taskService.deleteTemplate(templateId)
         setTaskTemplates(prev => prev.filter(t => t.Id !== templateId))
-        showToast("Template deleted successfully", "success")
+toast.success("Template deleted successfully")
       } else {
         await projectService.deleteTemplate(templateId)
         setProjectTemplates(prev => prev.filter(t => t.Id !== templateId))
-        showToast("Template deleted successfully", "success")
+toast.success("Template deleted successfully")
       }
     } catch (err) {
       console.error("Failed to delete template:", err)
-      showToast("Failed to delete template. Please try again.", "error")
+toast.error("Failed to delete template. Please try again.")
     }
   }
 
@@ -105,10 +105,10 @@ const Templates = () => {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
       
-      showToast("Templates exported successfully! 📄", "success")
+toast.success("Templates exported successfully! 📄")
     } catch (err) {
       console.error("Failed to export templates:", err)
-      showToast("Failed to export templates. Please try again.", "error")
+toast.error("Failed to export templates. Please try again.")
     }
   }
 
@@ -130,10 +130,10 @@ const Templates = () => {
         setProjectTemplates(prev => [...imported, ...prev])
       }
       
-      showToast(`Imported ${imported.length} templates successfully! 🎉`, "success")
+toast.success(`Imported ${imported.length} templates successfully! 🎉`)
     } catch (err) {
       console.error("Failed to import templates:", err)
-      showToast("Failed to import templates. Please check file format.", "error")
+toast.error("Failed to import templates. Please check file format.")
     }
     
     event.target.value = '' // Reset file input
@@ -329,10 +329,10 @@ const TemplateCard = ({ template, type, onDelete, onUse }) => {
     try {
       setIsLoading(true)
       await onUse(template.Id)
-      showToast(`${type === 'tasks' ? 'Task' : 'Project'} created from template! 🎉`, "success")
+toast.success(`${type === 'tasks' ? 'Task' : 'Project'} created from template! 🎉`)
     } catch (err) {
       console.error("Failed to use template:", err)
-      showToast("Failed to use template. Please try again.", "error")
+toast.error("Failed to use template. Please try again.")
     } finally {
       setIsLoading(false)
     }
