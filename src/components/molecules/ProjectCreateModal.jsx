@@ -61,16 +61,29 @@ if (isOpen) {
 
     // Auto-fill template data
 if (field === 'templateId' && value) {
-      const selectedTemplate = templates.find(t => t.Id === value)
+      const selectedTemplate = templates.find(t => t.Id === parseInt(value))
       if (selectedTemplate) {
         setFormData(prev => ({
           ...prev,
-          name: prev.name || selectedTemplate.name,
-          color: selectedTemplate.color,
-          icon: selectedTemplate.icon,
-          description: prev.description || selectedTemplate.description,
-          status: selectedTemplate.status || 'Active'
+          name: prev.name || selectedTemplate.name || '',
+          description: prev.description || selectedTemplate.description || '',
+          color: selectedTemplate.color || selectedTemplate.defaults?.color || '#3b82f6',
+          icon: selectedTemplate.icon || '📁',
+          status: selectedTemplate.status || selectedTemplate.defaults?.status || 'Active'
         }))
+        
+        // Visual feedback for successful template mapping
+        setTimeout(() => {
+          const templateSelectElement = document.querySelector(`select[value="${value}"]`)
+          if (templateSelectElement) {
+            templateSelectElement.style.borderColor = '#10b981'
+            templateSelectElement.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)'
+            setTimeout(() => {
+              templateSelectElement.style.borderColor = ''
+              templateSelectElement.style.boxShadow = ''
+            }, 2000)
+          }
+        }, 100)
       }
     }
   }
