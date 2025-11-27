@@ -398,12 +398,12 @@ export const buildCommentThreads = (comments) => {
     });
   });
 
-  // Sort threads within each topic: pinned first, then by creation date
+// Sort threads within each topic: pinned first, then by creation date (oldest first, newest last)
   Object.keys(topicGroups).forEach(topic => {
     topicGroups[topic].sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      return new Date(a.createdAt) - new Date(b.createdAt);
     });
   });
 
