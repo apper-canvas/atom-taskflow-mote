@@ -151,8 +151,7 @@ const handleSubmit = async (e) => {
       let commentContext = content || "General discussion";
       let previousComments = [];
       
-      // If we have taskId, get recent comments for context
-      if (taskId) {
+// If we have taskId, get recent comments for context
       if (taskId) {
         try {
           const taskComments = await commentService.getCommentsByTaskId(taskId);
