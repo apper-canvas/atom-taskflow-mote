@@ -1,19 +1,28 @@
 import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import commentService from "@/services/api/commentService";
+import commentService, { getCommentTopics } from "@/services/api/commentService";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
+import { showToast } from "@/utils/toast";
+
+// Initialize ApperClient for Edge function calls
+const { ApperClient } = window.ApperSDK;
+const apperClient = new ApperClient({
+  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+});
 
 const CommentInput = ({ 
   onSubmit, 
-onCancel, 
+  onCancel, 
   placeholder = "Add a comment...", 
   submitText = "Post Comment",
   initialContent = "",
   enableTopicSelection = false,
-  taskId = null
+  taskId = null,
+  contextComments = []
 }) => {
   const [content, setContent] = useState(initialContent);
   const [mentions, setMentions] = useState([]);
@@ -26,6 +35,11 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
   const textareaRef = useRef(null);
+  
+  // AI Suggestion states
+  const [suggestions, setSuggestions] = useState([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleContentChange = (e) => {
     const value = e.target.value;
@@ -101,6 +115,53 @@ const [isSubmitting, setIsSubmitting] = useState(false);
     }
   };
 
+const handleGenerateSuggestions = async () => {
+    if (!content.trim()) {
+      showToast.warning('Please enter some text first to get reply suggestions');
+      return;
+    }
+
+    setIsGeneratingSuggestions(true);
+    try {
+const result = await apperClient.functions.invoke(import.meta.env.VITE_GENERATE_REPLY_SUGGESTIONS, {
+        body: JSON.stringify({
+          commentText: content,
+          contextComments: contextComments || [],
+          authorName: 'Current User'
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (result.success) {
+        setSuggestions(result.suggestions);
+        setShowSuggestions(true);
+        showToast.success('Reply suggestions generated!');
+      } else {
+        console.info(`apper_info: Got an error in this function: ${import.meta.env.VITE_GENERATE_REPLY_SUGGESTIONS}. The response body is: ${JSON.stringify(result)}.`);
+        showToast.error(result.error || 'Failed to generate suggestions');
+      }
+    } catch (error) {
+      console.info(`apper_info: Got this error an this function: ${import.meta.env.VITE_GENERATE_REPLY_SUGGESTIONS}. The error is: ${error.message}`);
+      showToast.error('Failed to generate reply suggestions');
+    } finally {
+      setIsGeneratingSuggestions(false);
+    }
+  };
+
+const handleSelectSuggestion = (suggestion) => {
+    setContent(suggestion);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    textareaRef.current?.focus();
+  };
+
+  const handleDismissSuggestions = () => {
+    setShowSuggestions(false);
+    setSuggestions([]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 if (!content.trim() || isSubmitting) return;
@@ -141,7 +202,44 @@ if (!content.trim() || isSubmitting) return;
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4"
       onSubmit={handleSubmit}
-    >
+>
+      {/* AI Suggestions */}
+      {showSuggestions && suggestions.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ApperIcon name="Brain" size={16} className="text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">AI Reply Suggestions</span>
+            </div>
+            <button
+              onClick={handleDismissSuggestions}
+              className="text-blue-600 hover:text-blue-800 p-1 rounded"
+            >
+              <ApperIcon name="X" size={14} />
+            </button>
+          </div>
+          <div className="space-y-2">
+            {suggestions.map((suggestion, index) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleSelectSuggestion(suggestion)}
+                className="block w-full text-left p-3 text-sm bg-white border border-blue-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+              >
+                {suggestion}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+      
       <div className="relative">
         <Textarea
           ref={textareaRef}
@@ -200,13 +298,28 @@ if (!content.trim() || isSubmitting) return;
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+<div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <ApperIcon name="Info" size={14} />
           <span>Use @ to mention team members • Support rich text formatting</span>
         </div>
         
         <div className="flex items-center gap-3">
+          {/* AI Suggestions Button */}
+<Button
+            onClick={handleGenerateSuggestions}
+            disabled={isGeneratingSuggestions || !content.trim()}
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+          >
+            <ApperIcon 
+              name="Brain" 
+              size={14} 
+              className={isGeneratingSuggestions ? "animate-pulse" : ""} 
+            />
+            {isGeneratingSuggestions ? 'Thinking...' : 'Suggest Reply'}
+          </Button>
           {onCancel && (
             <Button
               type="button"

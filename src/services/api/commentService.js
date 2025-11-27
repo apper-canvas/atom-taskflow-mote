@@ -461,6 +461,46 @@ export const buildCommentThreads = (comments) => {
   return result;
 };
 
+// Helper function to build context for AI suggestions
+export const buildSuggestionContext = (comments, targetCommentId = null) => {
+  if (!comments || comments.length === 0) return [];
+  
+  // If we have a specific comment we're replying to, include thread context
+  if (targetCommentId) {
+    const targetComment = comments.find(c => c.Id === targetCommentId);
+    if (targetComment) {
+      // Get the thread (parent and replies)
+      const threadComments = comments.filter(c => 
+        c.Id === targetCommentId || 
+        c.parentId === targetCommentId || 
+        (targetComment.parentId && (c.Id === targetComment.parentId || c.parentId === targetComment.parentId))
+      );
+      return threadComments.slice(-5).map(c => ({
+        authorName: c.authorName,
+        content: c.content,
+        createdAt: c.createdAt
+      }));
+    }
+  }
+  
+  // Otherwise return recent comments for general context
+  return comments
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5)
+    .map(c => ({
+      authorName: c.authorName,
+      content: c.content,
+      createdAt: c.createdAt
+    }));
+};
+
+// Validate suggestion content
+export const validateSuggestion = (suggestion) => {
+  if (!suggestion || typeof suggestion !== 'string') return false;
+  const trimmed = suggestion.trim();
+  return trimmed.length > 0 && trimmed.length <= 500; // Reasonable length limit
+};
+
 const commentService = {
   getCommentsByTaskId,
   getCommentById,
@@ -473,13 +513,15 @@ const commentService = {
   toggleResolve,
   searchComments,
   markAsRead,
-getTeamMembers,
+  getTeamMembers,
   getCommentStats,
   buildCommentThreads,
   getCommentTopics,
   analyzeSentiment,
   generateConversationSummary,
-  getConversationsByTopic
+  getConversationsByTopic,
+  buildSuggestionContext,
+  validateSuggestion
 };
 
 // Named exports for direct import
