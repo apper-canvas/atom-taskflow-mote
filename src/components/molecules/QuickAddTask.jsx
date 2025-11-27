@@ -5,7 +5,7 @@ import Button from "@/components/atoms/Button";
 import Input from "@/components/atoms/Input";
 import Select from "@/components/atoms/Select";
 
-const QuickAddTask = ({ onAddTask, isLoading = false }) => {
+const QuickAddTask = ({ onAddTask, onOpenSubtaskModal, isLoading = false }) => {
   const [title, setTitle] = useState("")
 const [category, setCategory] = useState("Personal")
   const [priority, setPriority] = useState("Medium")
@@ -68,7 +68,7 @@ title: title.trim(),
               />
             </div>
 
-            {title.trim() && (
+{title.trim() && (
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -87,6 +87,44 @@ title: title.trim(),
                   )}
                   Add
                 </Button>
+                
+                {onOpenSubtaskModal && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      // First create the main task, then open subtask modal
+                      const handleCreateWithSubtask = async () => {
+                        const taskData = {
+                          title: title.trim(),
+                          category,
+                          priority,
+                          status,
+                          description: ""
+                        };
+                        const newTask = await onAddTask(taskData);
+                        if (newTask && newTask.Id) {
+                          onOpenSubtaskModal({ parentTaskId: newTask.Id });
+                        }
+                        // Reset form
+                        setTitle("");
+                        setCategory("Personal");
+                        setPriority("Medium");
+                        setStatus("Not Started");
+                        setIsExpanded(false);
+                      };
+                      handleCreateWithSubtask();
+                    }}
+                    disabled={isLoading}
+                    className="shadow-sm text-green-600 hover:text-green-800 border-green-200 hover:border-green-300 hover:bg-green-50"
+                    title="Create task and add subtask"
+                  >
+                    <ApperIcon name="Plus" size={16} />
+                    <ApperIcon name="ArrowRight" size={12} className="ml-1" />
+                    Add subtask
+                  </Button>
+                )}
               </motion.div>
             )}
           </div>
