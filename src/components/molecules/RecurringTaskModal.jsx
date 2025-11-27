@@ -10,7 +10,7 @@ import TagSelector from '@/components/molecules/TagSelector'
 import { taskService } from '@/services/api/taskService'
 import { cn } from '@/utils/cn'
 
-const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onDelete, isLoading = false }) => {
+const RecurringTaskModal = ({ isOpen, onClose, task, onSave, onSaveAndClose, onDelete, isLoading = false }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",

@@ -192,12 +192,14 @@ const handleInputChange = (field, value) => {
     }
 }
 
-  const handleRecurringSave = async (taskId, recurringData) => {
+const handleRecurringSave = async (taskId, recurringData) => {
     try {
       await onSave(taskId, recurringData)
       setShowRecurringModal(false)
+      toast.success('Recurring task updated successfully')
     } catch (error) {
       console.error('Failed to save recurring task:', error)
+      toast.error('Failed to update recurring task')
     }
   }
 
@@ -209,6 +211,18 @@ const handleInputChange = (field, value) => {
     }))
     setShowRecurringModal(false)
     toast.success('Recurring schedule updated successfully')
+  }
+
+  const handleRecurringDelete = async (taskId) => {
+    try {
+      await onDelete(taskId)
+      setShowRecurringModal(false)
+      onClose() // Close the parent modal as well since task is deleted
+      toast.success('Recurring task deleted successfully')
+    } catch (error) {
+      console.error('Failed to delete recurring task:', error)
+      toast.error('Failed to delete recurring task')
+    }
   }
 
 const handleEditRecurring = () => {
@@ -812,7 +826,7 @@ rows={4}
         </div>
       </form>
 {/* Recurring Task Configuration Modal */}
-      <RecurringTaskModal
+<RecurringTaskModal
         isOpen={showRecurringModal}
         onClose={() => setShowRecurringModal(false)}
         task={formData.isRecurring || (task?.isRecurring && task?.recurrence) ? { 
@@ -827,6 +841,7 @@ rows={4}
         } : null}
         onSave={handleRecurringSave}
         onSaveAndClose={handleRecurringSaveAndClose}
+        onDelete={handleRecurringDelete}
         isLoading={isLoading}
       />
 
