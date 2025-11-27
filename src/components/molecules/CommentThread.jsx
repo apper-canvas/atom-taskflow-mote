@@ -20,6 +20,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [conversationSummary, setConversationSummary] = useState(null);
+  const [collapsedThreads, setCollapsedThreads] = useState(new Set());
   const [commentStats, setCommentStats] = useState({
     total: 0,
     unread: 0,
@@ -104,7 +105,19 @@ case 'topic':
     setThreads(threadStructure);
   };
 
-const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null, topic = null) => {
+const toggleThreadCollapse = (commentId) => {
+    setCollapsedThreads(prev => {
+      const newCollapsed = new Set(prev);
+      if (newCollapsed.has(commentId)) {
+        newCollapsed.delete(commentId);
+      } else {
+        newCollapsed.add(commentId);
+      }
+      return newCollapsed;
+    });
+  };
+
+  const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null, topic = null) => {
     try {
       const newComment = await commentService.createComment({
         taskId,
@@ -224,12 +237,12 @@ const renderComment = (comment, isReply = false) => {
   };
 
   return (
-    <motion.div
+<motion.div
       key={comment.Id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={`${
-        isReply ? 'ml-10 mt-4' : 'mb-6'
+        isReply ? 'ml-12 mt-4 border-l-4 border-l-blue-200 pl-6' : 'mb-6'
       } ${
         comment.isPinned 
           ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm' 
@@ -295,7 +308,7 @@ const renderComment = (comment, isReply = false) => {
             </div>
             
             <div className="flex items-center gap-3 text-sm text-slate-500">
-              <span className="font-medium">{(() => {
+<span className="font-medium">{(() => {
                 try {
                   if (!comment.createdAt) return 'Recently'
                   const date = new Date(comment.createdAt)
@@ -516,8 +529,58 @@ const renderComment = (comment, isReply = false) => {
       )}
 
       {/* Enhanced Replies */}
-      {comment?.replies?.length > 0 && (
-        <div className="mt-6 space-y-4">
+{/* Thread Controls and Replies */}
+      {comment?.replies?.length > 0 && !isReply && (
+        <div className="mt-6 ml-16">
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={() => toggleThreadCollapse(comment.Id)}
+              className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-all duration-200 group"
+              title={collapsedThreads.has(comment.Id) ? 'Expand thread' : 'Collapse thread'}
+            >
+              <motion.div
+                animate={{ rotate: collapsedThreads.has(comment.Id) ? 0 : 90 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ApperIcon name="ChevronRight" size={16} />
+              </motion.div>
+              <span className="flex items-center gap-1.5">
+                <ApperIcon name="MessageCircle" size={14} className="text-slate-500" />
+                {collapsedThreads.has(comment.Id) ? 'View' : 'Hide'} {comment.totalReplyCount || comment.replies.length} 
+                {comment.totalReplyCount === 1 || comment.replies.length === 1 ? 'reply' : 'replies'}
+              </span>
+            </button>
+            
+            {/* Reply Count Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
+              <ApperIcon name="Users" size={12} />
+              <span className="text-xs font-medium">
+                {[...new Set([comment.authorId, ...comment.replies.map(r => r.authorId)])].length} participants
+              </span>
+            </div>
+          </div>
+          
+          <AnimatePresence>
+            {!collapsedThreads.has(comment.Id) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="space-y-4 overflow-hidden"
+              >
+                {comment.replies.map(reply => 
+                  reply ? renderComment(reply, true) : null
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Direct replies for nested comments */}
+      {comment?.replies?.length > 0 && isReply && (
+        <div className="mt-4 space-y-3">
           {comment.replies.map(reply => 
             reply ? renderComment(reply, true) : null
           )}
@@ -588,7 +651,7 @@ return (
               placeholder="Search comments..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all duration-200"
+className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all duration-200"
             />
           </div>
           

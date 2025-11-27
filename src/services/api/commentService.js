@@ -267,7 +267,7 @@ export const buildCommentThreads = (comments) => {
 
   // First pass: create comment map and group by topic
   comments.forEach(comment => {
-    commentMap[comment.Id] = { ...comment, replies: [] };
+    commentMap[comment.Id] = { ...comment, replies: [], replyCount: 0 };
     
     const topic = comment.topic || 'General';
     if (!topicGroups[topic]) {
@@ -275,15 +275,34 @@ export const buildCommentThreads = (comments) => {
     }
   });
 
-  // Second pass: build threads within topics
+  // Second pass: build threads within topics and count replies
   comments.forEach(comment => {
     const topic = comment.topic || 'General';
     
     if (comment.parentId && commentMap[comment.parentId]) {
       commentMap[comment.parentId].replies.push(commentMap[comment.Id]);
+      // Update reply count for parent
+      commentMap[comment.parentId].replyCount = commentMap[comment.parentId].replies.length;
     } else {
       topicGroups[topic].push(commentMap[comment.Id]);
     }
+  });
+
+  // Third pass: recursively count all nested replies
+  const countAllReplies = (comment) => {
+    let totalReplies = comment.replies.length;
+    comment.replies.forEach(reply => {
+      totalReplies += countAllReplies(reply);
+    });
+    comment.totalReplyCount = totalReplies;
+    return totalReplies;
+  };
+
+  // Apply recursive counting to all root comments
+  Object.keys(topicGroups).forEach(topic => {
+    topicGroups[topic].forEach(comment => {
+      countAllReplies(comment);
+    });
   });
 
   // Sort threads within each topic: pinned first, then by creation date
@@ -328,7 +347,7 @@ export default {
   toggleResolve,
   searchComments,
   markAsRead,
-  getCommentStats,
+getCommentStats,
   buildCommentThreads
 };
 

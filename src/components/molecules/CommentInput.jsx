@@ -55,7 +55,7 @@ const CommentInput = ({
   submitText = "Post Comment",
   initialContent = "",
   enableTopicSelection = false,
-  taskId = null,
+taskId = null,
   contextComments = []
 }) => {
   const [content, setContent] = useState(initialContent);
@@ -246,9 +246,9 @@ const handleSubmit = async (e) => {
       }
     }
 
-    setIsSubmitting(true);
+setIsSubmitting(true);
     
-    try {
+try {
       await onSubmit(content, mentions, attachments, null, null, selectedTopic);
       setContent('');
       setMentions([]);
