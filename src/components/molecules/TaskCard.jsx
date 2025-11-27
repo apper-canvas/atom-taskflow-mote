@@ -6,7 +6,7 @@ import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
-import { toast } from "@/utils/toast";
+import toast from "@/utils/toast";
 import { cn } from "@/utils/cn";
 
 const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, onCreateSubtask }) => {
