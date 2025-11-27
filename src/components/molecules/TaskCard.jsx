@@ -16,9 +16,10 @@ const TaskCard = ({ task, onToggleComplete, onEdit, onDelete, onToggleSubtask, o
   const [loadingSubtasks, setLoadingSubtasks] = useState(false);
 
   // Check if this task has subtasks or subtask progress
-  const hasSubtasks = task.subtaskCount > 0 || task.parentTaskId
+const hasSubtasks = task.subtaskCount > 0 || task.parentTaskId
   const isParentTask = task.subtaskCount > 0
   const isSubtask = !!task.parentTaskId
+  const canHaveSubtasks = !isSubtask && task.status !== 'Completed'
 
   useEffect(() => {
     if (showSubtasks && isParentTask && subtasks.length === 0) {
@@ -459,12 +460,17 @@ task.priority === "Urgent" && "text-red-800 bg-red-200",
                         {" "}{task.priority}
                     </div>
                     {/* Subtask actions for parent tasks */}
-                    {isParentTask && <button
+{canHaveSubtasks && (
+                      <button
                         onClick={handleCreateSubtask}
-                        className="flex items-center gap-1 text-xs text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 px-2 py-1 rounded-full transition-colors"
-                        title="Add subtask">
-                        <ApperIcon name="Plus" size={12} />Add subtask
-                                        </button>}
+                        className="flex items-center gap-1 text-xs text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 hover:border-green-300 px-3 py-1.5 rounded-full transition-all duration-200 hover:shadow-sm font-medium"
+                        title="Create a subtask for this task"
+                        aria-label="Add subtask"
+                      >
+                        <ApperIcon name="Plus" size={12} />
+                        <span>Add subtask</span>
+                      </button>
+                    )}
                 </div>
 {/* Expanded subtasks */}
                 {showSubtasks && isParentTask && <div className="mt-4 pl-4 border-l-2 border-gray-200 space-y-2">
