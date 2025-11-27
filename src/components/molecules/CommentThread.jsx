@@ -237,7 +237,7 @@ const isOwnComment = (comment) => {
     }
   };
 
-const renderComment = (comment, isReply = false) => {
+const RenderComment = ({ comment, isReply = false }) => {
   const sentiment = analyzeSentiment(comment.content);
   
   const getSentimentColor = (sentimentType) => {
@@ -256,7 +256,7 @@ const renderComment = (comment, isReply = false) => {
     }
   };
 
-const [showEditHistory, setShowEditHistory] = useState(false);
+  const [showEditHistory, setShowEditHistory] = useState(false);
   const [editTimeRemaining, setEditTimeRemaining] = useState(null);
   const editStatus = getEditStatus(comment);
 
@@ -631,7 +631,7 @@ const [showEditHistory, setShowEditHistory] = useState(false);
                 className="space-y-4 overflow-hidden"
               >
                 {comment.replies.map(reply => 
-                  reply ? renderComment(reply, true) : null
+                  reply ? <RenderComment key={reply.Id} comment={reply} isReply={true} /> : null
                 )}
               </motion.div>
             )}
@@ -643,7 +643,7 @@ const [showEditHistory, setShowEditHistory] = useState(false);
       {comment?.replies?.length > 0 && isReply && (
         <div className="mt-4 space-y-3">
           {comment.replies.map(reply => 
-            reply ? renderComment(reply, true) : null
+            reply ? <RenderComment key={reply.Id} comment={reply} isReply={true} /> : null
           )}
         </div>
 )}
@@ -808,9 +808,9 @@ className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm foc
                   isOwnComment(comment)
                     ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 ring-2 ring-blue-100'
                     : 'bg-white border-slate-200 hover:border-slate-300'
-                }`}
+}`}
               >
-                {renderComment(comment)}
+                <RenderComment comment={comment} />
               </motion.div>
             ))
           ) : (
