@@ -646,8 +646,9 @@ const [showEditHistory, setShowEditHistory] = useState(false);
             reply ? renderComment(reply, true) : null
           )}
         </div>
-      )}
+)}
     </motion.div>
+    </>
   );
 };
 
