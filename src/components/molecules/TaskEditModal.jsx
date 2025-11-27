@@ -357,21 +357,19 @@ linkedTasks: formData.linkedTasks
 <form onSubmit={handleSubmit} className="space-y-6">
         {/* Parent Task Selection for Subtasks */}
 {/* Project Selection */}
-        {(!task || !task.Id) && (
-          <Select
-            label="Project"
-            value={formData.projectId || ""}
-            onChange={(e) => handleInputChange("projectId", e.target.value)}
-            disabled={isLoading}
-          >
-            <option value="">No Project</option>
-            {availableProjects.map(project => (
-              <option key={project.Id} value={project.Id}>
-                <span style={{color: project.color}}>{project.icon || '📂'}</span> {project.name}
-              </option>
-            ))}
-          </Select>
-        )}
+<Select
+          label="Project"
+          value={formData.projectId || ""}
+          onChange={(e) => handleInputChange("projectId", e.target.value)}
+          disabled={isLoading}
+        >
+          <option value="">No Project</option>
+          {availableProjects.map(project => (
+            <option key={project.Id} value={project.Id}>
+              <span style={{color: project.color}}>{project.icon || '📂'}</span> {project.name}
+            </option>
+          ))}
+        </Select>
 
         {(!task || !task.Id) && (
           <Select
