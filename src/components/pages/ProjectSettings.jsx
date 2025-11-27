@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { projectService } from '@/services/api/projectService'
-import ApperIcon from '@/components/ApperIcon'
-import Loading from '@/components/ui/Loading'
-import ErrorView from '@/components/ui/ErrorView'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import Select from '@/components/atoms/Select'
-import Textarea from '@/components/atoms/Textarea'
-import Modal from '@/components/atoms/Modal'
-import { toast } from '@/utils/toast'
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import { projectService } from "@/services/api/projectService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import ErrorView from "@/components/ui/ErrorView";
+import Textarea from "@/components/atoms/Textarea";
+import Modal from "@/components/atoms/Modal";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import toast, { showToast } from "@/utils/toast";
 
 function ProjectSettings() {
   const { id } = useParams()
