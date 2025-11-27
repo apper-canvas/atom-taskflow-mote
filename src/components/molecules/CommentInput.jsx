@@ -139,8 +139,8 @@ if (!content.trim() || isSubmitting) return;
 <motion.form
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-3"
-onSubmit={handleSubmit}
+      className="space-y-4"
+      onSubmit={handleSubmit}
     >
       <div className="relative">
         <Textarea
@@ -155,12 +155,12 @@ onSubmit={handleSubmit}
           onItalic={() => handleRichTextAction('italic')}
           onLink={() => handleRichTextAction('link')}
           onCode={() => handleRichTextAction('code')}
-          className="resize-none"
+          className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg"
         />
         
         {/* Mention Dropdown */}
         {showMentionDropdown && (
-          <div className="absolute z-10" style={{ top: '100%', left: '12px' }}>
+          <div className="absolute z-20" style={{ top: '100%', left: '12px' }}>
             <MentionDropdown
               query={mentionQuery}
               onSelect={handleMentionSelect}
@@ -170,41 +170,50 @@ onSubmit={handleSubmit}
         )}
       </div>
 
-      {/* Mentioned Users */}
+      {/* Enhanced Mentioned Users */}
       {mentions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {mentions.map((mention, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
-            >
-              <ApperIcon name="AtSign" size={12} />
-              {mention.name}
-              <button
-                type="button"
-                onClick={() => setMentions(prev => prev.filter((_, i) => i !== index))}
-                className="ml-1 text-blue-600 hover:text-blue-800"
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2 mb-2">
+            <ApperIcon name="AtSign" size={14} className="text-blue-600" />
+            <span className="text-sm font-medium text-blue-800">Mentioning:</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {mentions.map((mention, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm px-3 py-1.5 rounded-full font-medium"
               >
-                <ApperIcon name="X" size={12} />
-              </button>
-            </span>
-          ))}
+                <div className="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold">
+                  {mention.name.charAt(0)}
+                </div>
+                {mention.name}
+                <button
+                  type="button"
+                  onClick={() => setMentions(prev => prev.filter((_, i) => i !== index))}
+                  className="ml-1 text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <ApperIcon name="X" size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <ApperIcon name="Info" size={12} />
-          <span>Use @ to mention team members</span>
+        <div className="flex items-center gap-2 text-xs text-slate-500">
+          <ApperIcon name="Info" size={14} />
+          <span>Use @ to mention team members • Support rich text formatting</span>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {onCancel && (
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleCancel}
+              className="text-slate-600 border-slate-300 hover:bg-slate-50"
             >
               Cancel
             </Button>
@@ -213,14 +222,18 @@ onSubmit={handleSubmit}
             type="submit"
             size="sm"
             disabled={!content.trim() || isSubmitting}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium shadow-sm"
           >
             {isSubmitting ? (
               <>
-                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                 Posting...
               </>
             ) : (
-              submitText
+              <>
+                <ApperIcon name="Send" size={16} className="mr-2" />
+                {submitText}
+              </>
             )}
           </Button>
         </div>
