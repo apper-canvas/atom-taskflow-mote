@@ -178,19 +178,17 @@ const handleInputChange = (field, value) => {
     }
   }
 
-  const handleRecurringToggle = () => {
+const handleRecurringToggle = () => {
+    // This now only handles disabling recurring (removing schedule)
     if (formData.isRecurring) {
-      // Disable recurring
       setFormData(prev => ({
         ...prev,
         isRecurring: false,
         recurrence: null
       }))
-    } else {
-      // Enable recurring - open modal
-      setShowRecurringModal(true)
+      toast.success('Recurring schedule removed')
     }
-}
+  }
 
 const handleRecurringSave = async (taskId, recurringData) => {
     try {
@@ -226,6 +224,7 @@ const handleRecurringSave = async (taskId, recurringData) => {
   }
 
 const handleEditRecurring = () => {
+    // Always open the modal for editing or creating recurring schedule
     setShowRecurringModal(true)
   }
 
@@ -553,22 +552,37 @@ rows={4}
                 <label className="text-sm font-medium text-gray-700">Recurring Task</label>
                 <p className="text-xs text-gray-500">Set up this task to repeat on a schedule</p>
               </div>
-              <div className="flex items-center gap-3">
+<div className="flex items-center gap-3">
                 {formData.isRecurring && formData.recurrence && (
                   <span className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
                     ✓ Configured
                   </span>
                 )}
-                <Button
-                  type="button"
-                  variant={formData.isRecurring ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={handleRecurringToggle}
-                  disabled={isLoading}
-                >
-                  <ApperIcon name="RotateCw" size={16} />
-                  {formData.isRecurring ? "Edit Schedule" : "Make Recurring"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant={formData.isRecurring ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={handleEditRecurring}
+                    disabled={isLoading}
+                  >
+                    <ApperIcon name="RotateCw" size={16} />
+                    {formData.isRecurring ? "Edit Schedule" : "Make Recurring"}
+                  </Button>
+                  {formData.isRecurring && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRecurringToggle()}
+                      disabled={isLoading}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                      title="Remove recurring schedule"
+                    >
+                      <ApperIcon name="Trash2" size={16} />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             {formData.isRecurring && formData.recurrence && (
