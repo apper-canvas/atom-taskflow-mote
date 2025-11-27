@@ -12,6 +12,12 @@ const mockTeamMembers = [
   { Id: 5, name: "Alex Johnson", email: "alex@example.com", avatar: null }
 ];
 
+// Helper function to get user by ID
+const getUserById = (userId) => {
+  const user = mockTeamMembers.find(member => member.Id === userId);
+  return user || { Id: userId, name: `User ${userId}`, email: `user${userId}@example.com`, avatar: null };
+};
+
 let comments = [...commentsData];
 
 // Get unique topics from comments
@@ -65,8 +71,8 @@ const newComment = {
     content: content.trim(), // Use validated and trimmed content
     contentType: commentData.contentType || "html", // text, html, markdown
 authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorId : 1,
-    authorName: commentData.authorName?.trim() || "Current User",
-    authorEmail: commentData.authorEmail?.trim() || "user@example.com",
+    authorName: commentData.authorName?.trim() || getUserById(commentData.authorId || 1).name,
+    authorEmail: commentData.authorEmail?.trim() || getUserById(commentData.authorId || 1).email,
     authorAvatar: commentData.authorAvatar || null,
     mentions: Array.isArray(commentData.mentions) ? commentData.mentions : [],
     attachments: Array.isArray(commentData.attachments) ? commentData.attachments : [],
@@ -89,11 +95,14 @@ isEdited: false,
 };
 
 // Add reaction to comment
-export const addReaction = async (commentId, emoji, userId = 1, userName = 'Current User') => {
+export const addReaction = async (commentId, emoji, userId = 1, userName = null) => {
   await new Promise(resolve => setTimeout(resolve, 200));
   
   const comment = comments.find(c => c.Id === commentId);
   if (!comment) throw new Error('Comment not found');
+  
+  // Get proper user name if not provided
+  const resolvedUserName = userName || getUserById(userId).name;
   
   // Check if user already reacted with this emoji
   const existingReaction = comment.reactions.find(r => r.userId === userId && r.emoji === emoji);
@@ -106,7 +115,7 @@ export const addReaction = async (commentId, emoji, userId = 1, userName = 'Curr
     comment.reactions.push({
       emoji,
       userId,
-      userName,
+      userName: resolvedUserName,
       createdAt: new Date().toISOString()
     });
   }
@@ -125,6 +134,9 @@ export const removeReaction = async (commentId, emoji, userId = 1) => {
   
   return comment;
 };
+
+// Export getUserById for use in other components
+export const getTeamMemberById = getUserById;
 
 // Update an existing comment
 export const updateComment = async (id, updates) => {
@@ -171,9 +183,10 @@ export const updateComment = async (id, updates) => {
 };
 
 // Helper function to check if comment is still editable
-export const isCommentEditable = (comment, currentUserId) => {
+export const isCommentEditable = (comment, currentUserId = 1) => {
   if (!comment || comment.authorId !== currentUserId) {
-    return { canEdit: false, reason: 'Not your comment' };
+    const author = getUserById(comment.authorId);
+    return { canEdit: false, reason: `Not your comment (authored by ${author.name})` };
   }
   
   const editWindowMinutes = comment.editWindowMinutes || 5;

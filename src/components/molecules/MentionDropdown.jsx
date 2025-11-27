@@ -29,15 +29,24 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
     try {
       setLoading(true);
       const teamMembers = await commentService.getTeamMembers();
-      setMembers(teamMembers);
+      // Ensure all members have proper names
+      const validMembers = teamMembers.map(member => ({
+        ...member,
+        name: member.name || `User ${member.Id}`,
+        email: member.email || `user${member.Id}@example.com`
+      }));
+      setMembers(validMembers);
     } catch (error) {
       console.error('Failed to load team members:', error);
+      // Fallback to empty array
+      setMembers([]);
     } finally {
       setLoading(false);
     }
   };
 
   const getInitials = (name) => {
+    if (!name || name.trim() === '') return 'U';
     return name
       .split(' ')
       .map(part => part.charAt(0))
@@ -51,7 +60,7 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
       'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
       'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500'
     ];
-    const index = name.charCodeAt(0) % colors.length;
+    const index = (name || '').charCodeAt(0) % colors.length;
     return colors[index];
   };
 
@@ -72,7 +81,7 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
   }
 
   return (
-<AnimatePresence>
+    <AnimatePresence>
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -92,7 +101,7 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
         ) : (
           <div className="py-2">
             {filteredMembers.map(member => (
-<button
+              <button
                 key={member.Id}
                 onClick={() => onSelect(member)}
                 className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left group"
@@ -109,10 +118,10 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-900 text-sm">
+                  <div className="font-semibold text-slate-900 text-sm text-ensure-visible">
                     {member.name}
                   </div>
-                  <div className="text-xs text-slate-500 truncate">
+                  <div className="text-xs text-slate-500 truncate text-ensure-visible-light">
                     {member.email}
                   </div>
                 </div>
