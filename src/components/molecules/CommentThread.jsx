@@ -566,7 +566,8 @@ return (
       </div>
 
       {/* Enhanced Comments List */}
-      <div className="space-y-4" style={{ maxHeight, overflowY: 'auto' }}>
+{/* Comment Conversation Section */}
+      <div className="space-y-4 mb-8" style={{ maxHeight, overflowY: 'auto' }}>
         <AnimatePresence>
           {threads.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
@@ -588,19 +589,25 @@ return (
           )}
         </AnimatePresence>
       </div>
+</div>
 
-      {/* Enhanced Add Comment Input */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-slate-900 mb-1">Add a comment</h3>
-          <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+      {/* Add New Comment Section - Positioned Below Conversation */}
+      <div className="border-t-2 border-slate-100 pt-6">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-slate-900 mb-1 flex items-center gap-2">
+              <ApperIcon name="Plus" size={18} className="text-blue-600" />
+              Add a comment
+            </h3>
+            <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+          </div>
+          <CommentInput
+            onSubmit={handleAddComment}
+            placeholder="What's on your mind?"
+            taskId={taskId}
+            enableTopicSelection={true}
+          />
         </div>
-        <CommentInput
-          onSubmit={handleAddComment}
-          placeholder="What's on your mind?"
-          taskId={taskId}
-          enableTopicSelection={true}
-        />
       </div>
     </div>
   );
