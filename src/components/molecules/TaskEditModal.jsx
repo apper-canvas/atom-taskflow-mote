@@ -115,7 +115,7 @@ if (task && task.Id) {
         linkedTasks: []
       });
       setIsSubtaskMode(false);
-    } else if (isOpen) {
+} else if (isOpen) {
       // Creating new task or modal just opened - reset to defaults
       const initializeForm = async () => {
         const baseFormData = {
@@ -129,7 +129,7 @@ if (task && task.Id) {
           isRecurring: false,
           recurrence: null,
           assignedTo: null,
-          projectId: null,
+          projectId: task?.projectId || null, // Extract projectId from task prop if provided
           reminders: [
             { type: "on_due", enabled: false },
             { type: "1_day_before", enabled: false },
