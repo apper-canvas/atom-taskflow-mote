@@ -232,9 +232,9 @@ const handleSelectSuggestion = (suggestion) => {
 if (!content.trim() || isSubmitting) return;
 
     // Load topics when topic selection is enabled
-    if (enableTopicSelection && taskId && availableTopics.length === 0) {
+// Load topics when topic selection is enabled
+if (enableTopicSelection && taskId && availableTopics.length === 0) {
       try {
-        const { commentService } = await import('@/services/api/commentService');
         const topics = await commentService.getCommentTopics(taskId);
         setAvailableTopics(topics);
       } catch (error) {
