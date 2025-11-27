@@ -12,7 +12,7 @@ const [category, setCategory] = useState("Personal")
   const [status, setStatus] = useState("Not Started")
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault()
     if (!title.trim()) return
 
@@ -24,7 +24,11 @@ title: title.trim(),
       description: ""
     })
 
+    // Reset all form fields to defaults
     setTitle("")
+    setCategory("Personal")
+    setPriority("Medium") 
+    setStatus("Not Started")
     setIsExpanded(false)
   }
 

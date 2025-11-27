@@ -58,7 +58,8 @@ const [availableTasks, setAvailableTasks] = useState([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showRecurringModal, setShowRecurringModal] = useState(false)
 useEffect(() => {
-if (task) {
+if (task && task.Id) {
+      // Editing existing task - populate with task data
       setFormData({
         title: task.title || "",
         description: task.description || "",
@@ -85,7 +86,35 @@ attachments: task.attachments || [],
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
-} else {
+} else if (isOpen) {
+      // Creating new task or modal just opened - reset to defaults
+      setFormData({
+        title: "",
+        description: "",
+        category: "Personal",
+        priority: "Medium",
+        status: "Not Started",
+        parentTaskId: null,
+        tags: [],
+        isRecurring: false,
+        recurrence: null,
+        assignedTo: null,
+        projectId: null,
+        reminders: [
+          { type: "on_due", enabled: false },
+          { type: "1_day_before", enabled: false },
+          { type: "1_hour_before", enabled: false },
+          { type: "custom", enabled: false, minutes: 60 }
+        ],
+        estimatedTime: null,
+        actualTime: 0,
+        timeSpent: 0,
+        notes: "",
+        attachments: [],
+        linkedTasks: []
+      });
+      setIsSubtaskMode(false);
+      
       // Check if we're creating a subtask (parentTaskId passed via task prop)
       if (task?.parentTaskId) {
         setFormData(prev => ({
@@ -96,12 +125,14 @@ attachments: task.attachments || [],
       }
     }
     
-    // Load available parent tasks for subtask creation
+    if (isOpen) {
+      // Load available parent tasks for subtask creation
 loadAvailableTasks()
-    loadAvailableProjects()
-    setErrors({})
-    setShowDeleteConfirm(false)
-    setShowRecurringModal(false)
+      loadAvailableProjects()
+      setErrors({})
+      setShowDeleteConfirm(false)
+      setShowRecurringModal(false)
+    }
   }, [task, isOpen])
 
 const [availableProjects, setAvailableProjects] = useState([])
