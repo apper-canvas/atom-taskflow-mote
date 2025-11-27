@@ -426,7 +426,7 @@ className={project?.isFavorite ? 'fill-current' : ''}
         </div>
       )}
 {activeTab === 'comments' && (
-        <div className="space-y-6">
+<div className="space-y-6 isolate">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Task Comments
