@@ -7,12 +7,17 @@ import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
 import { showToast } from "@/utils/toast";
 
-// Initialize ApperClient for Edge function calls
-const { ApperClient } = window.ApperSDK;
-const apperClient = new ApperClient({
-  apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
-  apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
-});
+// Safe ApperClient initialization
+const initializeApperClient = () => {
+  if (typeof window !== 'undefined' && window.ApperSDK && window.ApperSDK.ApperClient) {
+    const { ApperClient } = window.ApperSDK;
+    return new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
+  }
+  return null;
+};
 
 const CommentInput = ({ 
   onSubmit, 
@@ -34,7 +39,21 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableTopics, setAvailableTopics] = useState([]);
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
+  const [apperClient, setApperClient] = useState(null);
+  const [apperError, setApperError] = useState(false);
   const textareaRef = useRef(null);
+
+  // Initialize ApperClient on component mount
+  React.useEffect(() => {
+    const client = initializeApperClient();
+    if (client) {
+      setApperClient(client);
+      setApperError(false);
+    } else {
+      console.warn('ApperSDK not available - reply suggestions disabled');
+      setApperError(true);
+    }
+  }, []);
   
   // AI Suggestion states
   const [suggestions, setSuggestions] = useState([]);
@@ -123,7 +142,13 @@ const handleGenerateSuggestions = async () => {
 
     setIsGeneratingSuggestions(true);
     try {
-const result = await apperClient.functions.invoke(import.meta.env.VITE_GENERATE_REPLY_SUGGESTIONS, {
+if (!apperClient) {
+        console.info('apper_info: Got an error in this function: generate-reply-suggestions. ApperClient not initialized');
+        showToast('Reply suggestions unavailable - ApperSDK not loaded', 'error');
+        return;
+      }
+
+      const result = await apperClient.functions.invoke(import.meta.env.VITE_GENERATE_REPLY_SUGGESTIONS, {
         body: JSON.stringify({
           commentText: content,
           contextComments: contextComments || [],
