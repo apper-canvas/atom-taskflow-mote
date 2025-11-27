@@ -245,7 +245,8 @@ const [previewFile, setPreviewFile] = useState(null);
 const handleTaskSearch = async (e) => {
     const searchTerm = e.target.value;
     if (searchTerm.length > 2) {
-const allTasks = await taskService.getAll();
+      try {
+        const allTasks = await taskService.getAll();
         const filteredTasks = (allTasks || []).filter(t => 
           t.Id !== task?.Id && 
           t.title && t.title.toLowerCase().includes(searchTerm.toLowerCase())
