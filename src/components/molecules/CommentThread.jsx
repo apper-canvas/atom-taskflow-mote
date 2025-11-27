@@ -11,7 +11,7 @@ import toast from "@/utils/toast";
 
 const CommentThread = ({ taskId, maxHeight = "600px" }) => {
   const [comments, setComments] = useState([]);
-const [threads, setThreads] = useState([]);
+  const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, pinned, resolved, unread, topic, sentiment
@@ -20,14 +20,34 @@ const [threads, setThreads] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [conversationSummary, setConversationSummary] = useState(null);
+  const [commentStats, setCommentStats] = useState({
+    total: 0,
+    unread: 0,
+    pinned: 0,
+    resolved: 0,
+    threads: 0
+  });
+
   useEffect(() => {
     loadComments();
   }, [taskId]);
 
-useEffect(() => {
+  useEffect(() => {
     buildThreads();
   }, [comments, searchQuery, filterType]);
 
+  useEffect(() => {
+    loadCommentStats();
+  }, [comments]);
+
+  const loadCommentStats = async () => {
+    try {
+      const stats = await commentService.getCommentStats(taskId);
+      setCommentStats(stats);
+    } catch (error) {
+      console.error('Failed to load comment stats:', error);
+    }
+  };
   const loadComments = async () => {
     try {
       setLoading(true);
@@ -474,8 +494,50 @@ const renderComment = (comment, isReply = false) => {
   }
 return (
 <div className="space-y-6 relative">
-      {/* Enhanced Search and Filters */}
+      {/* Enhanced Comments Header */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <ApperIcon name="MessageCircle" size={20} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Comments</h2>
+              <p className="text-sm text-slate-600">Collaborate and discuss with your team</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200">
+              <ApperIcon name="MessageSquare" size={16} />
+              <span className="font-semibold">{commentStats.total}</span>
+              <span className="text-blue-600">comments</span>
+            </div>
+            
+            {commentStats.unread > 0 && (
+              <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full border border-orange-200">
+                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium">{commentStats.unread} unread</span>
+              </div>
+            )}
+            
+            {commentStats.pinned > 0 && (
+              <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200">
+                <ApperIcon name="Pin" size={14} />
+                <span className="text-sm font-medium">{commentStats.pinned}</span>
+              </div>
+            )}
+            
+            {commentStats.resolved > 0 && (
+              <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
+                <ApperIcon name="CheckCircle" size={14} />
+                <span className="text-sm font-medium">{commentStats.resolved}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Enhanced Search and Filters */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
             <ApperIcon name="Search" size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
@@ -566,43 +628,58 @@ return (
       </div>
 
       {/* Enhanced Comments List */}
-{/* Comment Conversation Section */}
       <div className="space-y-4 mb-8" style={{ maxHeight, overflowY: 'auto' }}>
         <AnimatePresence>
           {threads.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ApperIcon name="MessageCircle" size={32} className="text-slate-400" />
+            <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border border-slate-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <ApperIcon name="MessageCircle" size={32} className="text-blue-500" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">
                 {searchQuery || filterType !== 'all' ? 'No comments match your search' : 'No comments yet'}
               </h3>
-              <p className="text-slate-500">
+              <p className="text-slate-600 mb-6 max-w-md mx-auto">
                 {searchQuery || filterType !== 'all' 
-                  ? 'Try adjusting your search criteria or filters' 
-                  : 'Be the first to start the conversation'
+                  ? 'Try adjusting your search criteria or filters to find what you\'re looking for' 
+                  : 'Start the conversation! Share your thoughts, ask questions, or provide feedback to keep the team connected and informed.'
                 }
               </p>
+              {(!searchQuery && filterType === 'all') && (
+                <button
+                  onClick={() => document.getElementById('comment-input')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+                >
+                  <ApperIcon name="Plus" size={18} />
+                  Add a comment
+                </button>
+              )}
             </div>
           ) : (
             threads.map(thread => renderComment(thread))
           )}
-</AnimatePresence>
+        </AnimatePresence>
       </div>
 
-      {/* Add New Comment Section - Positioned Below Conversation */}
-      <div className="border-t-2 border-slate-100 pt-6">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold text-slate-900 mb-1 flex items-center gap-2">
-              <ApperIcon name="Plus" size={18} className="text-blue-600" />
-              Add a comment
-            </h3>
-            <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+      {/* Enhanced Add New Comment Section */}
+      <div className="border-t-2 border-slate-100 pt-8">
+        <div id="comment-input" className="bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 shadow-sm p-8">
+          <div className="mb-6">
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <ApperIcon name="User" size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <ApperIcon name="Plus" size={18} className="text-blue-600" />
+                  Add a comment
+                </h3>
+                <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+              </div>
+            </div>
           </div>
           <CommentInput
             onSubmit={handleAddComment}
-            placeholder="What's on your mind?"
+            placeholder="What's on your mind? Share updates, ask questions, or provide feedback..."
             taskId={taskId}
             enableTopicSelection={true}
           />
@@ -611,5 +688,4 @@ return (
     </div>
   );
 };
-
 export default CommentThread;

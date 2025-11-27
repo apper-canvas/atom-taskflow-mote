@@ -363,57 +363,72 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
         </div>
       )}
 
-<div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+<div className="space-y-4">
+        {/* Helper Text */}
+        <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-lg">
           <ApperIcon name="Info" size={14} />
-          <span>Use @ to mention team members • Support rich text formatting</span>
+          <span>Use @ to mention team members • Supports rich text formatting • Press Ctrl+Enter to submit</span>
         </div>
         
-        <div className="flex items-center gap-3">
-          {/* AI Suggestions Button */}
-<Button
-            onClick={handleGenerateSuggestions}
-            disabled={isGeneratingSuggestions || !content.trim()}
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-          >
-            <ApperIcon 
-              name="Brain" 
-              size={14} 
-              className={isGeneratingSuggestions ? "animate-pulse" : ""} 
-            />
-            {isGeneratingSuggestions ? 'Thinking...' : 'Suggest Reply'}
-          </Button>
-          {onCancel && (
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center gap-2">
+            {/* AI Suggestions Button */}
             <Button
-              type="button"
-              variant="outline"
+              onClick={handleGenerateSuggestions}
+              disabled={isGeneratingSuggestions || !content.trim()}
+              variant="ghost"
               size="sm"
-              onClick={handleCancel}
-              className="text-slate-600 border-slate-300 hover:bg-slate-50"
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 transition-all duration-200"
             >
-              Cancel
+              <ApperIcon 
+                name="Brain" 
+                size={14} 
+                className={isGeneratingSuggestions ? "animate-pulse" : ""} 
+              />
+              {isGeneratingSuggestions ? 'Thinking...' : 'AI Suggest'}
             </Button>
-          )}
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!content.trim() || isSubmitting}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium shadow-sm"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Posting...
-              </>
-            ) : (
-              <>
-                <ApperIcon name="Send" size={16} className="mr-2" />
-                {submitText}
-              </>
+            
+            {/* Character Count (if needed) */}
+            {content.length > 100 && (
+              <span className="text-xs text-slate-400">
+                {content.length} characters
+              </span>
             )}
-          </Button>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                className="text-slate-600 border-slate-300 hover:bg-slate-50 px-4 py-2 transition-all duration-200"
+              >
+                <ApperIcon name="X" size={14} className="mr-1.5" />
+                Cancel
+              </Button>
+            )}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!content.trim() || isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <ApperIcon name="Send" size={16} className="mr-2" />
+                  {submitText || 'Post Comment'}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </motion.form>
