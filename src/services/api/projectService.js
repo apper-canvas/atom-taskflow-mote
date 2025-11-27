@@ -613,8 +613,12 @@ return new Promise((resolve, reject) => {
     }
   },
 
-  // Create project from template (legacy method for compatibility)
+// Create project from template (legacy method for compatibility)
   async createFromTemplate(templateId, projectData) {
+    if (!this.getTemplates || typeof this.getTemplates !== 'function') {
+      throw new Error('getTemplates method is not available')
+    }
+    
     const templates = await this.getTemplates()
     const template = templates.find(t => t.Id === templateId)
     

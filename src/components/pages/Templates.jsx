@@ -295,7 +295,7 @@ toast.error("Failed to import templates. Please check file format.")
                     template={template}
                     type={activeTab}
                     onDelete={handleDeleteTemplate}
-                    onUse={activeTab === "tasks" ? taskService.createFromTemplate : projectService.createFromTemplate}
+onUse={activeTab === "tasks" ? taskService.createFromTemplate : (templateId, projectData) => projectService.createFromTemplate(templateId, projectData)}
                   />
                 ))}
               </AnimatePresence>
