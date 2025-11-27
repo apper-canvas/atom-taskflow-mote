@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import commentService, { getCommentTopics } from "@/services/api/commentService";
 import ApperIcon from "@/components/ApperIcon";
@@ -6,17 +6,45 @@ import Textarea from "@/components/atoms/Textarea";
 import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
 import { showToast } from "@/utils/toast";
+import { cn } from "@/utils/cn";
 
-// Safe ApperClient initialization
+// Safe SDK availability check
+const checkApperSDKAvailable = () => {
+  return typeof window !== 'undefined' && 
+         window.ApperSDK && 
+         typeof window.ApperSDK.ApperClient === 'function';
+};
+
+// Initialize ApperClient safely
 const initializeApperClient = () => {
-  if (typeof window !== 'undefined' && window.ApperSDK && window.ApperSDK.ApperClient) {
+  if (!checkApperSDKAvailable()) {
+    return null;
+  }
+  
+  try {
     const { ApperClient } = window.ApperSDK;
     return new ApperClient({
       apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
       apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
     });
+  } catch (error) {
+    console.warn('Failed to initialize ApperClient:', error);
+    return null;
   }
-  return null;
+};
+
+// Wait for SDK with timeout
+const waitForSDK = async (timeout = 5000) => {
+  const startTime = Date.now();
+  
+  while (Date.now() - startTime < timeout) {
+    if (checkApperSDKAvailable()) {
+      return true;
+    }
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  
+  return false;
 };
 
 const CommentInput = ({ 
@@ -44,15 +72,27 @@ const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef(null);
 
   // Initialize ApperClient on component mount
-  React.useEffect(() => {
-    const client = initializeApperClient();
-    if (client) {
-      setApperClient(client);
-      setApperError(false);
-    } else {
-      console.warn('ApperSDK not available - reply suggestions disabled');
-      setApperError(true);
-    }
+React.useEffect(() => {
+    const initSDK = async () => {
+      // Wait for SDK to be available
+      const sdkAvailable = await waitForSDK();
+      
+      if (sdkAvailable) {
+        const client = initializeApperClient();
+        if (client) {
+          setApperClient(client);
+          setApperError(false);
+        } else {
+          console.warn('ApperSDK available but client initialization failed');
+          setApperError(true);
+        }
+      } else {
+        console.warn('ApperSDK not available - reply suggestions disabled');
+        setApperError(true);
+      }
+    };
+    
+    initSDK();
   }, []);
   
   // AI Suggestion states
