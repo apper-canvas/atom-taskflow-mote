@@ -12,7 +12,7 @@ let userPreferences = {
   quietHoursEnabled: false,
   quietHoursStart: '22:00',
   quietHoursEnd: '08:00',
-  notificationTypes: {
+notificationTypes: {
     task_assigned: true,
     task_completed: true,
     task_due: true,
@@ -20,7 +20,9 @@ let userPreferences = {
     task_mentioned: true,
     task_comment: true,
     task_updated: false,
-    reminder: true
+    reminder: true,
+    comment_reply: true,
+    comment_mention: true
   }
 };
 
@@ -154,6 +156,30 @@ async createTaskNotification(type, taskId, taskTitle, message, userId = null) {
       metadata: {
         taskTitle,
         taskId
+      }
+    };
+
+    return this.create(notification);
+  },
+
+  async createCommentNotification(type, commentId, taskId, taskTitle, message, userId, authorName, commentContent = null) {
+    const typeMessages = {
+      comment_reply: 'Someone replied to your comment',
+      comment_mention: 'You were mentioned in a comment'
+    };
+
+    const notification = {
+      type,
+      title: typeMessages[type] || 'Comment notification',
+      message: message || typeMessages[type],
+      taskId,
+      userId,
+      metadata: {
+        taskTitle,
+        taskId,
+        commentId,
+        authorName,
+        commentContent: commentContent ? (commentContent.length > 100 ? commentContent.substring(0, 97) + '...' : commentContent) : null
       }
     };
 

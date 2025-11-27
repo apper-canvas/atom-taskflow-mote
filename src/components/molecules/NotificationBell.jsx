@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import ApperIcon from '@/components/ApperIcon';
-import { notificationService } from '@/services/api/notificationService';
-import { formatDistanceToNow } from 'date-fns';
-import toast from '@/utils/toast';
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { notificationService } from "@/services/api/notificationService";
+import { formatDistanceToNow } from "date-fns";
+import { markAsRead } from "@/services/api/commentService";
+import ApperIcon from "@/components/ApperIcon";
+import toast from "@/utils/toast";
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,7 +70,7 @@ console.error('Failed to mark all notifications as read:', error);
     }
   };
 
-  const getNotificationIcon = (type) => {
+const getNotificationIcon = (type) => {
     const iconMap = {
       task_assigned: 'UserPlus',
       task_completed: 'CheckCircle',
@@ -78,7 +79,9 @@ console.error('Failed to mark all notifications as read:', error);
       task_mentioned: 'AtSign',
       task_comment: 'MessageCircle',
       task_updated: 'Edit',
-      reminder: 'Bell'
+      reminder: 'Bell',
+      comment_reply: 'MessageCircle',
+      comment_mention: 'AtSign'
     };
     return iconMap[type] || 'Bell';
   };
@@ -92,7 +95,9 @@ console.error('Failed to mark all notifications as read:', error);
       task_mentioned: 'text-purple-500',
       task_comment: 'text-indigo-500',
       task_updated: 'text-gray-500',
-      reminder: 'text-yellow-500'
+      reminder: 'text-yellow-500',
+      comment_reply: 'text-indigo-500',
+comment_mention: 'text-purple-500'
     };
     return colorMap[type] || 'text-gray-500';
   };

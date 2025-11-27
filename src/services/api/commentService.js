@@ -70,7 +70,7 @@ const newComment = {
     topic: commentData.topic || null,
     content: content.trim(), // Use validated and trimmed content
     contentType: commentData.contentType || "html", // text, html, markdown
-authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorId : 1,
+    authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorId : 1,
     authorName: commentData.authorName?.trim() || getUserById(commentData.authorId || 1).name,
     authorEmail: commentData.authorEmail?.trim() || getUserById(commentData.authorId || 1).email,
     authorAvatar: commentData.authorAvatar || null,
@@ -81,7 +81,7 @@ authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorI
     likedBy: [],
     isPinned: false,
     isResolved: false,
-isEdited: false,
+    isEdited: false,
     editHistory: [],
     isUnread: false,
     quotedCommentId: commentData.quotedCommentId || null,
@@ -92,7 +92,51 @@ isEdited: false,
   
   comments.push(newComment);
 
+  // Generate comment notifications asynchronously
+  setTimeout(async () => {
+    try {
+      const { notificationService } = await import('./notificationService.js');
+      
+      // Notification for reply to existing comment
+      if (commentData.parentId) {
+        const parentComment = comments.find(c => c.Id === parseInt(commentData.parentId));
+        if (parentComment && parentComment.authorId !== newComment.authorId) {
+          await notificationService.createCommentNotification(
+            'comment_reply',
+            newComment.Id,
+            commentData.taskId,
+            `Task #${commentData.taskId}`,
+            `${newComment.authorName} replied to your comment`,
+            parentComment.authorId,
+            newComment.authorName,
+            content.trim()
+          );
+        }
+      }
+
+      // Notifications for mentions in comment
+      if (commentData.mentions && Array.isArray(commentData.mentions)) {
+        for (const mention of commentData.mentions) {
+          if (mention.id && mention.id !== newComment.authorId) {
+            await notificationService.createCommentNotification(
+              'comment_mention',
+              newComment.Id,
+              commentData.taskId,
+              `Task #${commentData.taskId}`,
+              `${newComment.authorName} mentioned you in a comment`,
+              mention.id,
+              newComment.authorName,
+              content.trim()
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to send comment notifications:', error.message);
+    }
+  }, 50);
   // Trigger email notification for comment (async, don't block comment creation)
+// Email notification (separate from in-app notifications)
   setTimeout(async () => {
     try {
       const { notificationService } = await import('./notificationService.js');
