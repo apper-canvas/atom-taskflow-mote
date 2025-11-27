@@ -668,14 +668,6 @@ const RenderComment = ({ comment, isReply = false }) => {
         </div>
       )}
 
-      {/* Direct replies for nested comments */}
-      {comment?.replies?.length > 0 && isReply && (
-        <div className="mt-4 space-y-3">
-          {comment.replies.map(reply => 
-            reply ? <RenderComment key={reply.Id} comment={reply} isReply={true} /> : null
-          )}
-        </div>
-)}
     </motion.div>
     </>
   );
