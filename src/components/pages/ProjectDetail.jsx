@@ -698,27 +698,6 @@ className={project?.isFavorite ? 'fill-current' : ''}
         </div>
       )}
 
-{/* Project Comments Section */}
-      <div className="bg-white rounded-lg shadow p-6 mt-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Project Discussion</h3>
-            <p className="text-sm text-gray-500 mt-1">Share updates, ideas, and feedback about this project</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <ApperIcon name="MessageCircle" size={16} className="text-gray-400" />
-            <span className="text-sm text-gray-500">Comments</span>
-          </div>
-        </div>
-        
-        <CommentThread 
-          taskId={null} 
-          projectId={parseInt(id)} 
-          maxHeight="600px"
-          placeholder="Share your thoughts about this project..."
-          showProjectComments={true}
-        />
-      </div>
 
       {/* Project Files Section */}
       <div className="bg-white rounded-lg shadow p-6 mt-6">
