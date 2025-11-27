@@ -1,5 +1,4 @@
 import commentsData from "@/services/mockData/comments.json";
-
 // Mock delay function for simulating API calls
 const delay = (ms = 200) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -43,10 +42,10 @@ export const createComment = async (commentData) => {
   const newComment = {
     Id: maxId + 1,
     taskId: parseInt(commentData.taskId),
-parentId: commentData.parentId || null,
+    parentId: commentData.parentId || null,
     topic: commentData.topic || null,
     content: commentData.content || "",
-    contentType: commentData.contentType || "text", // text, html, markdown
+    contentType: commentData.contentType || "html", // text, html, markdown
     authorId: commentData.authorId || 1,
     authorName: commentData.authorName || "Current User",
     authorEmail: commentData.authorEmail || "user@example.com",
@@ -68,6 +67,27 @@ parentId: commentData.parentId || null,
   
   comments.push(newComment);
   return newComment;
+};
+
+// Add reaction to comment
+export const addReaction = async (commentId, emoji, userId = 1, userName = 'Current User') => {
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  const comment = comments.find(c => c.Id === commentId);
+  if (!comment) throw new Error('Comment not found');
+  
+  // Remove existing reaction from this user for this emoji
+  comment.reactions = comment.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
+  
+  // Add new reaction
+  comment.reactions.push({
+    emoji,
+    userId,
+    userName,
+    createdAt: new Date().toISOString()
+  });
+  
+  return comment;
 };
 
 // Update an existing comment
@@ -118,44 +138,6 @@ export const deleteComment = async (id) => {
   );
   
   return deletedComment;
-};
-
-// Add reaction to comment
-export const addReaction = async (commentId, reaction, userId) => {
-  await new Promise(resolve => setTimeout(resolve, 150));
-  
-  const index = comments.findIndex(comment => comment.Id === parseInt(commentId));
-  if (index === -1) {
-    throw new Error('Comment not found');
-  }
-
-  const comment = comments[index];
-  const reactions = [...(comment.reactions || [])];
-  
-  // Check if user already reacted with this emoji
-  const existingReaction = reactions.find(r => r.emoji === reaction && r.userId === userId);
-  
-  if (existingReaction) {
-    // Remove existing reaction
-    const reactionIndex = reactions.findIndex(r => r.emoji === reaction && r.userId === userId);
-    reactions.splice(reactionIndex, 1);
-  } else {
-    // Add new reaction
-    reactions.push({
-      emoji: reaction,
-      userId,
-      userName: "Current User",
-      createdAt: new Date().toISOString()
-    });
-  }
-
-  comments[index] = {
-    ...comment,
-    reactions,
-    updatedAt: new Date().toISOString()
-  };
-  
-  return comments[index];
 };
 
 // Toggle like on comment
@@ -262,6 +244,24 @@ export const markAsRead = async (commentIds) => {
 export const getTeamMembers = async () => {
   await new Promise(resolve => setTimeout(resolve, 100));
   return mockTeamMembers;
+};
+
+// Export all functions
+export default {
+  getCommentsByTaskId,
+  createComment,
+  updateComment,
+  deleteComment,
+  getCommentById,
+  getCommentTopics,
+  getTeamMembers,
+  addReaction,
+  toggleLike,
+  togglePin,
+  toggleResolve,
+  searchComments,
+  markAsRead,
+  getCommentStats
 };
 
 // Get comment statistics for a task
@@ -526,5 +526,3 @@ const commentService = {
 
 // Named exports for direct import
 export { analyzeSentiment, generateConversationSummary, getConversationsByTopic };
-
-export default commentService;

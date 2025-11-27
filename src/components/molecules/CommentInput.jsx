@@ -5,6 +5,7 @@ import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
+import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
 import { showToast } from "@/utils/toast";
 import { cn } from "@/utils/cn";
 
@@ -62,15 +63,15 @@ const CommentInput = ({
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(0);
-const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState('');
   const [availableTopics, setAvailableTopics] = useState([]);
   const [isCreatingTopic, setIsCreatingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
   const [apperClient, setApperClient] = useState(null);
   const [apperError, setApperError] = useState(false);
+  const [attachments, setAttachments] = useState([]);
   const textareaRef = useRef(null);
-
   // Initialize ApperClient on component mount
 React.useEffect(() => {
     const initSDK = async () => {
@@ -100,7 +101,7 @@ React.useEffect(() => {
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const handleContentChange = (e) => {
+const handleContentChange = (e) => {
     const value = e.target.value;
     setContent(value);
 
@@ -120,6 +121,10 @@ React.useEffect(() => {
     } else {
       setShowMentionDropdown(false);
     }
+  };
+
+  const handleAttachmentsChange = (newAttachments) => {
+    setAttachments(newAttachments);
   };
 
   const handleMentionSelect = (member) => {
@@ -227,13 +232,12 @@ const handleSelectSuggestion = (suggestion) => {
     setSuggestions([]);
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
-if (!content.trim() || isSubmitting) return;
+    if (!content.trim() || isSubmitting) return;
 
     // Load topics when topic selection is enabled
-// Load topics when topic selection is enabled
-if (enableTopicSelection && taskId && availableTopics.length === 0) {
+    if (enableTopicSelection && taskId && availableTopics.length === 0) {
       try {
         const topics = await commentService.getCommentTopics(taskId);
         setAvailableTopics(topics);
@@ -245,9 +249,11 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
     setIsSubmitting(true);
     
     try {
-      await onSubmit(content, mentions, []);
+      await onSubmit(content, mentions, attachments, null, null, selectedTopic);
       setContent('');
       setMentions([]);
+      setAttachments([]);
+      setSelectedTopic('');
     } catch (error) {
       console.error('Failed to submit comment:', error);
     } finally {
@@ -261,13 +267,27 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
     if (onCancel) onCancel();
   };
 
-  return (
-<motion.form
+return (
+    <motion.form
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4"
       onSubmit={handleSubmit}
->
+    >
+      {/* User Avatar and Info Section */}
+      <div className="flex items-start gap-4 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg">
+          <ApperIcon name="User" size={20} />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-slate-900">Current User</span>
+            <span className="text-sm text-slate-500">•</span>
+            <span className="text-sm text-slate-500">Adding a comment</span>
+          </div>
+          <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+        </div>
+      </div>
       {/* AI Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
         <motion.div
@@ -307,19 +327,30 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
       
       <div className="relative">
         <Textarea
-          ref={textareaRef}
+ref={textareaRef}
           value={content}
           onChange={handleContentChange}
           placeholder={placeholder}
-          rows={3}
+          rows={4}
           richText={true}
           toolbar={true}
           onBold={() => handleRichTextAction('bold')}
           onItalic={() => handleRichTextAction('italic')}
           onLink={() => handleRichTextAction('link')}
           onCode={() => handleRichTextAction('code')}
-          className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg"
+          className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg text-base"
         />
+
+        {/* File Attachment Manager */}
+        <div className="mt-4">
+          <FileAttachmentManager
+            files={attachments}
+            onChange={handleAttachmentsChange}
+            maxFiles={5}
+            maxFileSize={10 * 1024 * 1024} // 10MB
+            allowedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.txt']}
+          />
+        </div>
         
         {/* Mention Dropdown */}
         {showMentionDropdown && (
@@ -371,8 +402,8 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
         </div>
         
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-2">
+<div className="flex items-center justify-between pt-4">
+          <div className="flex items-center gap-3">
             {/* AI Suggestions Button */}
             <Button
               onClick={handleGenerateSuggestions}
@@ -389,15 +420,17 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
               {isGeneratingSuggestions ? 'Thinking...' : 'AI Suggest'}
             </Button>
             
-            {/* Character Count (if needed) */}
+            {/* Character Count */}
             {content.length > 100 && (
-              <span className="text-xs text-slate-400">
-                {content.length} characters
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
+                <span className="text-xs text-slate-500 font-medium">
+                  {content.length} characters
+                </span>
+              </div>
             )}
           </div>
-          
-          <div className="flex items-center gap-3">
+<div className="flex items-center gap-3">
             {onCancel && (
               <Button
                 type="button"
@@ -414,7 +447,7 @@ if (enableTopicSelection && taskId && availableTopics.length === 0) {
               type="submit"
               size="sm"
               disabled={!content.trim() || isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
             >
               {isSubmitting ? (
                 <>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
-import commentService, { addReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
+import commentService, { addReaction, analyzeSentiment, buildCommentThreads, createComment, deleteComment, generateConversationSummary, getCommentStats, getCommentsByTaskId, markAsRead, searchComments, toggleLike, togglePin, toggleResolve, updateComment } from "@/services/api/commentService";
 import { updateTaskCommentStats } from "@/services/api/taskService";
 import ApperIcon from "@/components/ApperIcon";
 import Select from "@/components/atoms/Select";
@@ -27,7 +27,7 @@ const CommentThread = ({ taskId, maxHeight = "600px" }) => {
     resolved: 0,
     threads: 0
   });
-
+  const currentUserId = 1; // This would come from authentication context
   useEffect(() => {
     loadComments();
   }, [taskId]);
@@ -109,14 +109,16 @@ const handleAddComment = async (content, mentions = [], attachments = [], parent
       const newComment = await commentService.createComment({
         taskId,
         parentId,
-content,
+        content,
         topic,
         contentType: 'html',
         mentions,
         attachments,
         quotedCommentId,
+        authorId: currentUserId,
         authorName: 'Current User',
-        authorEmail: 'user@example.com'
+        authorEmail: 'user@example.com',
+        authorAvatar: null
       });
 
       setComments(prev => [...prev, newComment]);
@@ -127,6 +129,17 @@ content,
     } catch (error) {
       toast.error('Failed to add comment');
     }
+  };
+
+  // Check if comment is from current user
+  const isOwnComment = (comment) => {
+    return comment?.authorId === currentUserId;
+  };
+
+  // Handle profile navigation (prepared for future implementation)
+  const handleProfileClick = (authorId, authorName) => {
+    // Future: navigate to user profile
+    console.log(`Navigate to profile: ${authorName} (${authorId})`);
   };
 
   const handleEditComment = async (commentId, content) => {
@@ -224,22 +237,39 @@ const renderComment = (comment, isReply = false) => {
       } rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 p-6`}
     >
       {/* Comment Header */}
-      <div className="flex items-start justify-between mb-4">
+<div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-4">
-          {/* Enhanced Avatar */}
+          {/* Enhanced Avatar with Profile Click */}
           <div className="relative">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg">
-              {comment?.authorName?.charAt(0) || '?'}
-            </div>
+            <button
+              onClick={() => handleProfileClick(comment.authorId, comment.authorName)}
+              className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 cursor-pointer"
+              title={`View ${comment?.authorName || 'User'}'s profile`}
+            >
+              {comment?.authorAvatar ? (
+                <img 
+                  src={comment.authorAvatar} 
+                  alt={comment?.authorName || 'User'}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                comment?.authorName?.charAt(0) || '?'
+              )}
+            </button>
             {comment.isUnread && (
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white animate-pulse"></div>
             )}
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 mb-1">
-              <span className="font-semibold text-slate-900 text-base">{comment?.authorName || 'Anonymous'}</span>
-              
+<div className="flex items-center gap-3 mb-1">
+              <button
+                onClick={() => handleProfileClick(comment.authorId, comment.authorName)}
+                className="font-semibold text-slate-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                title={`View ${comment?.authorName || 'User'}'s profile`}
+              >
+                {comment?.authorName || 'Anonymous'}
+              </button>
               {/* Enhanced Status Indicators */}
               <div className="flex items-center gap-2">
                 {comment.isPinned && (
@@ -282,67 +312,73 @@ const renderComment = (comment, isReply = false) => {
           </div>
         </div>
 
-        {/* Enhanced Action Buttons */}
-        <div className="flex items-center gap-1">
-          <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
-            <button
-              onClick={() => handleToggleLike(comment.Id)}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                comment.likedBy?.includes(1) 
-                  ? 'text-rose-600 bg-rose-100 hover:bg-rose-200' 
-                  : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
-              }`}
-              title="Like"
-            >
-              <ApperIcon name="Heart" size={16} />
-            </button>
-            <button
-              onClick={() => setReplyingTo(comment.Id)}
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
-              title="Reply"
-            >
-              <ApperIcon name="MessageCircle" size={16} />
-            </button>
-            <button
-              onClick={() => handleTogglePin(comment.Id)}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                comment.isPinned 
-                  ? 'text-amber-600 bg-amber-100 hover:bg-amber-200' 
-                  : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'
-              }`}
-              title={comment.isPinned ? 'Unpin' : 'Pin'}
-            >
-              <ApperIcon name="Pin" size={16} />
-            </button>
-            <button
-              onClick={() => handleToggleResolve(comment.Id)}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                comment.isResolved 
-                  ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' 
-                  : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
-              }`}
-              title={comment.isResolved ? 'Reopen' : 'Resolve'}
-            >
-              <ApperIcon name="CheckCircle" size={16} />
-            </button>
+{/* Enhanced Action Buttons */}
+        <div className="flex items-center justify-between">
+          {/* Primary Actions */}
+          <div className="flex items-center gap-1">
+            <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
+              <button
+                onClick={() => handleToggleLike(comment.Id)}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  comment.likedBy?.includes(currentUserId) 
+                    ? 'text-rose-600 bg-rose-100 hover:bg-rose-200' 
+                    : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
+                }`}
+                title="Like"
+              >
+                <ApperIcon name="Heart" size={16} />
+              </button>
+              <button
+                onClick={() => setReplyingTo(comment.Id)}
+                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+                title="Reply"
+              >
+                <ApperIcon name="MessageCircle" size={16} />
+              </button>
+              <button
+                onClick={() => handleTogglePin(comment.Id)}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  comment.isPinned 
+                    ? 'text-amber-600 bg-amber-100 hover:bg-amber-200' 
+                    : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'
+                }`}
+                title={comment.isPinned ? 'Unpin' : 'Pin'}
+              >
+                <ApperIcon name="Pin" size={16} />
+              </button>
+              <button
+                onClick={() => handleToggleResolve(comment.Id)}
+                className={`p-2 rounded-md transition-all duration-200 ${
+                  comment.isResolved 
+                    ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' 
+                    : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
+                }`}
+                title={comment.isResolved ? 'Reopen' : 'Resolve'}
+              >
+                <ApperIcon name="CheckCircle" size={16} />
+              </button>
+            </div>
           </div>
-          
-          <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5 ml-2">
-            <button
-              onClick={() => setEditingComment(comment.Id)}
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
-              title="Edit"
-            >
-              <ApperIcon name="Edit3" size={16} />
-            </button>
-            <button
-              onClick={() => handleDeleteComment(comment.Id)}
-              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all duration-200"
-              title="Delete"
-            >
-              <ApperIcon name="Trash2" size={16} />
-            </button>
-          </div>
+
+          {/* Management Actions - Only show for own comments */}
+          {isOwnComment(comment) && (
+            <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
+              <button
+                onClick={() => setEditingComment(comment.Id)}
+                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+                title="Edit"
+              >
+                <ApperIcon name="Edit3" size={16} />
+              </button>
+              <button
+                onClick={() => handleDeleteComment(comment.Id)}
+                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all duration-200"
+                title="Delete"
+              >
+                <ApperIcon name="Trash2" size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -460,15 +496,21 @@ const renderComment = (comment, isReply = false) => {
         </div>
       </div>
 
-      {/* Enhanced Reply Input */}
+{/* Enhanced Reply Input */}
       {replyingTo === comment.Id && (
-        <div className="mt-6 ml-16 p-4 bg-slate-50 rounded-lg border border-slate-200">
+        <div className="mt-6 ml-16 p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200 shadow-sm">
+          <div className="mb-3">
+            <span className="text-sm font-medium text-slate-700">
+              Replying to <span className="font-semibold text-blue-600">{comment?.authorName || 'Anonymous'}</span>
+            </span>
+          </div>
           <CommentInput
             onSubmit={(content, mentions, attachments) => 
               handleAddComment(content, mentions, attachments, comment.Id)
             }
             onCancel={() => setReplyingTo(null)}
             placeholder={`Reply to ${comment?.authorName || 'Anonymous'}...`}
+            submitText="Post Reply"
           />
         </div>
       )}
@@ -627,11 +669,31 @@ return (
         )}
       </div>
 
-      {/* Enhanced Comments List */}
+{/* Enhanced Comments List */}
       <div className="space-y-4 mb-8" style={{ maxHeight, overflowY: 'auto' }}>
         <AnimatePresence>
-          {threads.length === 0 ? (
-            <div className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border border-slate-200">
+          {threads.length > 0 ? (
+            threads.map((comment) => (
+              <motion.div
+                key={comment.Id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className={`transition-all duration-200 hover:shadow-md ${
+                  isOwnComment(comment)
+                    ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 ring-2 ring-blue-100'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {renderComment(comment)}
+              </motion.div>
+            ))
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border border-slate-200"
+            >
               <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
                 <ApperIcon name="MessageCircle" size={32} className="text-blue-500" />
               </div>
@@ -647,37 +709,28 @@ return (
               {(!searchQuery && filterType === 'all') && (
                 <button
                   onClick={() => document.getElementById('comment-input')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   <ApperIcon name="Plus" size={18} />
                   Add a comment
                 </button>
               )}
-            </div>
-          ) : (
-            threads.map(thread => renderComment(thread))
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Enhanced Add New Comment Section */}
+{/* Enhanced Add New Comment Section */}
       <div className="border-t-2 border-slate-100 pt-8">
-        <div id="comment-input" className="bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 shadow-sm p-8">
-          <div className="mb-6">
-            <div className="flex items-center gap-4 mb-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                <ApperIcon name="User" size={20} className="text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <ApperIcon name="Plus" size={18} className="text-blue-600" />
-                  Add a comment
-                </h3>
-                <p className="text-sm text-slate-600">Share your thoughts with the team</p>
-              </div>
-            </div>
+        <div id="comment-input" className="bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
+              <ApperIcon name="Plus" size={18} className="text-blue-600" />
+              Add a comment
+            </h3>
+            <p className="text-sm text-slate-600">Share your thoughts with the team</p>
           </div>
-          <CommentInput
+<CommentInput
             onSubmit={handleAddComment}
             placeholder="What's on your mind? Share updates, ask questions, or provide feedback..."
             taskId={taskId}

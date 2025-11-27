@@ -92,12 +92,12 @@ const MentionDropdown = ({ query, onSelect, onClose }) => {
         ) : (
           <div className="py-2">
             {filteredMembers.map(member => (
-              <button
+<button
                 key={member.Id}
                 onClick={() => onSelect(member)}
-                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
+                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left group"
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getAvatarColor(member.name)} shadow-sm`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold ${getAvatarColor(member.name)} shadow-sm group-hover:shadow-md transition-shadow duration-200`}>
                   {member.avatar ? (
                     <img 
                       src={member.avatar} 
