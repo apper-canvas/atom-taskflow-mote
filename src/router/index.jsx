@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import React, { Suspense, lazy } from "react";
-import Loading from "@/components/ui/Loading";
+import React, { Suspense } from "react";
 import Layout from "@/components/organisms/Layout";
 import ProjectSettings from "@/components/pages/ProjectSettings";
 import ProjectTimeline from "@/components/pages/ProjectTimeline";
@@ -8,51 +7,11 @@ import Dashboard from "@/components/pages/Dashboard";
 import NotificationPreferences from "@/components/pages/NotificationPreferences";
 import NotFound from "@/components/pages/NotFound";
 import ProjectDetail from "@/components/pages/ProjectDetail";
+import Templates from "@/components/pages/Templates";
 import NotificationCenter from "@/components/pages/NotificationCenter";
 import ProjectList from "@/components/pages/ProjectList";
 
-// Lazy load Templates page
-const Templates = lazy(() => import("@/components/pages/Templates"));
-
-// Enhanced lazy loading with error recovery
-const createLazyComponent = (importFunc, componentName) => {
-  return lazy(() => 
-    importFunc().catch(error => {
-      console.error(`Failed to load ${componentName}:`, error);
-      // Return a fallback component instead of throwing
-      return Promise.resolve({
-        default: () => (
-          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-            <div className="text-center space-y-4 max-w-md mx-4">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900">Page Loading Failed</h2>
-<p className="text-gray-600">
-                The {componentName} component could not be loaded. This might be due to a network issue or missing files.
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Reload Page
-              </button>
-            </div>
-          </div>
-        )
-      });
-    })
-  );
-};
-
-// Components are already imported directly at the top of the file
-// Using direct imports instead of lazy loading for better performance
-
+// Suspense wrapper component
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -70,8 +29,7 @@ const SuspenseWrapper = ({ children }) => (
   }>
     {children}
   </Suspense>
-)
-
+);
 // Router Error Boundary Component
 class RouterErrorBoundary extends React.Component {
   constructor(props) {
@@ -202,11 +160,11 @@ const routes = [
   }
 ]
 
-export const router = createBrowserRouter(routes)
+export const router = createBrowserRouter(routes);
 
 // Enhanced router with error boundary wrapper
 export const createRouterWithErrorBoundary = () => (
   <RouterErrorBoundary>
     {/* Router will be provided by App component */}
   </RouterErrorBoundary>
-)
+);
