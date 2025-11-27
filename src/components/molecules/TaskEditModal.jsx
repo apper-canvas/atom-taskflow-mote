@@ -30,7 +30,6 @@ const [formData, setFormData] = useState({
     category: "",
     priority: "",
     status: "",
-dueDateTime: "",
     parentTaskId: null,
     tags: [],
     isRecurring: false,
@@ -66,8 +65,6 @@ if (task) {
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         status: task.status || "Not Started",
-dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
-        dueDateTime: task.dueDateTime ? format(new Date(task.dueDateTime), "yyyy-MM-dd'T'HH:mm") : "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
 isRecurring: task.isRecurring || false,
@@ -249,9 +246,6 @@ const handleTagsChange = (newTags) => {
       newErrors.title = "Task title is required"
     }
     
-if (formData.dueDateTime && new Date(formData.dueDateTime) < new Date()) {
-      newErrors.dueDateTime = "Due date cannot be in the past"
-    }
     
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -266,7 +260,6 @@ const taskData = {
       projectId: formData.projectId ? parseInt(formData.projectId) : null,
       title: formData.title.trim(),
       description: formData.description.trim(),
-dueDateTime: formData.dueDateTime ? new Date(formData.dueDateTime).toISOString() : null,
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
 tags: formData.tags,
       isRecurring: formData.isRecurring,
@@ -388,9 +381,10 @@ linkedTasks: formData.linkedTasks
 
         {/* Title */}
         <Input
-          label={isSubtaskMode ? "Subtask Title" : "Task Title"}
+label={isSubtaskMode ? "Subtask Title" : "Task Title"}
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
+          placeholder={task?.title || "Enter task title..."}
           error={errors.title}
           placeholder={isSubtaskMode ? "What step needs to be completed?" : "What needs to be done?"}
           disabled={isLoading}
@@ -553,17 +547,6 @@ rows={4}
         </div>
 
 {/* Due Date and Time */}
-<div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Due Date & Time
-          </label>
-          <Input
-            type="datetime-local"
-            value={formData.dueDateTime}
-            onChange={(e) => handleInputChange("dueDateTime", e.target.value)}
-            disabled={isLoading}
-          />
-        </div>
 
 {/* Time Estimation */}
         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -710,14 +693,6 @@ rows={4}
         </Select>
 
 {/* Due Date */}
-        <Input
-          label="Due Date (Optional)"
-          type="datetime-local"
-          value={formData.dueDateTime}
-          onChange={(e) => handleInputChange("dueDateTime", e.target.value)}
-          error={errors.dueDateTime}
-          disabled={isLoading}
-        />
 
 
         {/* Action Buttons */}
