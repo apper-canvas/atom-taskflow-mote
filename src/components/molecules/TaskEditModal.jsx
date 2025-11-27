@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { projectService } from "@/services/api/projectService";
 import { taskService } from "@/services/api/taskService";
-import toast from "@/utils/toast";
 import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Modal from "@/components/atoms/Modal";
@@ -15,6 +14,7 @@ import FilePreviewModal from "@/components/molecules/FilePreviewModal";
 import TagSelector from "@/components/molecules/TagSelector";
 import NotificationBell from "@/components/molecules/NotificationBell";
 import QuickTemplateSelector from "@/components/molecules/QuickTemplateSelector";
+import toast from "@/utils/toast";
 // Mock users data - in real app, this would come from user service
 const mockUsers = [
   { id: 1, name: "John Smith", email: "john@company.com" },
@@ -138,22 +138,22 @@ loadAvailableTasks()
 
 const [availableProjects, setAvailableProjects] = useState([])
 
-  const loadAvailableTasks = async () => {
+const loadAvailableTasks = async () => {
     try {
       const allTasks = await taskService.getAll()
       // Only show top-level tasks (not subtasks) as potential parents
       const parentTasks = allTasks.filter(t => !t.parentTaskId && !t.completed)
-      setAvailableTasks(parentTasks)
+      setAvailableTasks(parentTasks || [])
     } catch (error) {
       console.error('Failed to load tasks:', error)
     }
   }
 
-  const loadAvailableProjects = async () => {
+const loadAvailableProjects = async () => {
     try {
       const projects = await projectService.getAll()
       // Only show active projects
-      const activeProjects = projects.filter(p => p.status === 'Active')
+      const activeProjects = (projects || []).filter(p => p.status === 'Active')
       setAvailableProjects(activeProjects)
     } catch (error) {
       console.error('Failed to load projects:', error)
@@ -242,14 +242,13 @@ const [previewFile, setPreviewFile] = useState(null);
   };
 
 
-  const handleTaskSearch = async (e) => {
+const handleTaskSearch = async (e) => {
     const searchTerm = e.target.value;
     if (searchTerm.length > 2) {
-      try {
-        const allTasks = await taskService.getAll();
-        const filteredTasks = allTasks.filter(t => 
+const allTasks = await taskService.getAll();
+        const filteredTasks = (allTasks || []).filter(t => 
           t.Id !== task?.Id && 
-          t.title.toLowerCase().includes(searchTerm.toLowerCase())
+          t.title && t.title.toLowerCase().includes(searchTerm.toLowerCase())
         );
         // Show search results (implementation depends on UI needs)
       } catch (error) {

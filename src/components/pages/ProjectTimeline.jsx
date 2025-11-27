@@ -69,13 +69,19 @@ toast.error('Failed to load project timeline')
     }
   }
 
-  const getTasksForDate = (date) => {
+const getTasksForDate = (date) => {
     return tasks.filter(task => {
-      const taskDate = task.dueDateTime ? parseISO(task.dueDateTime) : parseISO(task.dueDate)
-      return isSameDay(taskDate, date)
+      try {
+        const dateString = task.dueDateTime || task.dueDate
+        if (!dateString) return false
+        const taskDate = parseISO(dateString)
+        if (isNaN(taskDate.getTime())) return false
+        return isSameDay(taskDate, date)
+      } catch (error) {
+        return false
+      }
     })
   }
-
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'High': return 'bg-red-500'
@@ -193,11 +199,18 @@ toast.error('Failed to load project timeline')
         {viewMode === 'year' ? (
           // Year view - show months
           <div className="grid grid-cols-3 md:grid-cols-4 gap-4 p-6">
-            {timelineDates.map((monthDate, index) => {
+{timelineDates.map((monthDate, index) => {
               const monthTasks = tasks.filter(task => {
-                const taskDate = task.dueDateTime ? parseISO(task.dueDateTime) : parseISO(task.dueDate)
-                return taskDate.getMonth() === monthDate.getMonth() && 
-                       taskDate.getFullYear() === monthDate.getFullYear()
+                try {
+                  const dateString = task.dueDateTime || task.dueDate
+                  if (!dateString) return false
+                  const taskDate = parseISO(dateString)
+                  if (isNaN(taskDate.getTime())) return false
+                  return taskDate.getMonth() === monthDate.getMonth() && 
+                         taskDate.getFullYear() === monthDate.getFullYear()
+                } catch (error) {
+                  return false
+                }
               })
               
               return (

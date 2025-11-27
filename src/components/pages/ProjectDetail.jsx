@@ -227,17 +227,23 @@ switch (status) {
     }
   }
 
-  const getDaysRemaining = (endDate) => {
+const getDaysRemaining = (endDate) => {
     if (!endDate) return null
-    const days = differenceInDays(new Date(endDate), new Date())
-    return days
+    try {
+      const endDateObj = new Date(endDate)
+      if (isNaN(endDateObj.getTime())) return null
+      const days = differenceInDays(endDateObj, new Date())
+      return days
+    } catch (error) {
+      return null
+    }
   }
 
   if (loading) return <Loading />
   if (error) return <ErrorView message={error} onRetry={loadProjectData} />
-  if (!project) return <ErrorView message="Project not found" />
+if (!project) return <ErrorView message="Project not found" />
 
-  const daysRemaining = getDaysRemaining(project.endDate)
+  const daysRemaining = project?.endDate ? getDaysRemaining(project.endDate) : null
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -605,13 +611,20 @@ className={project?.isFavorite ? 'fill-current' : ''}
                         >
                           <div className="flex-1">
                             <h5 className="font-medium text-gray-900 mb-1">{conv.title}</h5>
-                            <div className="flex items-center gap-3 text-sm text-gray-500">
-                              <span>by {conv.author}</span>
-                              <span>•</span>
-                              <span>{formatDistanceToNow(new Date(conv.createdAt), { addSuffix: true })}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
+<div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span>by {conv.author}</span>
+                          <span>•</span>
+                          <span>{(() => {
+                            try {
+                              if (!conv.createdAt) return 'Recently'
+                              const date = new Date(conv.createdAt)
+                              if (isNaN(date.getTime())) return 'Recently'
+                              return formatDistanceToNow(date, { addSuffix: true })
+                            } catch (error) {
+                              return 'Recently'
+                            }
+                          })()}</span>
+                        </div>
                             <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
                               conv.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
                               conv.sentiment === 'negative' ? 'bg-red-100 text-red-700' :

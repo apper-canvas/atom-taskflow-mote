@@ -495,9 +495,16 @@ try {
               Next Occurrences Preview
             </h4>
             <div className="space-y-1">
-              {previewDates.slice(0, 5).map((date, index) => (
+{previewDates.slice(0, 5).map((date, index) => (
                 <div key={index} className="text-sm text-blue-800">
-                  {index + 1}. {format(date, 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                  {index + 1}. {(() => {
+                    try {
+                      if (!date || isNaN(date.getTime())) return 'Invalid date'
+                      return format(date, 'EEEE, MMMM d, yyyy \'at\' h:mm a')
+                    } catch (error) {
+                      return 'Invalid date'
+                    }
+                  })()}
                 </div>
               ))}
             </div>

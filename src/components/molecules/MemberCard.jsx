@@ -87,10 +87,18 @@ function MemberCard({ member, onEdit, onRemove, canManageMembers = true }) {
         {/* Member Info */}
         <div className="flex-1">
           <div className="font-medium text-gray-900">{member.name}</div>
-          <div className="text-sm text-gray-500">{member.email}</div>
+<div className="text-sm text-gray-500">{member.email}</div>
           {member.joinedAt && (
             <div className="text-xs text-gray-400 mt-1">
-              Joined {format(new Date(member.joinedAt), 'MMM d, yyyy')}
+              Joined {(() => {
+                try {
+                  const date = new Date(member.joinedAt)
+                  if (isNaN(date.getTime())) return 'recently'
+                  return format(date, 'MMM d, yyyy')
+                } catch (error) {
+                  return 'recently'
+                }
+              })()}
             </div>
           )}
         </div>

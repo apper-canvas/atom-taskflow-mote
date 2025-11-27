@@ -219,9 +219,18 @@ const renderComment = (comment, isReply = false) => {
                   {sentiment.sentiment}
                 </span>
               )}
-            </div>
+</div>
             <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</span>
+              <span>{(() => {
+                try {
+                  if (!comment.createdAt) return 'Recently'
+                  const date = new Date(comment.createdAt)
+                  if (isNaN(date.getTime())) return 'Recently'
+                  return formatDistanceToNow(date, { addSuffix: true })
+                } catch (error) {
+                  return 'Recently'
+                }
+              })()}</span>
               {comment.isEdited && <span>• edited</span>}
               {comment.isUnread && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
             </div>

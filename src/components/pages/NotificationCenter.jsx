@@ -305,11 +305,29 @@ setNotifications(prev => prev.filter(n => !selectedNotifications.includes(n.Id))
                         </h3>
                         <p className="text-gray-700 mb-3">
                           {notification.message}
-                        </p>
+</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>{format(new Date(notification.createdAt), 'MMM d, yyyy h:mm a')}</span>
+                          <span>{(() => {
+                            try {
+                              if (!notification.createdAt) return 'No date'
+                              const date = new Date(notification.createdAt)
+                              if (isNaN(date.getTime())) return 'No date'
+                              return format(date, 'MMM d, yyyy h:mm a')
+                            } catch (error) {
+                              return 'No date'
+                            }
+                          })()}</span>
                           <span>•</span>
-                          <span>{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</span>
+                          <span>{(() => {
+                            try {
+                              if (!notification.createdAt) return 'Recently'
+                              const date = new Date(notification.createdAt)
+                              if (isNaN(date.getTime())) return 'Recently'
+                              return formatDistanceToNow(date, { addSuffix: true })
+                            } catch (error) {
+                              return 'Recently'
+                            }
+                          })()}</span>
                           {!notification.isRead && (
                             <>
                               <span>•</span>

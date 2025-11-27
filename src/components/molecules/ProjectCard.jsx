@@ -32,10 +32,16 @@ case 'On Hold': return 'bg-yellow-100 text-yellow-800'
     }
   }
 
-  const getDaysRemaining = () => {
+const getDaysRemaining = () => {
     if (!project.endDate) return null
-    const days = differenceInDays(new Date(project.endDate), new Date())
-    return days
+    try {
+      const endDate = new Date(project.endDate)
+      if (isNaN(endDate.getTime())) return null
+      const days = differenceInDays(endDate, new Date())
+      return days
+    } catch (error) {
+      return null
+    }
   }
 
   const daysRemaining = getDaysRemaining()
@@ -170,9 +176,18 @@ case 'On Hold': return 'bg-yellow-100 text-yellow-800'
       </div>
 
       {/* Footer */}
-      <div className="flex justify-between items-center text-xs text-gray-500">
+<div className="flex justify-between items-center text-xs text-gray-500">
         <span>
-          Updated {format(new Date(project.updatedAt), 'MMM d')}
+          Updated {(() => {
+            try {
+              if (!project.updatedAt) return 'recently'
+              const date = new Date(project.updatedAt)
+              if (isNaN(date.getTime())) return 'recently'
+              return format(date, 'MMM d')
+            } catch (error) {
+              return 'recently'
+            }
+          })()}
         </span>
         {daysRemaining !== null && (
           <span className={
