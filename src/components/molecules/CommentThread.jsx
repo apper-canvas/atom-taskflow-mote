@@ -587,9 +587,8 @@ return (
           ) : (
             threads.map(thread => renderComment(thread))
           )}
-        </AnimatePresence>
+</AnimatePresence>
       </div>
-</div>
 
       {/* Add New Comment Section - Positioned Below Conversation */}
       <div className="border-t-2 border-slate-100 pt-6">
