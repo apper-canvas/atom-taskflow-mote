@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import Modal from '@/components/atoms/Modal'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import Select from '@/components/atoms/Select'
-import Badge from '@/components/atoms/Badge'
-import ApperIcon from '@/components/ApperIcon'
-import Loading from '@/components/ui/Loading'
-import Empty from '@/components/ui/Empty'
-import { taskService } from '@/services/api/taskService'
-import { projectService } from '@/services/api/projectService'
-import { showToast } from '@/utils/toast'
-
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { projectService } from "@/services/api/projectService";
+import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Empty from "@/components/ui/Empty";
+import Modal from "@/components/atoms/Modal";
+import Select from "@/components/atoms/Select";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Badge from "@/components/atoms/Badge";
+import toast from "@/utils/toast";
 const TemplateLibrary = ({ isOpen, onClose, type = "tasks" }) => {
   const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(false)
@@ -39,7 +38,7 @@ const TemplateLibrary = ({ isOpen, onClose, type = "tasks" }) => {
       setCategories(categoryData)
     } catch (error) {
       console.error('Failed to load library templates:', error)
-      showToast("Failed to load template library", "error")
+toast.error("Failed to load template library")
     } finally {
       setLoading(false)
     }
@@ -49,15 +48,15 @@ const TemplateLibrary = ({ isOpen, onClose, type = "tasks" }) => {
     try {
       if (type === 'tasks') {
         await taskService.createFromTemplate(templateId)
-        showToast("Task created from template! 🎉", "success")
+toast.success("Task created from template! 🎉")
       } else {
-        await projectService.createFromTemplate(templateId)
-        showToast("Project created from template! 🎉", "success")
+await projectService.createFromTemplate(templateId)
+        toast.success("Project created from template! 🎉")
       }
       onClose()
     } catch (error) {
       console.error('Failed to use template:', error)
-      showToast("Failed to use template. Please try again.", "error")
+      toast.error("Failed to use template. Please try again.")
     }
   }
 

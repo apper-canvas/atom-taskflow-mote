@@ -384,9 +384,8 @@ linkedTasks: formData.linkedTasks
 label={isSubtaskMode ? "Subtask Title" : "Task Title"}
           value={formData.title}
           onChange={(e) => handleInputChange("title", e.target.value)}
-          placeholder={task?.title || "Enter task title..."}
-          error={errors.title}
           placeholder={isSubtaskMode ? "What step needs to be completed?" : "What needs to be done?"}
+          error={errors.title}
           disabled={isLoading}
           autoFocus
         />
