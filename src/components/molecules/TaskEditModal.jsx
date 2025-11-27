@@ -190,9 +190,18 @@ const handleInputChange = (field, value) => {
       // Enable recurring - open modal
       setShowRecurringModal(true)
     }
+}
+
+  const handleRecurringSave = async (taskId, recurringData) => {
+    try {
+      await onSave(taskId, recurringData)
+      setShowRecurringModal(false)
+    } catch (error) {
+      console.error('Failed to save recurring task:', error)
+    }
   }
 
-const handleRecurringSave = (taskId, recurringData) => {
+  const handleRecurringSaveAndClose = (taskId, recurringData) => {
     setFormData(prev => ({
       ...prev,
       isRecurring: true,
@@ -202,9 +211,8 @@ const handleRecurringSave = (taskId, recurringData) => {
     toast.success('Recurring schedule updated successfully')
   }
 
-  const handleEditRecurring = () => {
+const handleEditRecurring = () => {
     setShowRecurringModal(true)
-    setShowRecurringModal(false)
   }
 
 const [previewFile, setPreviewFile] = useState(null);

@@ -72,9 +72,9 @@ async update(id, updates) {
     }
     
     const updatedTask = {
-...tasks[index],
+      ...tasks[index],
       ...updates,
-tags: updates.tags || tasks[index].tags || [],
+      tags: updates.tags || tasks[index].tags || [],
       isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
       recurrence: updates.recurrence !== undefined ? updates.recurrence : tasks[index].recurrence,
       assignedTo: updates.assignedTo !== undefined ? updates.assignedTo : tasks[index].assignedTo,
@@ -84,7 +84,7 @@ tags: updates.tags || tasks[index].tags || [],
       timeSpent: updates.timeSpent !== undefined ? updates.timeSpent : (tasks[index].timeSpent || 0),
       isTracking: updates.isTracking !== undefined ? updates.isTracking : (tasks[index].isTracking || false),
       trackingStartedAt: updates.trackingStartedAt !== undefined ? updates.trackingStartedAt : tasks[index].trackingStartedAt,
-notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
+      notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
       attachments: updates.attachments !== undefined ? 
         (Array.isArray(updates.attachments) ? updates.attachments.map(att => ({
           ...att,
@@ -96,7 +96,7 @@ notes: updates.notes !== undefined ? updates.notes : (tasks[index].notes || ""),
       linkedTasks: updates.linkedTasks !== undefined ? 
         (Array.isArray(updates.linkedTasks) ? updates.linkedTasks : []) : 
         (Array.isArray(tasks[index].linkedTasks) ? tasks[index].linkedTasks : []),
-externalLinks: updates.externalLinks !== undefined ?
+      externalLinks: updates.externalLinks !== undefined ?
         (Array.isArray(updates.externalLinks) ? updates.externalLinks : []) :
         (Array.isArray(tasks[index].externalLinks) ? tasks[index].externalLinks : []),
       commentCount: updates.commentCount !== undefined ? updates.commentCount : (tasks[index].commentCount || 0),
@@ -121,6 +121,16 @@ externalLinks: updates.externalLinks !== undefined ?
       updatedTask.completedAt = updates.completed 
         ? new Date().toISOString() 
         : null
+    }
+    
+    // Ensure recurring task properties are properly maintained
+    if (updatedTask.isRecurring && updatedTask.recurrence) {
+      updatedTask.recurrence = {
+        ...updatedTask.recurrence,
+        type: updatedTask.recurrence.type || "daily",
+        interval: updatedTask.recurrence.interval || 1,
+        startDate: updatedTask.recurrence.startDate || new Date().toISOString()
+      }
     }
     
     tasks[index] = updatedTask
@@ -235,16 +245,21 @@ const loadedTasks = JSON.parse(stored)
 // Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
           ...task,
-          tags: task.tags || [],
+tags: task.tags || [],
           assignedTo: task.assignedTo || null,
           projectId: task.projectId || null,
           dueDateTime: task.dueDateTime || task.dueDate || null,
-reminders: task.reminders || [],
+          reminders: task.reminders || [],
           estimatedTime: task.estimatedTime || null,
           actualTime: task.actualTime || 0,
           timeSpent: task.timeSpent || 0,
           isRecurring: task.isRecurring || false,
-          recurrence: task.recurrence || null,
+          recurrence: task.isRecurring && task.recurrence ? {
+            ...task.recurrence,
+            type: task.recurrence.type || "daily",
+            interval: task.recurrence.interval || 1,
+            startDate: task.recurrence.startDate || new Date().toISOString()
+          } : null,
           isTracking: task.isTracking || false,
           trackingStartedAt: task.trackingStartedAt || null,
 notes: task.notes || "",

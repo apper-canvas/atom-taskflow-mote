@@ -164,8 +164,9 @@ const handleSaveTask = async (taskId, taskData) => {
         const updatedTask = await taskService.update(taskId, taskData)
         // Refresh all tasks to get updated parent progress if it's a subtask
         const allTasks = await taskService.getAll()
-        setTasks(allTasks)
-        toast.success(taskData.parentTaskId ? "Subtask updated successfully! ✅" : "Task updated successfully! ✅")
+setTasks(allTasks)
+        const isRecurring = taskData.isRecurring ? " (Recurring)" : ""
+        toast.success(taskData.parentTaskId ? `Subtask updated successfully! ✅${isRecurring}` : `Task updated successfully! ✅${isRecurring}`)
       } else {
         // Create new task or subtask
         if (taskData.parentTaskId) {

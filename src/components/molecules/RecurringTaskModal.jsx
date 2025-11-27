@@ -47,7 +47,12 @@ if (task) {
         tags: task.tags || [],
         recurrence: task.recurrence ? {
           ...task.recurrence,
-          startDate: task.recurrence.startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm")
+          startDate: task.recurrence.startDate || format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+          endType: task.recurrence.endType || "never",
+          endDate: task.recurrence.endDate || "",
+          occurrences: task.recurrence.occurrences || 10,
+          weekdays: task.recurrence.weekdays || [1, 2, 3, 4, 5],
+          monthlyType: task.recurrence.monthlyType || "date"
         } : {
           type: "daily",
           interval: 1,
@@ -220,8 +225,12 @@ if (daysOfWeek.length > 0) {
         endDate: formData.recurrence.endDate ? new Date(formData.recurrence.endDate).toISOString() : null
       }
     }
-
-    await onSave(task?.Id, taskData)
+try {
+      await onSave(task?.Id, taskData)
+      onClose()
+    } catch (error) {
+      console.error('Failed to save recurring task:', error)
+    }
   }
 
   const handleDelete = async () => {
