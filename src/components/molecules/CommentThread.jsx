@@ -9,7 +9,7 @@ import CommentReactions from "@/components/molecules/CommentReactions";
 import CommentInput from "@/components/molecules/CommentInput";
 import toast from "@/utils/toast";
 
-const CommentThread = ({ taskId, maxHeight = "600px" }) => {
+const CommentThread = ({ taskId, maxHeight = "400px" }) => {
   const [comments, setComments] = useState([]);
   const [threads, setThreads] = useState([]);
   const [loading, setLoading] = useState(true);

@@ -10,6 +10,7 @@ import Loading from "@/components/ui/Loading";
 import ErrorView from "@/components/ui/ErrorView";
 import Button from "@/components/atoms/Button";
 import Badge from "@/components/atoms/Badge";
+import Modal from "@/components/atoms/Modal";
 import TaskList from "@/components/organisms/TaskList";
 import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
 import MemberCard from "@/components/molecules/MemberCard";
@@ -30,7 +31,7 @@ function ProjectDetail() {
   const [loadingTasks, setLoadingTasks] = useState(false)
   const [loadingProject, setLoadingProject] = useState(false)
   const [error, setError] = useState(null)
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false)
@@ -39,6 +40,8 @@ function ProjectDetail() {
   const [projectFiles, setProjectFiles] = useState([])
   const [projectExternalLinks, setProjectExternalLinks] = useState([])
   const [selectedTaskForComments, setSelectedTaskForComments] = useState(null)
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false)
+  const [commentModalTask, setCommentModalTask] = useState(null)
   useEffect(() => {
     if (id) {
       loadProjectData()
@@ -146,9 +149,14 @@ const handleDeleteProject = async () => {
     setIsTaskModalOpen(true)
   }
 
-  const handleEditTask = (task) => {
+const handleEditTask = (task) => {
     setEditingTask(task)
     setIsTaskModalOpen(true)
+  }
+
+  const handleCommentClick = (task) => {
+    setCommentModalTask(task)
+    setIsCommentModalOpen(true)
   }
 
   const handleSaveTask = async (taskId, taskData) => {
@@ -162,7 +170,7 @@ setTasks(prev => prev.map(t => t.Id === taskId ? updatedTask : t))
         setTasks(prev => [newTask, ...prev])
         toast.success('Task created successfully!')
       }
-      setIsTaskModalOpen(false)
+setIsTaskModalOpen(false)
       setEditingTask(null)
       
       // Refresh project stats
@@ -179,7 +187,7 @@ setProjectStats(updatedStats)
       await taskService.delete(taskId)
 setTasks(prev => prev.filter(t => t.Id !== taskId))
       setIsTaskModalOpen(false)
-      setEditingTask(null)
+setEditingTask(null)
       toast.success('Task deleted successfully')
       
       // Refresh project stats
@@ -406,6 +414,7 @@ className={project?.isFavorite ? 'fill-current' : ''}
               tasks={tasks}
               onToggleComplete={handleToggleComplete}
               onEdit={handleEditTask}
+              onComment={handleCommentClick}
               onCreateSubtask={() => {}} // Handled by TaskCard internally
               onToggleSubtask={() => {}} // Handled by TaskCard internally
               viewMode="list"
@@ -731,6 +740,80 @@ className={project?.isFavorite ? 'fill-current' : ''}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
 />
+
+      {/* Comment Modal */}
+      <Modal
+        isOpen={isCommentModalOpen}
+        onClose={() => {
+          setIsCommentModalOpen(false)
+          setCommentModalTask(null)
+        }}
+        title="Task Comments"
+        size="large"
+      >
+        {commentModalTask && (
+          <div className="space-y-6">
+            {/* Task Details Header */}
+            <div className="border-b border-gray-200 pb-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {commentModalTask.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {commentModalTask.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 ml-6">
+                  {commentModalTask.priority && (
+                    <Badge
+                      variant={
+                        commentModalTask.priority === 'high' ? 'error' :
+                        commentModalTask.priority === 'medium' ? 'warning' : 'success'
+                      }
+                    >
+                      {commentModalTask.priority}
+                    </Badge>
+                  )}
+                  {commentModalTask.category && (
+                    <Badge variant="secondary">
+                      {commentModalTask.category}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              {/* Task Meta Information */}
+              <div className="flex items-center gap-6 text-sm text-gray-500">
+                {commentModalTask.dueDate && (
+                  <div className="flex items-center gap-1">
+                    <ApperIcon name="Calendar" size={16} />
+                    <span>Due {format(new Date(commentModalTask.dueDate), 'MMM dd, yyyy')}</span>
+                  </div>
+                )}
+                {commentModalTask.assignedTo && (
+                  <div className="flex items-center gap-1">
+                    <ApperIcon name="User" size={16} />
+                    <span>Assigned to {commentModalTask.assignedTo}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  <ApperIcon name="MessageCircle" size={16} />
+                  <span>{commentModalTask.commentCount || 0} comments</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Comments Section */}
+            <div className="flex-1 min-h-0">
+              <CommentThread 
+                taskId={commentModalTask.Id} 
+                maxHeight="calc(70vh - 200px)"
+              />
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Member Management Modal */}
       <MemberManagementModal
