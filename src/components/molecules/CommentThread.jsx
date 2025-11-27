@@ -473,7 +473,7 @@ const renderComment = (comment, isReply = false) => {
     );
   }
 return (
-    <div className="space-y-6">
+<div className="space-y-6 relative z-50">
       {/* Enhanced Search and Filters */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
         <div className="flex flex-col sm:flex-row gap-4">
