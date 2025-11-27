@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import ApperIcon from '@/components/ApperIcon'
-import Badge from '@/components/atoms/Badge'
-import Button from '@/components/atoms/Button'
-import Input from '@/components/atoms/Input'
-import { taskService } from '@/services/api/taskService'
-import { toast } from '@/utils/toast'
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { taskService } from "@/services/api/taskService";
+import ApperIcon from "@/components/ApperIcon";
+import Loading from "@/components/ui/Loading";
+import Button from "@/components/atoms/Button";
+import Input from "@/components/atoms/Input";
+import Badge from "@/components/atoms/Badge";
+import Templates from "@/components/pages/Templates";
+import toast, { showToast } from "@/utils/toast";
 
 const QuickTemplateSelector = ({ onSelectTemplate, onCancel, isVisible }) => {
   const [templates, setTemplates] = useState([])
