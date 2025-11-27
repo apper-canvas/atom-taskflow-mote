@@ -822,7 +822,7 @@ taskService.deleteTemplate = async function(id) {
 
 taskService.createFromTemplate = async function(templateId, overrides = {}) {
   await delay()
-  const template = await this.getTemplateById(templateId)
+  const template = await taskService.getTemplateById(templateId)
   
   // Create main task from template
   const taskData = {
@@ -831,12 +831,12 @@ taskService.createFromTemplate = async function(templateId, overrides = {}) {
     title: overrides.title || template.defaults.title || template.name
   }
   
-  const mainTask = await this.create(taskData)
+  const mainTask = await taskService.create(taskData)
   
   // Create subtasks if template has them
   if (template.subtasks && template.subtasks.length > 0) {
     for (const subtaskTemplate of template.subtasks) {
-      await this.createSubtask(mainTask.Id, {
+      await taskService.createSubtask(mainTask.Id, {
         ...subtaskTemplate,
         category: taskData.category,
         priority: taskData.priority,
@@ -847,7 +847,7 @@ taskService.createFromTemplate = async function(templateId, overrides = {}) {
   
   // Increment usage count for user templates only
   if (!template.isBuiltIn) {
-    await this.updateTemplate(templateId, {
+    await taskService.updateTemplate(templateId, {
       usageCount: template.usageCount + 1
     })
   }
