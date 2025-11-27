@@ -5,7 +5,6 @@ import ApperIcon from "@/components/ApperIcon";
 import Textarea from "@/components/atoms/Textarea";
 import Button from "@/components/atoms/Button";
 import MentionDropdown from "@/components/molecules/MentionDropdown";
-import FileAttachmentManager from "@/components/molecules/FileAttachmentManager";
 import { showToast } from "@/utils/toast";
 import { cn } from "@/utils/cn";
 
@@ -70,7 +69,6 @@ taskId = null,
   const [newTopicName, setNewTopicName] = useState('');
   const [apperClient, setApperClient] = useState(null);
   const [apperError, setApperError] = useState(false);
-  const [attachments, setAttachments] = useState([]);
   const textareaRef = useRef(null);
   // Initialize ApperClient on component mount
 React.useEffect(() => {
@@ -123,9 +121,6 @@ const handleContentChange = (e) => {
     }
   };
 
-  const handleAttachmentsChange = (newAttachments) => {
-    setAttachments(newAttachments);
-  };
 
   const handleMentionSelect = (member) => {
     const beforeMention = content.slice(0, mentionPosition);
@@ -249,10 +244,9 @@ const handleSubmit = async (e) => {
 setIsSubmitting(true);
     
 try {
-      await onSubmit(content, mentions, attachments, null, null, selectedTopic);
+await onSubmit(content, mentions, null, null, null, selectedTopic);
       setContent('');
       setMentions([]);
-      setAttachments([]);
       setSelectedTopic('');
     } catch (error) {
       console.error('Failed to submit comment:', error);
@@ -275,15 +269,49 @@ return (
       onSubmit={handleSubmit}
     >
       {/* User Avatar and Info Section */}
-      <div className="flex items-start gap-4 mb-4">
+<div className="flex items-start gap-4 mb-4">
         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg">
           <ApperIcon name="User" size={20} />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-slate-900">Current User</span>
-            <span className="text-sm text-slate-500">•</span>
-            <span className="text-sm text-slate-500">Adding a comment</span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-900">Current User</span>
+              <span className="text-sm text-slate-500">•</span>
+              <span className="text-sm text-slate-500">Adding a comment</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {onCancel && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                  className="text-slate-600 border-slate-300 hover:bg-slate-50 px-4 py-2 transition-all duration-200"
+                >
+                  <ApperIcon name="X" size={14} className="mr-1.5" />
+                  Cancel
+                </Button>
+              )}
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!content.trim() || isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Publishing...
+                  </>
+                ) : (
+                  <>
+                    <ApperIcon name="Send" size={16} className="mr-2" />
+                    {submitText || 'Add Comment'}
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
           <p className="text-sm text-slate-600">Share your thoughts with the team</p>
         </div>
@@ -341,16 +369,6 @@ ref={textareaRef}
           className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg text-base"
         />
 
-        {/* File Attachment Manager */}
-        <div className="mt-4">
-          <FileAttachmentManager
-            files={attachments}
-            onChange={handleAttachmentsChange}
-            maxFiles={5}
-            maxFileSize={10 * 1024 * 1024} // 10MB
-            allowedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.txt']}
-          />
-        </div>
         
         {/* Mention Dropdown */}
         {showMentionDropdown && (
@@ -429,38 +447,6 @@ ref={textareaRef}
                 </span>
               </div>
             )}
-          </div>
-<div className="flex items-center gap-3">
-            {onCancel && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                className="text-slate-600 border-slate-300 hover:bg-slate-50 px-4 py-2 transition-all duration-200"
-              >
-                <ApperIcon name="X" size={14} className="mr-1.5" />
-                Cancel
-              </Button>
-            )}
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!content.trim() || isSubmitting}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Publishing...
-                </>
-              ) : (
-                <>
-                  <ApperIcon name="Send" size={16} className="mr-2" />
-                  {submitText || 'Post Comment'}
-                </>
-              )}
-            </Button>
           </div>
         </div>
       </div>
