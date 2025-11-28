@@ -272,31 +272,31 @@ return (
     <motion.form
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
+      className="space-y-3"
       onSubmit={handleSubmit}
     >
-      {/* User Avatar and Info Section */}
-<div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg">
-          <ApperIcon name="User" size={20} />
+      {/* Compact User Avatar and Info Section */}
+      <div className="flex items-start gap-3 mb-3">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold ring-2 ring-white shadow-lg">
+          <ApperIcon name="User" size={16} />
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-900">Current User</span>
-              <span className="text-sm text-slate-500">•</span>
-              <span className="text-sm text-slate-500">Adding a comment</span>
+              <span className="font-medium text-slate-900 text-sm">Current User</span>
+              <span className="text-xs text-slate-500">•</span>
+              <span className="text-xs text-slate-500">Adding a comment</span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {onCancel && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleCancel}
-                  className="text-slate-600 border-slate-300 hover:bg-slate-50 px-4 py-2 transition-all duration-200"
+                  className="text-slate-600 border-slate-300 hover:bg-slate-50 px-3 py-1.5 transition-all duration-200 text-xs"
                 >
-                  <ApperIcon name="X" size={14} className="mr-1.5" />
+                  <ApperIcon name="X" size={12} className="mr-1" />
                   Cancel
                 </Button>
               )}
@@ -304,46 +304,47 @@ return (
                 type="submit"
                 size="sm"
                 disabled={!content.trim() || isSubmitting}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-1.5 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:hover:shadow-lg text-xs"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
                     Publishing...
                   </>
                 ) : (
                   <>
-                    <ApperIcon name="Send" size={16} className="mr-2" />
+                    <ApperIcon name="Send" size={14} className="mr-1.5" />
                     {submitText || 'Add Comment'}
                   </>
                 )}
               </Button>
             </div>
           </div>
-          <p className="text-sm text-slate-600">Share your thoughts with the team</p>
+          <p className="text-xs text-slate-600">Share your thoughts with the team</p>
         </div>
       </div>
-      {/* AI Suggestions */}
+      
+      {/* Compact AI Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
+          className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <ApperIcon name="Brain" size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">AI Reply Suggestions</span>
+              <ApperIcon name="Brain" size={14} className="text-blue-600" />
+              <span className="text-xs font-medium text-blue-900">AI Reply Suggestions</span>
             </div>
             <button
               onClick={handleDismissSuggestions}
               className="text-blue-600 hover:text-blue-800 p-1 rounded"
             >
-              <ApperIcon name="X" size={14} />
+              <ApperIcon name="X" size={12} />
             </button>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1">
             {suggestions.map((suggestion, index) => (
               <motion.button
                 key={index}
@@ -351,7 +352,7 @@ return (
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="block w-full text-left p-3 text-sm bg-white border border-blue-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                className="block w-full text-left p-2 text-xs bg-white border border-blue-200 rounded-md hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
               >
                 {suggestion}
               </motion.button>
@@ -362,21 +363,20 @@ return (
       
       <div className="relative">
         <Textarea
-ref={textareaRef}
+          ref={textareaRef}
           value={content}
           onChange={handleContentChange}
           placeholder={placeholder}
-          rows={4}
+          rows={3}
           richText={true}
           toolbar={true}
           onBold={() => handleRichTextAction('bold')}
           onItalic={() => handleRichTextAction('italic')}
           onLink={() => handleRichTextAction('link')}
           onCode={() => handleRichTextAction('code')}
-          className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg text-base"
+          className="resize-none border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 rounded-lg text-sm"
         />
 
-        
         {/* Mention Dropdown */}
         {showMentionDropdown && (
           <div className="absolute z-20" style={{ top: '100%', left: '12px' }}>
@@ -389,29 +389,29 @@ ref={textareaRef}
         )}
       </div>
 
-      {/* Enhanced Mentioned Users */}
+      {/* Compact Mentioned Users */}
       {mentions.length > 0 && (
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-center gap-2 mb-2">
-            <ApperIcon name="AtSign" size={14} className="text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">Mentioning:</span>
+        <div className="p-2.5 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2 mb-1.5">
+            <ApperIcon name="AtSign" size={12} className="text-blue-600" />
+            <span className="text-xs font-medium text-blue-800">Mentioning:</span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {mentions.map((mention, index) => (
               <span
                 key={index}
-                className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-800 text-sm px-3 py-1.5 rounded-full font-medium"
+                className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-full font-medium"
               >
-                <div className="w-5 h-5 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold">
+                <div className="w-4 h-4 bg-blue-200 rounded-full flex items-center justify-center text-xs font-bold">
                   {mention.name.charAt(0)}
                 </div>
                 {mention.name}
                 <button
                   type="button"
                   onClick={() => setMentions(prev => prev.filter((_, i) => i !== index))}
-                  className="ml-1 text-blue-600 hover:text-blue-800 transition-colors"
+                  className="ml-0.5 text-blue-600 hover:text-blue-800 transition-colors"
                 >
-                  <ApperIcon name="X" size={12} />
+                  <ApperIcon name="X" size={10} />
                 </button>
               </span>
             ))}
@@ -419,27 +419,27 @@ ref={textareaRef}
         </div>
       )}
 
-<div className="space-y-4">
-        {/* Helper Text */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-3 py-2 rounded-lg">
-          <ApperIcon name="Info" size={14} />
+      <div className="space-y-3">
+        {/* Compact Helper Text */}
+        <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg">
+          <ApperIcon name="Info" size={12} />
           <span>Use @ to mention team members • Supports rich text formatting • Press Ctrl+Enter to submit</span>
         </div>
         
-        {/* Action Buttons */}
-<div className="flex items-center justify-between pt-4">
-          <div className="flex items-center gap-3">
+        {/* Compact Action Buttons */}
+        <div className="flex items-center justify-between pt-3">
+          <div className="flex items-center gap-2">
             {/* AI Suggestions Button */}
             <Button
               onClick={handleGenerateSuggestions}
               disabled={isGeneratingSuggestions || !content.trim()}
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 transition-all duration-200"
+              className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 disabled:opacity-50 transition-all duration-200 text-xs px-3 py-1.5"
             >
               <ApperIcon 
                 name="Brain" 
-                size={14} 
+                size={12} 
                 className={isGeneratingSuggestions ? "animate-pulse" : ""} 
               />
               {isGeneratingSuggestions ? 'Thinking...' : 'AI Suggest'}
@@ -447,7 +447,7 @@ ref={textareaRef}
             
             {/* Character Count */}
             {content.length > 100 && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="w-1 h-1 bg-slate-300 rounded-full"></div>
                 <span className="text-xs text-slate-500 font-medium">
                   {content.length} characters
@@ -460,5 +460,4 @@ ref={textareaRef}
     </motion.form>
   );
 };
-
 export default CommentInput;

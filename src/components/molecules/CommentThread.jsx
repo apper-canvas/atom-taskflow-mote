@@ -313,21 +313,21 @@ const RenderComment = ({ comment, isReply = false }) => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className={`${
-          isReply ? 'ml-12 mt-4 border-l-4 border-l-blue-200 pl-6' : 'mb-6'
+          isReply ? 'ml-8 mt-2 border-l-2 border-l-blue-200 pl-3' : 'mb-3'
         } ${
           comment.isPinned 
             ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm' 
             : 'bg-white border-slate-200'
-        } rounded-xl border shadow-sm hover:shadow-md transition-all duration-200 p-6`}
+        } rounded-lg border hover:shadow-md transition-all duration-200 p-4`}
     >
-      {/* Comment Header */}
-<div className="flex items-start justify-between mb-4">
-        <div className="flex items-start gap-4">
-          {/* Enhanced Avatar with Profile Click */}
+      {/* Compact Comment Header */}
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start gap-3">
+          {/* Smaller Avatar */}
           <div className="relative">
             <button
               onClick={() => handleProfileClick(comment.authorId, comment.authorName)}
-              className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-base font-semibold ring-2 ring-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 cursor-pointer"
+              className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold ring-2 ring-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer"
               title={`View ${comment?.authorName || 'User'}'s profile`}
             >
               {comment?.authorAvatar ? (
@@ -341,44 +341,44 @@ const RenderComment = ({ comment, isReply = false }) => {
               )}
             </button>
             {comment.isUnread && (
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-white animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white animate-pulse"></div>
             )}
           </div>
           
           <div className="flex-1 min-w-0">
-<div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-2 mb-1">
               <button
                 onClick={() => handleProfileClick(comment.authorId, comment.authorName)}
-                className="font-semibold text-slate-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                className="font-medium text-slate-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer text-sm"
                 title={`View ${comment?.authorName || 'User'}'s profile`}
               >
-{comment?.authorName?.trim() || 'Unknown User'}
+                {comment?.authorName?.trim() || 'Unknown User'}
               </button>
-              {/* Enhanced Status Indicators */}
-              <div className="flex items-center gap-2">
+              {/* Compact Status Indicators */}
+              <div className="flex items-center gap-1">
                 {comment.isPinned && (
-                  <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded-full">
-                    <ApperIcon name="Pin" size={12} />
-                    Pinned
+                  <div className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    <ApperIcon name="Pin" size={10} />
+                    <span className="hidden sm:inline">Pinned</span>
                   </div>
                 )}
                 {comment.isResolved && (
-                  <div className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full">
-                    <ApperIcon name="CheckCircle" size={12} />
-                    Resolved
+                  <div className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    <ApperIcon name="CheckCircle" size={10} />
+                    <span className="hidden sm:inline">Resolved</span>
                   </div>
                 )}
-                {/* Enhanced Sentiment Indicator */}
+                {/* Compact Sentiment Indicator */}
                 {sentiment.confidence > 0.4 && (
-                  <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${getSentimentColor(sentiment.sentiment)}`}>
-                    <ApperIcon name={getSentimentIcon(sentiment.sentiment)} size={12} />
-                    <span className="capitalize">{sentiment.sentiment}</span>
+                  <div className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${getSentimentColor(sentiment.sentiment)}`}>
+                    <ApperIcon name={getSentimentIcon(sentiment.sentiment)} size={10} />
+                    <span className="hidden sm:inline capitalize">{sentiment.sentiment}</span>
                   </div>
                 )}
               </div>
             </div>
             
-<div className="flex items-center gap-3 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
               <span className="font-medium">{(() => {
                 try {
                   if (!comment.createdAt) return 'Recently'
@@ -395,7 +395,7 @@ const RenderComment = ({ comment, isReply = false }) => {
                   className="text-slate-400 text-xs hover:text-blue-600 transition-colors duration-200 cursor-pointer flex items-center gap-1"
                   title={`Last edited ${formatDistanceToNow(new Date(comment.updatedAt), { addSuffix: true })}. Click to view edit history.`}
                 >
-                  • <ApperIcon name="Edit3" size={12} />
+                  • <ApperIcon name="Edit3" size={10} />
                   <span>edited</span>
                 </button>
               )}
@@ -403,61 +403,61 @@ const RenderComment = ({ comment, isReply = false }) => {
           </div>
         </div>
 
-{/* Enhanced Action Buttons */}
+        {/* Compact Action Buttons */}
         <div className="flex items-center justify-between">
           {/* Primary Actions */}
-          <div className="flex items-center gap-1">
-            <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
+          <div className="flex items-center gap-0.5">
+            <div className="flex items-center bg-slate-50 rounded-lg p-0.5 gap-0.5">
               <button
                 onClick={() => handleToggleLike(comment.Id)}
-                className={`p-2 rounded-md transition-all duration-200 ${
+                className={`p-1.5 rounded-md transition-all duration-200 ${
                   comment.likedBy?.includes(currentUserId) 
                     ? 'text-rose-600 bg-rose-100 hover:bg-rose-200' 
                     : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50'
                 }`}
                 title="Like"
               >
-                <ApperIcon name="Heart" size={16} />
+                <ApperIcon name="Heart" size={14} />
               </button>
               <button
                 onClick={() => setReplyingTo(comment.Id)}
-                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
+                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all duration-200"
                 title="Reply"
               >
-                <ApperIcon name="MessageCircle" size={16} />
+                <ApperIcon name="MessageCircle" size={14} />
               </button>
               <button
                 onClick={() => handleTogglePin(comment.Id)}
-                className={`p-2 rounded-md transition-all duration-200 ${
+                className={`p-1.5 rounded-md transition-all duration-200 ${
                   comment.isPinned 
                     ? 'text-amber-600 bg-amber-100 hover:bg-amber-200' 
                     : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50'
                 }`}
                 title={comment.isPinned ? 'Unpin' : 'Pin'}
               >
-                <ApperIcon name="Pin" size={16} />
+                <ApperIcon name="Pin" size={14} />
               </button>
               <button
                 onClick={() => handleToggleResolve(comment.Id)}
-                className={`p-2 rounded-md transition-all duration-200 ${
+                className={`p-1.5 rounded-md transition-all duration-200 ${
                   comment.isResolved 
                     ? 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200' 
                     : 'text-slate-400 hover:text-emerald-500 hover:bg-emerald-50'
                 }`}
                 title={comment.isResolved ? 'Reopen' : 'Resolve'}
               >
-                <ApperIcon name="CheckCircle" size={16} />
+                <ApperIcon name="CheckCircle" size={14} />
               </button>
             </div>
           </div>
 
           {/* Management Actions - Only show for own comments */}
-{isOwnComment(comment) && (
-            <div className="flex items-center bg-slate-50 rounded-lg p-1 gap-0.5">
+          {isOwnComment(comment) && (
+            <div className="flex items-center bg-slate-50 rounded-lg p-0.5 gap-0.5 ml-1">
               <button
                 onClick={() => setEditingComment(comment.Id)}
                 disabled={!editStatus.canEdit}
-                className={`p-2 rounded-md transition-all duration-200 relative group ${
+                className={`p-1.5 rounded-md transition-all duration-200 relative group ${
                   editStatus.canEdit
                     ? 'text-slate-400 hover:text-blue-600 hover:bg-blue-50 cursor-pointer'
                     : 'text-slate-300 cursor-not-allowed opacity-50'
@@ -467,7 +467,7 @@ const RenderComment = ({ comment, isReply = false }) => {
                   : 'Edit window expired'
                 }
               >
-                <ApperIcon name="Edit3" size={16} />
+                <ApperIcon name="Edit3" size={14} />
                 {editStatus.canEdit && editStatus.remainingMinutes <= 1 && (
                   <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                     {editStatus.remainingSeconds}s left
@@ -476,20 +476,19 @@ const RenderComment = ({ comment, isReply = false }) => {
               </button>
               <button
                 onClick={() => handleDeleteComment(comment.Id)}
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all duration-200"
+                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-all duration-200"
                 title="Delete"
               >
-                <ApperIcon name="Trash2" size={16} />
+                <ApperIcon name="Trash2" size={14} />
               </button>
             </div>
-)}
+          )}
         </div>
       </div>
       
-      {/* Enhanced Comment Content */}
-      {/* Enhanced Comment Content */}
+      {/* Compact Comment Content */}
       {editingComment === comment.Id ? (
-        <div className="ml-16">
+        <div className="ml-13">
           <CommentInput
             initialContent={comment.content}
             onSubmit={(content) => handleEditComment(comment.Id, content)}
@@ -499,52 +498,52 @@ const RenderComment = ({ comment, isReply = false }) => {
           />
         </div>
       ) : (
-        <div className="ml-16 space-y-4">
+        <div className="ml-13 space-y-2">
           <div 
-            className="text-slate-700 leading-relaxed text-base prose prose-sm max-w-none"
+            className="text-slate-700 leading-relaxed text-sm prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: comment.content }}
           />
           
-          {/* Enhanced Conversation Summary */}
+          {/* Compact Conversation Summary */}
           {!isReply && comment.replies && comment.replies.length > 2 && (
-            <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <ApperIcon name="MessageSquare" size={16} className="text-blue-600" />
+            <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <ApperIcon name="MessageSquare" size={12} className="text-blue-600" />
                 </div>
-                <span className="text-sm font-semibold text-blue-900">Conversation Summary</span>
+                <span className="text-xs font-semibold text-blue-900">Conversation Summary</span>
               </div>
               {(() => {
                 const allComments = [comment, ...(comment.replies || [])];
                 const summary = generateConversationSummary(allComments);
                 return (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4 text-sm text-blue-800">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 text-xs text-blue-800">
                       <div className="flex items-center gap-1">
-                        <ApperIcon name="Users" size={14} />
+                        <ApperIcon name="Users" size={12} />
                         <span className="font-medium">{summary.participantCount}</span>
-                        <span className="text-blue-600">participants</span>
+                        <span className="text-blue-600">people</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <ApperIcon name="Lightbulb" size={14} />
+                        <ApperIcon name="Lightbulb" size={12} />
                         <span className="font-medium">{summary.keyPoints.length}</span>
-                        <span className="text-blue-600">key points</span>
+                        <span className="text-blue-600">points</span>
                       </div>
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                         summary.overallSentiment === 'positive' ? 'bg-emerald-100 text-emerald-700' :
                         summary.overallSentiment === 'negative' ? 'bg-rose-100 text-rose-700' :
                         'bg-slate-100 text-slate-700'
                       }`}>
-                        <ApperIcon name={getSentimentIcon(summary.overallSentiment)} size={12} />
-                        <span className="capitalize">{summary.overallSentiment} tone</span>
+                        <ApperIcon name={getSentimentIcon(summary.overallSentiment)} size={10} />
+                        <span className="capitalize">{summary.overallSentiment}</span>
                       </div>
                     </div>
                     {summary.topics.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <ApperIcon name="Hash" size={14} className="text-blue-500" />
+                      <div className="flex items-center gap-1">
+                        <ApperIcon name="Hash" size={12} className="text-blue-500" />
                         <div className="flex flex-wrap gap-1">
                           {summary.topics.slice(0, 3).map((topic, idx) => (
-                            <span key={idx} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">
+                            <span key={idx} className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium">
                               {topic}
                             </span>
                           ))}
@@ -557,18 +556,18 @@ const RenderComment = ({ comment, isReply = false }) => {
             </div>
           )}
           
-          {/* Enhanced Attachments */}
+          {/* Compact Attachments */}
           {comment.attachments?.length > 0 && (
-            <div className="space-y-2">
-              <span className="text-sm font-medium text-slate-600">Attachments</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <span className="text-xs font-medium text-slate-600">Attachments</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                 {comment.attachments.map((file, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <ApperIcon name="Paperclip" size={16} className="text-blue-600" />
+                  <div key={idx} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <ApperIcon name="Paperclip" size={12} className="text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm font-medium text-slate-700 truncate block">{file.name}</span>
+                      <span className="text-xs font-medium text-slate-700 truncate block">{file.name}</span>
                       <span className="text-xs text-slate-500">Click to download</span>
                     </div>
                   </div>
@@ -579,33 +578,33 @@ const RenderComment = ({ comment, isReply = false }) => {
         </div>
       )}
 
-      {/* Enhanced Reactions and Stats */}
-      <div className="flex items-center justify-between mt-6 ml-16">
+      {/* Compact Reactions and Stats */}
+      <div className="flex items-center justify-between mt-3 ml-13">
         <CommentReactions 
           reactions={comment.reactions || []}
           onAddReaction={(emoji) => handleAddReaction(comment.Id, emoji)}
         />
-        <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-slate-500">
           {comment.likes > 0 && (
-            <div className="flex items-center gap-1.5">
-              <ApperIcon name="Heart" size={14} className="text-rose-500" />
+            <div className="flex items-center gap-1">
+              <ApperIcon name="Heart" size={12} className="text-rose-500" />
               <span className="font-medium">{comment.likes}</span>
             </div>
           )}
           {comment.replies?.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              <ApperIcon name="MessageCircle" size={14} className="text-blue-500" />
+            <div className="flex items-center gap-1">
+              <ApperIcon name="MessageCircle" size={12} className="text-blue-500" />
               <span className="font-medium">{comment.replies.length} replies</span>
             </div>
           )}
         </div>
       </div>
 
-{/* Enhanced Reply Input */}
+      {/* Compact Reply Input */}
       {replyingTo === comment.Id && (
-        <div className="mt-6 ml-16 p-4 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200 shadow-sm">
-          <div className="mb-3">
-            <span className="text-sm font-medium text-slate-700">
+        <div className="mt-3 ml-13 p-3 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border border-slate-200">
+          <div className="mb-2">
+            <span className="text-xs font-medium text-slate-700">
               Replying to <span className="font-semibold text-blue-600">{comment?.authorName || 'Anonymous'}</span>
             </span>
           </div>
@@ -620,32 +619,31 @@ const RenderComment = ({ comment, isReply = false }) => {
         </div>
       )}
 
-      {/* Enhanced Replies */}
-{/* Thread Controls and Replies */}
+      {/* Compact Thread Controls and Replies */}
       {comment?.replies?.length > 0 && !isReply && (
-        <div className="mt-6 ml-16">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="mt-3 ml-13">
+          <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => toggleThreadCollapse(comment.Id)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-sm font-medium text-slate-700 transition-all duration-200 group"
+              className="flex items-center gap-2 px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-medium text-slate-700 transition-all duration-200 group"
               title={collapsedThreads.has(comment.Id) ? 'Expand thread' : 'Collapse thread'}
             >
               <motion.div
                 animate={{ rotate: collapsedThreads.has(comment.Id) ? 0 : 90 }}
                 transition={{ duration: 0.2 }}
               >
-                <ApperIcon name="ChevronRight" size={16} />
+                <ApperIcon name="ChevronRight" size={14} />
               </motion.div>
-              <span className="flex items-center gap-1.5">
-                <ApperIcon name="MessageCircle" size={14} className="text-slate-500" />
+              <span className="flex items-center gap-1">
+                <ApperIcon name="MessageCircle" size={12} className="text-slate-500" />
                 {collapsedThreads.has(comment.Id) ? 'View' : 'Hide'} {comment.totalReplyCount || comment.replies.length} 
                 {comment.totalReplyCount === 1 || comment.replies.length === 1 ? 'reply' : 'replies'}
               </span>
             </button>
             
-            {/* Reply Count Badge */}
-            <div className="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
-              <ApperIcon name="Users" size={12} />
+            {/* Compact Reply Count Badge */}
+            <div className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+              <ApperIcon name="Users" size={10} />
               <span className="text-xs font-medium">
                 {[...new Set([comment.authorId, ...comment.replies.map(r => r.authorId)])].length} participants
               </span>
@@ -659,7 +657,7 @@ const RenderComment = ({ comment, isReply = false }) => {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="space-y-4 overflow-hidden"
+                className="space-y-2 overflow-hidden"
               >
                 {comment.replies.map(reply => 
                   reply ? <RenderComment key={reply.Id} comment={reply} isReply={true} /> : null
@@ -683,68 +681,68 @@ const RenderComment = ({ comment, isReply = false }) => {
     );
   }
 return (
-<div className="space-y-6 relative">
-      {/* Enhanced Comments Header */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4 relative">
+      {/* Compact Comments Header */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <ApperIcon name="MessageCircle" size={20} className="text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+              <ApperIcon name="MessageCircle" size={16} className="text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Comments</h2>
-              <p className="text-sm text-slate-600">Collaborate and discuss with your team</p>
+              <h2 className="text-lg font-bold text-slate-900">Comments</h2>
+              <p className="text-xs text-slate-600">Collaborate and discuss with your team</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full border border-blue-200">
-              <ApperIcon name="MessageSquare" size={16} />
-              <span className="font-semibold">{commentStats.total}</span>
-              <span className="text-blue-600">comments</span>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-200">
+              <ApperIcon name="MessageSquare" size={14} />
+              <span className="font-semibold text-sm">{commentStats.total}</span>
+              <span className="text-blue-600 text-sm">comments</span>
             </div>
             
             {commentStats.unread > 0 && (
-              <div className="inline-flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full border border-orange-200">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium">{commentStats.unread} unread</span>
+              <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-2.5 py-1 rounded-full border border-orange-200">
+                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium">{commentStats.unread} unread</span>
               </div>
             )}
             
             {commentStats.pinned > 0 && (
-              <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-full border border-amber-200">
-                <ApperIcon name="Pin" size={14} />
-                <span className="text-sm font-medium">{commentStats.pinned}</span>
+              <div className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200">
+                <ApperIcon name="Pin" size={12} />
+                <span className="text-xs font-medium">{commentStats.pinned}</span>
               </div>
             )}
             
             {commentStats.resolved > 0 && (
-              <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full border border-emerald-200">
-                <ApperIcon name="CheckCircle" size={14} />
-                <span className="text-sm font-medium">{commentStats.resolved}</span>
+              <div className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">
+                <ApperIcon name="CheckCircle" size={12} />
+                <span className="text-xs font-medium">{commentStats.resolved}</span>
               </div>
             )}
           </div>
         </div>
         
-        {/* Enhanced Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* Compact Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <ApperIcon name="Search" size={18} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <ApperIcon name="Search" size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search comments..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all duration-200"
+              className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all duration-200"
             />
           </div>
           
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <select
-value={filterType}
+              value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-32"
+              className="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-28"
             >
               <option value="all">All Comments</option>
               <option value="pinned">📌 Pinned</option>
@@ -755,26 +753,26 @@ value={filterType}
               <option value="topic">🏷️ By Topic</option>
             </select>
             
-            {/* Enhanced Topic Selection */}
+            {/* Compact Topic Selection */}
             {filterType === 'topic' && (
               <select
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
-                className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-40"
+                className="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-32"
               >
                 <option value="">Select Topic</option>
                 {[...new Set(comments.map(c => c.topic).filter(Boolean))].map(topic => (
                   <option key={topic} value={topic}>{topic}</option>
                 ))}
               </select>
-)}
+            )}
             
             {/* Author Filter */}
             {filterType === 'author' && (
               <select
                 value={selectedAuthor}
                 onChange={(e) => setSelectedAuthor(e.target.value)}
-                className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-40"
+                className="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-32"
               >
                 <option value="">Select Author</option>
                 {[...new Set(comments.map(c => c.authorName).filter(Boolean))].map(author => (
@@ -783,12 +781,12 @@ value={filterType}
               </select>
             )}
             
-            {/* Enhanced Sentiment Filter */}
+            {/* Compact Sentiment Filter */}
             {filterType === 'sentiment' && (
               <select
                 value={selectedSentiment}
                 onChange={(e) => setSelectedSentiment(e.target.value)}
-                className="px-4 py-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-40"
+                className="px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-32"
               >
                 <option value="">All Sentiments</option>
                 <option value="positive">😊 Positive</option>
@@ -799,35 +797,35 @@ value={filterType}
           </div>
         </div>
         
-        {/* Filter Summary */}
-{(searchQuery || filterType !== 'all' || selectedTopic || selectedSentiment || selectedAuthor) && (
-          <div className="mt-4 pt-4 border-t border-slate-200">
+        {/* Compact Filter Summary */}
+        {(searchQuery || filterType !== 'all' || selectedTopic || selectedSentiment || selectedAuthor) && (
+          <div className="mt-3 pt-3 border-t border-slate-200">
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <ApperIcon name="Filter" size={14} />
+              <ApperIcon name="Filter" size={12} />
               <span>Active filters:</span>
               <div className="flex flex-wrap gap-1">
                 {searchQuery && (
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                     Search: "{searchQuery}"
                   </span>
                 )}
                 {filterType !== 'all' && (
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                     {filterType}
                   </span>
                 )}
                 {selectedTopic && (
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                     Topic: {selectedTopic}
                   </span>
                 )}
                 {selectedSentiment && (
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                     Sentiment: {selectedSentiment}
                   </span>
                 )}
                 {selectedAuthor && (
-                  <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
                     Author: {selectedAuthor}
                   </span>
                 )}
@@ -837,8 +835,8 @@ value={filterType}
         )}
       </div>
 
-{/* Enhanced Comments List */}
-      <div className="space-y-4 mb-8" style={{ maxHeight, overflowY: 'auto' }}>
+      {/* Compact Comments List */}
+      <div className="space-y-2 mb-6" style={{ maxHeight, overflowY: 'auto' }}>
         <AnimatePresence>
           {threads.length > 0 ? (
             threads.map((comment) => (
@@ -849,9 +847,9 @@ value={filterType}
                 exit={{ opacity: 0, y: -20 }}
                 className={`transition-all duration-200 hover:shadow-md ${
                   isOwnComment(comment)
-                    ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 ring-2 ring-blue-100'
+                    ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 ring-1 ring-blue-100'
                     : 'bg-white border-slate-200 hover:border-slate-300'
-}`}
+                }`}
               >
                 <RenderComment comment={comment} />
               </motion.div>
@@ -860,15 +858,15 @@ value={filterType}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-16 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border border-slate-200"
+              className="text-center py-12 bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl border border-slate-200"
             >
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-                <ApperIcon name="MessageCircle" size={32} className="text-blue-500" />
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <ApperIcon name="MessageCircle" size={24} className="text-blue-500" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">
                 {searchQuery || filterType !== 'all' ? 'No comments match your search' : 'No comments yet'}
               </h3>
-              <p className="text-slate-600 mb-6 max-w-md mx-auto">
+              <p className="text-slate-600 mb-4 max-w-md mx-auto text-sm">
                 {searchQuery || filterType !== 'all' 
                   ? 'Try adjusting your search criteria or filters to find what you\'re looking for' 
                   : 'Start the conversation! Share your thoughts, ask questions, or provide feedback to keep the team connected and informed.'
@@ -877,9 +875,9 @@ value={filterType}
               {(!searchQuery && filterType === 'all') && (
                 <button
                   onClick={() => document.getElementById('comment-input')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-sm"
                 >
-                  <ApperIcon name="Plus" size={18} />
+                  <ApperIcon name="Plus" size={16} />
                   Add a comment
                 </button>
               )}
@@ -888,8 +886,8 @@ value={filterType}
         </AnimatePresence>
       </div>
 
-{/* Enhanced Add New Comment Section */}
-<div className="border-t-2 border-slate-100 pt-8">
+      {/* Compact Add New Comment Section */}
+      <div className="border-t-2 border-slate-100 pt-6">
         <CommentInput
           onSubmit={handleAddComment}
           placeholder="What's on your mind? Share updates, ask questions, or provide feedback..."
