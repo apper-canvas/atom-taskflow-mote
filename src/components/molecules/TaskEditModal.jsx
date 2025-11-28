@@ -31,8 +31,6 @@ const [formData, setFormData] = useState({
     category: "",
     priority: "",
     status: "",
-    dueDate: "",
-    dueDateTime: "",
     parentTaskId: null,
     tags: [],
     isRecurring: false,
@@ -61,7 +59,7 @@ const [availableTasks, setAvailableTasks] = useState([])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showRecurringModal, setShowRecurringModal] = useState(false)
 useEffect(() => {
-    if (task && task.Id) {
+if (task && task.Id) {
       // Editing existing task - populate with task data
       setFormData({
         title: task.title || "",
@@ -69,8 +67,6 @@ useEffect(() => {
         category: task.category || "Personal",
         priority: task.priority || "Medium",
         status: task.status || "Not Started",
-        dueDate: task.dueDate || "",
-        dueDateTime: task.dueDateTime || "",
         parentTaskId: task.parentTaskId || null,
         tags: task.tags || [],
         isRecurring: task.isRecurring || false,
@@ -91,7 +87,7 @@ useEffect(() => {
         linkedTasks: task.linkedTasks || []
       });
       setIsSubtaskMode(!!task.parentTaskId)
-} else if (template) {
+    } else if (template) {
       // Creating new task from template - populate with template data
       setFormData({
         title: template.title || "",
@@ -99,8 +95,6 @@ useEffect(() => {
         category: template.category || "Personal",
         priority: template.priority || "Medium",
         status: "Not Started",
-        dueDate: template.dueDate || "",
-        dueDateTime: template.dueDateTime || "",
         parentTaskId: null,
         tags: template.tags || [],
         isRecurring: template.isRecurring || false,
@@ -123,15 +117,13 @@ useEffect(() => {
       setIsSubtaskMode(false);
 } else if (isOpen) {
       // Creating new task or modal just opened - reset to defaults
-const initializeForm = async () => {
+      const initializeForm = async () => {
         const baseFormData = {
           title: "",
           description: "",
           category: "Personal",
           priority: "Medium",
           status: "Not Started",
-          dueDate: "",
-          dueDateTime: "",
           parentTaskId: null,
           tags: [],
           isRecurring: false,
@@ -379,14 +371,12 @@ const handleTagsChange = (newTags) => {
     if (!validateForm()) return
 
 const taskData = {
-      ...formData,
+...formData,
       projectId: formData.projectId ? parseInt(formData.projectId) : null,
       title: formData.title.trim(),
       description: formData.description.trim(),
       parentTaskId: formData.parentTaskId ? parseInt(formData.parentTaskId) : null,
-      dueDate: formData.dueDate || null,
-      dueDateTime: formData.dueDateTime || null,
-      tags: formData.tags,
+tags: formData.tags,
       isRecurring: formData.isRecurring,
       recurrence: formData.recurrence,
       assignedTo: formData.assignedTo,
@@ -396,7 +386,7 @@ const taskData = {
       timeSpent: formData.timeSpent || 0,
       notes: formData.notes.trim(),
       attachments: formData.attachments,
-      linkedTasks: formData.linkedTasks
+linkedTasks: formData.linkedTasks
     };
 
     await onSave(task?.Id, taskData)
@@ -684,142 +674,9 @@ rows={4}
             ))}
 </Select>
         </div>
+
 {/* Due Date and Time */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Due Date
-                </label>
-                <Input
-                  type="date"
-                  value={formData.dueDate ? formData.dueDate.split('T')[0] : ''}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    dueDate: e.target.value ? new Date(e.target.value).toISOString() : ''
-                  }))}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Due Time
-                </label>
-                <Input
-                  type="time"
-                  value={formData.dueDateTime ? new Date(formData.dueDateTime).toTimeString().slice(0,5) : ''}
-                  onChange={(e) => {
-                    if (e.target.value && formData.dueDate) {
-                      const dateStr = formData.dueDate.split('T')[0];
-                      const timeStr = e.target.value;
-                      const datetime = new Date(`${dateStr}T${timeStr}`).toISOString();
-                      setFormData(prev => ({
-                        ...prev,
-                        dueDateTime: datetime
-                      }));
-                    } else {
-                      setFormData(prev => ({
-                        ...prev,
-                        dueDateTime: ''
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                  disabled={!formData.dueDate}
-                />
-              </div>
-            </div>
 
-            {/* Assignment */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <ApperIcon name="User" size={16} className="inline mr-2" />
-                Assign To
-              </label>
-              <Input
-                type="text"
-                placeholder="Enter team member name or email"
-                value={formData.assignedTo?.name || ''}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  assignedTo: e.target.value ? { name: e.target.value } : null
-                }))}
-                className="w-full"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Future: Integration with team member selection
-              </p>
-            </div>
-
-            {/* Notes */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <ApperIcon name="FileText" size={16} className="inline mr-2" />
-                Notes
-              </label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  notes: e.target.value
-                }))}
-                placeholder="Add detailed notes about this task..."
-                className="w-full min-h-[100px]"
-                rows={4}
-              />
-            </div>
-
-            {/* Tags */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <ApperIcon name="Tag" size={16} className="inline mr-2" />
-                Tags
-              </label>
-              <TagSelector
-                selectedTags={formData.tags}
-                onTagsChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
-                placeholder="Add tags to organize this task"
-              />
-            </div>
-
-            {/* Time Tracking */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <ApperIcon name="Clock" size={16} className="inline mr-2" />
-                  Estimated Time (minutes)
-                </label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="15"
-                  value={formData.estimatedTime || ''}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    estimatedTime: e.target.value ? parseInt(e.target.value) : null
-                  }))}
-                  placeholder="e.g., 60"
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <ApperIcon name="Timer" size={16} className="inline mr-2" />
-                  Time Spent (minutes)
-                </label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="15"
-                  value={formData.timeSpent || ''}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    timeSpent: e.target.value ? parseInt(e.target.value) : 0
-                  }))}
-                  placeholder="e.g., 45"
-                  className="w-full"
-                />
-              </div>
-            </div>
 {/* Time Estimation */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>

@@ -1,5 +1,6 @@
 import tasksData from "@/services/mockData/tasks.json";
 let tasks = [...tasksData]
+
 const delay = () => new Promise(resolve => setTimeout(resolve, 300))
 
 export const taskService = {
@@ -20,8 +21,8 @@ export const taskService = {
   async create(taskData) {
     await delay()
 const maxId = tasks.length > 0 ? Math.max(...tasks.map(t => t.Id)) : 0
-const newTask = {
-      Id: maxId + 1,
+    const newTask = {
+Id: maxId + 1,
       projectId: taskData.projectId || null,
       title: taskData.title || "",
       description: taskData.description || "",
@@ -34,7 +35,7 @@ const newTask = {
       tags: taskData.tags || [],
       completed: taskData.status === "Completed" || false,
       completedAt: taskData.status === "Completed" ? new Date().toISOString() : null,
-      isRecurring: taskData.isRecurring || false,
+isRecurring: taskData.isRecurring || false,
       recurrence: taskData.recurrence || null,
       assignedTo: taskData.assignedTo || null,
       reminders: taskData.reminders || [],
@@ -50,7 +51,7 @@ const newTask = {
         isArchived: att.isArchived || false,
         storageLocation: att.storageLocation || 'local'
       })) : [],
-      linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
+linkedTasks: Array.isArray(taskData.linkedTasks) ? taskData.linkedTasks : [],
       externalLinks: Array.isArray(taskData.externalLinks) ? taskData.externalLinks : [],
       commentCount: 0,
       hasUnreadComments: false,
@@ -73,8 +74,6 @@ async update(id, updates) {
     const updatedTask = {
       ...tasks[index],
       ...updates,
-      dueDate: updates.dueDate !== undefined ? updates.dueDate : tasks[index].dueDate,
-      dueDateTime: updates.dueDateTime !== undefined ? updates.dueDateTime : tasks[index].dueDateTime,
       tags: updates.tags || tasks[index].tags || [],
       isRecurring: updates.isRecurring !== undefined ? updates.isRecurring : tasks[index].isRecurring,
       recurrence: updates.recurrence !== undefined ? updates.recurrence : tasks[index].recurrence,
@@ -103,7 +102,7 @@ async update(id, updates) {
       commentCount: updates.commentCount !== undefined ? updates.commentCount : (tasks[index].commentCount || 0),
       hasUnreadComments: updates.hasUnreadComments !== undefined ? updates.hasUnreadComments : (tasks[index].hasUnreadComments || false),
       lastCommentAt: updates.lastCommentAt !== undefined ? updates.lastCommentAt : tasks[index].lastCommentAt,
-updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString()
     }
     
     // Handle status and completion synchronization
@@ -245,12 +244,11 @@ saveToLocalStorage() {
 const loadedTasks = JSON.parse(stored)
 // Ensure all tasks have required fields for new features
         const migratedTasks = loadedTasks.map(task => ({
-...task,
-          dueDate: task.dueDate || null,
-          dueDateTime: task.dueDateTime || task.dueDate || null,
-          tags: task.tags || [],
+          ...task,
+tags: task.tags || [],
           assignedTo: task.assignedTo || null,
           projectId: task.projectId || null,
+          dueDateTime: task.dueDateTime || task.dueDate || null,
           reminders: task.reminders || [],
           estimatedTime: task.estimatedTime || null,
           actualTime: task.actualTime || 0,
@@ -264,7 +262,7 @@ const loadedTasks = JSON.parse(stored)
           } : null,
           isTracking: task.isTracking || false,
           trackingStartedAt: task.trackingStartedAt || null,
-          notes: task.notes || "",
+notes: task.notes || "",
           attachments: Array.isArray(task.attachments) ? task.attachments.map(att => ({
             ...att,
             folderId: att.folderId || null,
