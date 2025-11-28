@@ -846,8 +846,20 @@ return (
       {/* Compact Comments List */}
       <div className="space-y-2 mb-6" style={{ maxHeight, overflowY: 'auto' }}>
         <AnimatePresence>
-          {threads.length > 0 ? (
-            threads.map((comment) => (
+{threads.length > 0 ? (
+            threads
+              .filter((comment) => {
+                // Filter out invalid comments that cause blank entries
+                return (
+                  comment && 
+                  comment.Id && 
+                  comment.content && 
+                  comment.content.trim() !== '' &&
+                  comment.author && 
+                  (comment.author.name || comment.author.displayName || comment.authorName)
+                );
+              })
+              .map((comment) => (
               <motion.div
                 key={comment.Id}
                 initial={{ opacity: 0, y: 20 }}
