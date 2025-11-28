@@ -163,13 +163,13 @@ title: title.trim(),
                       <option value="Low">🟢 Low</option>
                     </Select>
                   </div>
-
+                  
                   <div>
                     <Select
                       label="Status"
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-disabled={isLoading}
+                      disabled={isLoading}
                     >
                       <option value="Not Started">⏸️ Not Started</option>
                       <option value="In Progress">🔄 In Progress</option>
