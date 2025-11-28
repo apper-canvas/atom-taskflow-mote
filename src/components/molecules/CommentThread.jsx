@@ -141,18 +141,25 @@ const toggleThreadCollapse = (commentId) => {
     });
   };
 
-  const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null, topic = null) => {
+const handleAddComment = async (content, mentions = [], attachments = [], parentId = null, quotedCommentId = null, topic = null) => {
     try {
+      // Additional validation before service call
+      const trimmedContent = content?.trim();
+      if (!trimmedContent || trimmedContent.length < 3) {
+        toast.error('Comment content must be at least 3 characters long');
+        return;
+      }
+
       const newComment = await commentService.createComment({
         taskId,
         parentId,
-        content,
+        content: trimmedContent,
         topic,
         contentType: 'html',
         mentions,
         attachments,
         quotedCommentId,
-authorId: currentUserId,
+        authorId: currentUserId,
         authorName: currentUserName,
         authorEmail: currentUserEmail,
         authorAvatar: null
@@ -162,9 +169,10 @@ authorId: currentUserId,
       await updateTaskCommentStats(taskId, comments.length + 1, false, new Date().toISOString());
       
       setReplyingTo(null);
-      toast.success('Comment added successfully');
+      // Remove duplicate success toast since CommentInput handles it
     } catch (error) {
-      toast.error('Failed to add comment');
+      console.error('Comment creation error:', error);
+      toast.error(error.message || 'Failed to add comment');
     }
   };
 

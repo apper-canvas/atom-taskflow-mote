@@ -48,13 +48,21 @@ export const createComment = async (commentData) => {
   if (!commentData) {
     throw new Error('Comment data is required');
   }
-// Enhanced content validation - ensure it's not empty or whitespace only
+
+  // Enhanced content validation - prevent empty/whitespace only content
   const content = commentData.content?.trim() || '';
-  if (!content || content.length < 3) {
-    throw new Error('Comment content must be at least 3 characters long');
-  }
-  if (!content.trim()) {
+  
+  // Multiple validation checks to prevent empty comments
+  if (!content) {
     throw new Error('Comment content cannot be empty');
+  }
+  
+  if (content.length === 0) {
+    throw new Error('Comment content cannot be empty');
+  }
+  
+  if (content.length < 3) {
+    throw new Error('Comment content must be at least 3 characters long');
   }
   
   // Validate taskId
@@ -68,7 +76,7 @@ const newComment = {
     taskId: parseInt(commentData.taskId),
     parentId: commentData.parentId || null,
     topic: commentData.topic || null,
-    content: content.trim(), // Use validated and trimmed content
+    content: content, // Use already validated and trimmed content
     contentType: commentData.contentType || "html", // text, html, markdown
     authorId: commentData.authorId && commentData.authorId > 0 ? commentData.authorId : 1,
     authorName: commentData.authorName?.trim() || getUserById(commentData.authorId || 1).name,

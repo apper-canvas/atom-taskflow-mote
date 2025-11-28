@@ -230,13 +230,24 @@ const handleSelectSuggestion = (suggestion) => {
 const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Enhanced validation with user feedback
-    if (!content.trim()) {
+    // Enhanced validation with user feedback - prevent empty/whitespace content
+    const trimmedContent = content.trim();
+    if (!trimmedContent || trimmedContent.length === 0) {
       showToast.warning('Please enter a comment before submitting');
       return;
     }
     
-    if (isSubmitting) return;
+    // Additional length validation
+    if (trimmedContent.length < 3) {
+      showToast.warning('Comment must be at least 3 characters long');
+      return;
+    }
+    
+    // Prevent double submissions
+    if (isSubmitting) {
+      return;
+    }
+    
     // Load topics when topic selection is enabled
     if (enableTopicSelection && taskId && availableTopics.length === 0) {
       try {
@@ -247,16 +258,20 @@ const handleSubmit = async (e) => {
       }
     }
 
-setIsSubmitting(true);
+    setIsSubmitting(true);
     
-try {
-      // Pass trimmed content to ensure no whitespace-only comments
-      await onSubmit(content.trim(), mentions, null, null, null, selectedTopic);
+    try {
+      // Pass validated trimmed content to ensure no whitespace-only comments
+      await onSubmit(trimmedContent, mentions, null, null, null, selectedTopic);
+      
+      // Only clear form on successful submission
       setContent('');
       setMentions([]);
       setSelectedTopic('');
+      showToast.success('Comment added successfully');
     } catch (error) {
       console.error('Failed to submit comment:', error);
+      showToast.error('Failed to add comment. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
